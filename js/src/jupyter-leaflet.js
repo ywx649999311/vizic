@@ -1,6 +1,6 @@
 var widgets = require('jupyter-js-widgets');
 var _ = require('underscore');
-var L = require('leaflet');
+var L = require('leaflet/leaflet-src');
 require('leaflet-draw');
 
 L.Icon.Default.imagePath = __webpack_public_path__;

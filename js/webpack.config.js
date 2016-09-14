@@ -1,6 +1,9 @@
 var version = require('./package.json').version;
 
-var leaflet_marker_selector = /leaflet\/dist\/images\/marker-.*\.png/;
+var leaflet_marker_selector = /leaflet\/images\/marker-.*\.png/;
+var leaflet_layer_icon = /leaflet\/images\/layers.*\.png/;
+
+var path = require('path');
 
 var loaders = [
     { test: /\.json$/, loader: 'json-loader' },
@@ -24,7 +27,8 @@ var loaders = [
     //
     //  return path + '/marker-' + name + '.png';
     //
-    { test: leaflet_marker_selector, loader: 'file?name=[name].[ext]' }
+    { test: leaflet_marker_selector, loader: 'file?name=[name].[ext]' },
+    { test: leaflet_layer_icon, loader: 'file?name=[name].[ext]' },
 ];
 
 module.exports = [
@@ -47,6 +51,12 @@ module.exports = [
         module: {
             loaders: loaders
         },
+        resolve:{
+            root: [
+                path.resolve("./node_modules"),
+                path.resolve("./src")
+            ]
+        },
         externals: ['jupyter-js-widgets']
     },
     {// embeddable jupyter-leaflet bundle
@@ -60,6 +70,12 @@ module.exports = [
         devtool: 'source-map',
         module: {
             loaders: loaders
+        },
+        resolve:{
+            root: [
+                path.resolve("./node_modules"),
+                path.resolve("./src")
+            ]
         },
         externals: ['jupyter-js-widgets']
     }
