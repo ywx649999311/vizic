@@ -39,7 +39,7 @@ class Layer(Widget, InteractMixin):
     _view_module = Unicode('jupyter-leaflet').tag(sync=True)
     _model_module = Unicode('jupyter-leaflet').tag(sync=True)
 
-    bottom = Bool().tag(sync=True)
+    # bottom = Bool().tag(sync=True)
     options = List(trait=Unicode).tag(sync=True)
 
     @default('options')
@@ -108,7 +108,7 @@ class TileLayer(RasterLayer):
     _view_name = Unicode('LeafletTileLayerView').tag(sync=True)
     _model_name = Unicode('LeafletTileLayerModel').tag(sync=True)
 
-    bottom = Bool(True).tag(sync=True)
+    # bottom = Bool(True).tag(sync=True)
     url = Unicode('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').tag(sync=True)
     min_zoom = Int(0).tag(sync=True, o=True)
     max_zoom = Int(18).tag(sync=True, o=True)
@@ -117,6 +117,17 @@ class TileLayer(RasterLayer):
     opacity = Float(1.0).tag(sync=True, o=True)
     detect_retina = Bool(False).tag(sync=True, o=True)
 
+class GridLayer(RasterLayer):
+    _view_name = Unicode('LeafletGridLayerView').tag(sync=True)
+    _model_name = Unicode('LeafletGridLayerModel').tag(sync=True)
+
+    # bottom = Bool(False).tag(sync=True)
+    # min_zoom = Int(0).tag(sync=True, o=True)
+    # max_zoom = Int(18).tag(sync=True, o=True)
+    # tile_size = Int(256).tag(sync=True, o=True)
+    # xc = Int(3).tag(sync=True, o=True)
+    # yc = Int(3).tag(sync=True, o=True)
+    # detect_retina = Bool(False).tag(sync=True, o=True)
 
 class ImageOverlay(RasterLayer):
     _view_name = Unicode('LeafletImageOverlayView').tag(sync=True)
@@ -351,7 +362,8 @@ class Map(DOMWidget, InteractMixin):
     zoom_start = Int(12).tag(sync=True, o=True)
     zoom = Int(12).tag(sync=True, o=True)
     max_zoom = Int(18).tag(sync=True, o=True)
-    min_zoom = Int(1).tag(sync=True, o=True)
+    min_zoom = Int(0).tag(sync=True, o=True)
+    max_bounds = List([[-90, 0],[90, 360]]).tag(sync=True, o=True)
     # Interaction options
     dragging = Bool(True).tag(sync=True, o=True)
     touch_zoom = Bool(True).tag(sync=True, o=True)
@@ -364,8 +376,8 @@ class Map(DOMWidget, InteractMixin):
     close_popup_on_click = Bool(True).tag(sync=True, o=True)
     bounce_at_zoom_limits = Bool(True).tag(sync=True, o=True)
     keyboard = Bool(True).tag(sync=True, o=True)
-    keyboard_pan_offset = Int(80).tag(sync=True, o=True)
-    keyboard_zoom_offset = Int(1).tag(sync=True, o=True)
+    keyboard_pan_delta = Int(80).tag(sync=True, o=True)
+    # keyboard_zoom_offset = Int(1).tag(sync=True, o=True)
     inertia = Bool(True).tag(sync=True, o=True)
     inertia_deceleration = Int(3000).tag(sync=True, o=True)
     inertia_max_speed = Int(1500).tag(sync=True, o=True)
