@@ -1,10 +1,15 @@
 var widgets = require('jupyter-js-widgets');
 var _ = require('underscore');
 var L = require('leaflet/leaflet-src');
+var d3 = require("d3");
 require('leaflet-draw');
+require('leaflet/scripts/L.canvasLayer');
+require('leaflet/scripts/L.DesCRS');
+
+// console.log(L.CRS.RADEC);
+
 
 L.Icon.Default.imagePath = __webpack_public_path__;
-
 
 function camel_case(input) {
     // Convert from foo_bar to fooBar
@@ -93,6 +98,14 @@ var LeafletTileLayerView = LeafletRasterLayerView.extend({
             this.get_options()
         );
     },
+});
+
+var LeafletGridLayerView = LeafletRasterLayerView.extend({
+    create_obj: function (){
+        this.obj = L.canvasLayer();
+
+    },
+
 });
 
 
@@ -408,6 +421,8 @@ var LeafletMapView = widgets.DOMWidgetView.extend({
             // Convert from foo_bar to fooBar that Leaflet.js uses
             options[camel_case(key)] = this.model.get(key);
         }
+        options.crs = L.CRS.RADEC;
+        // console.log(L.CRS.RADEC);
         return options;
     },
 
@@ -472,7 +487,7 @@ var LeafletLayerModel = widgets.WidgetModel.extend({
         _model_name : 'LeafletLayerModel',
         _view_module : 'jupyter-leaflet',
         _model_module : 'jupyter-leaflet',
-        bottom : false,
+        // bottom : false,
         options : []
     })
 });
@@ -525,7 +540,7 @@ var LeafletTileLayerModel = LeafletRasterLayerModel.extend({
         _view_name : 'LeafletTileLayerView',
         _model_name : 'LeafletTileLayerModel',
 
-        bottom : true,
+        // bottom : true,
         url : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
         min_zoom : 0,
         max_zoom : 18,
@@ -533,6 +548,22 @@ var LeafletTileLayerModel = LeafletRasterLayerModel.extend({
         attribution : 'Map data (c) <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
         opacity : 1.0,
         detect_retina : false
+    })
+});
+
+var LeafletGridLayerModel = LeafletRasterLayerModel.extend({
+    defaults: _.extend({}, LeafletRasterLayerModel.prototype.defaults, {
+        _view_name : 'LeafletGridLayerView',
+        _model_name : 'LeafletGridLayerModel',
+
+        // bottom : false,
+        // url : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        // min_zoom : 0,
+        // max_zoom : 18,
+        // tile_size : 256,
+        // attribution : 'Map data (c) <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
+        // opacity : 1.0,
+        // detect_retina : false
     })
 });
 
@@ -631,7 +662,7 @@ var LeafletCircleMarkerModel = LeafletCircleModel.extend({
 var LeafletLayerGroupModel = LeafletLayerModel.extend({
     defaults: _.extend({}, LeafletLayerModel.prototype.defaults, {
         _view_name : 'LeafletLayerGroupView',
-        _view_name : 'LeafletLayerGroupModel',
+        _model_name : 'LeafletLayerGroupModel',
         layers : []
     })
 }, {
@@ -769,6 +800,7 @@ module.exports = {
     LeafletMarkerView : LeafletMarkerView,
     LeafletPopupView : LeafletPopupView,
     LeafletRasterLayerView : LeafletRasterLayerView,
+    LeafletGridLayerView : LeafletGridLayerView,
     LeafletTileLayerView : LeafletTileLayerView,
     LeafletImageOverlayView : LeafletImageOverlayView,
     LeafletVectorLayerView : LeafletVectorLayerView,
@@ -789,7 +821,7 @@ module.exports = {
     // models
     LeafletLayerModel : LeafletLayerModel,
     LeafletUILayerModel : LeafletUILayerModel,
-    LeafletUILayerModel : LeafletUILayerModel,
+    LeafletGridLayerModel : LeafletGridLayerModel,
     LeafletMarkerModel : LeafletMarkerModel,
     LeafletPopupModel : LeafletPopupModel,
     LeafletRasterLayerModel : LeafletRasterLayerModel,
