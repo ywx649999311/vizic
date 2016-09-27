@@ -5,6 +5,7 @@ var d3 = require("d3");
 require('leaflet-draw');
 require('leaflet/scripts/L.canvasLayer');
 require('leaflet/scripts/L.DesCRS');
+require('leaflet/scripts/L.SvgTile');
 
 // console.log(L.CRS.RADEC);
 
@@ -102,8 +103,7 @@ var LeafletTileLayerView = LeafletRasterLayerView.extend({
 
 var LeafletGridLayerView = LeafletRasterLayerView.extend({
     create_obj: function (){
-        this.obj = L.canvasLayer();
-
+        this.obj = L.svgTile();
     },
 
 });

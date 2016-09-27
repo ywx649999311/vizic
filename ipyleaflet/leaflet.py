@@ -201,7 +201,7 @@ class CircleMarker(Circle):
 
 class LayerGroup(Layer):
     _view_name = Unicode('LeafletLayerGroupView').tag(sync=True)
-    _view_name = Unicode('LeafletLayerGroupModel').tag(sync=True)
+    _model_name = Unicode('LeafletLayerGroupModel').tag(sync=True)
 
     layers = List(Instance(Layer)).tag(sync=True, **widget_serialization)
 

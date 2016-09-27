@@ -1,3 +1,4 @@
+var d3 = require("d3");
 L.SvgTile = L.GridLayer.extend({
             
             options: {
@@ -32,7 +33,7 @@ L.SvgTile = L.GridLayer.extend({
 
                 var tile_url = this.getTileUrl(coords);
                 //var layerClass = this,
-                    key = this._tileCoordsToKey(coords);
+                key = this._tileCoordsToKey(coords);
                               
                 d3.json(tile_url, function (error, json){
 
@@ -41,6 +42,7 @@ L.SvgTile = L.GridLayer.extend({
                         return console.log(error);
                     }
                     
+                    // console.log(json);
                     json.forEach(function (d){
                         
                         var latlng = new L.LatLng(d.DEC, d.RA);
@@ -64,13 +66,15 @@ L.SvgTile = L.GridLayer.extend({
 
             getTileUrl: function (coords) {
 
-                return L.Util.template('tiles/{z}/{x}/{y}.json', L.extend({
+                return L.Util.template('/tiles/{z}/{x}/{y}.json', L.extend({
                     //r: this.options.detectRetina && L.Browser.retina && this.options.maxZoom > 0 ? '@2x' : '',
                     //s: this._getSubdomain(coords),
+                    // host: document.location.origin,
                     x: coords.x,
                     y: coords.y,
                     z: this._getZoomForUrl()
                 }, this.options));
+                // return document.location.origin+'/hello';
             },
 
             _pruneTiles: function () {
@@ -268,8 +272,8 @@ L.SvgTile = L.GridLayer.extend({
                                 .attr('transform', function (d){return d.rotate;})
                                 .attr('fill', 'red');
 
-                d3.select(tile).selectAll('ellipse').on('click', L.DomEvent.stop)
-                                                    .on('click', function(e){layerClass._displayObject(e);});
+                // d3.select(tile).selectAll('ellipse').on('click', L.DomEvent.stop)
+                                                    // .on('click', function(e){layerClass._displayObject(e);});
 
                 return ellipses;
 
