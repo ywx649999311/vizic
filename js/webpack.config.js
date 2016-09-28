@@ -36,7 +36,7 @@ module.exports = [
         entry: './src/extension.js',
         output: {
             filename: 'extension.js',
-            path: '../ipyleaflet/static',
+            path: '../ipydesleaflet/static',
             libraryTarget: 'amd'
         }
     },
@@ -44,7 +44,7 @@ module.exports = [
         entry: './src/index.js',
         output: {
             filename: 'index.js',
-            path: '../ipyleaflet/static',
+            path: '../ipydesleaflet/static',
             libraryTarget: 'amd'
         },
         devtool: 'source-map',
@@ -59,24 +59,24 @@ module.exports = [
         },
         externals: ['jupyter-js-widgets']
     },
-    {// embeddable jupyter-leaflet bundle
-        entry: './src/embed.js',
-        output: {
-            filename: 'index.js',
-            path: './dist/',
-            libraryTarget: 'amd',
-            publicPath: 'https://unpkg.com/jupyter-leaflet@' + version + '/dist/'
-        },
-        devtool: 'source-map',
-        module: {
-            loaders: loaders
-        },
-        resolve:{
-            root: [
-                path.resolve("./node_modules"),
-                path.resolve("./src")
-            ]
-        },
-        externals: ['jupyter-js-widgets']
-    }
+    // {// embeddable jupyter-leaflet bundle
+    //     entry: './src/embed.js',
+    //     output: {
+    //         filename: 'index.js',
+    //         path: './dist/',
+    //         libraryTarget: 'amd',
+    //         publicPath: 'https://unpkg.com/jupyter-leaflet@' + version + '/dist/'
+    //     },
+    //     devtool: 'source-map',
+    //     module: {
+    //         loaders: loaders
+    //     },
+    //     resolve:{
+    //         root: [
+    //             path.resolve("./node_modules"),
+    //             path.resolve("./src")
+    //         ]
+    //     },
+    //     externals: ['jupyter-js-widgets']
+    // }
 ];

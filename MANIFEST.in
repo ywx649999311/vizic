@@ -1,1 +1,1 @@
-recursive-include ipyleaflet/static *.*
+recursive-include ipydesleaflet/static *.*

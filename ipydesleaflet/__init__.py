@@ -6,6 +6,6 @@ def _jupyter_nbextension_paths():
     return [{
         'section': 'notebook',
         'src': 'static',
-        'dest': 'jupyter-leaflet',
-        'require': 'jupyter-leaflet/extension'
+        'dest': 'jupyter-des-leaflet',
+        'require': 'jupyter-des-leaflet/extension'
     }]

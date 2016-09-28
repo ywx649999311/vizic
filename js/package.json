@@ -1,5 +1,5 @@
 {
-  "name": "jupyter-leaflet",
+  "name": "jupyter-des-leaflet",
   "version": "0.2.1",
   "description": "jupyter - leaflet bridge",
   "author": "Brian Granger",
