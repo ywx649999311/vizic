@@ -10,3 +10,6 @@ ipyleaflet/static/
 
 # OS X
 .DS_Store
+
+# Jupyter Notebook
+.ipynb

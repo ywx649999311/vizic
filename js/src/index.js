@@ -1,5 +1,5 @@
 // Setup notebook base URL
-__webpack_public_path__ = document.querySelector('body').getAttribute('data-base-url') + 'nbextensions/jupyter-des-leaflet/';
+__webpack_public_path__ = document.querySelector('body').getAttribute('data-base-url') + 'nbextensions/jupyter-astro-leaflet/';
 
 // Load css
 require('leaflet/leaflet.css');
@@ -11,5 +11,5 @@ require('leaflet/images/marker-icon.png');
 require('leaflet/images/marker-icon-2x.png');
 
 // Export everything from jupyter-leaflet and the npm package version number.
-module.exports = require('./jupyter-des-leaflet.js');
+module.exports = require('./jupyter-astro-leaflet.js');
 module.exports['version'] = require('../package.json').version;

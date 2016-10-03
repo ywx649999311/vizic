@@ -36,7 +36,7 @@ module.exports = [
         entry: './src/extension.js',
         output: {
             filename: 'extension.js',
-            path: '../ipydesleaflet/static',
+            path: '../ipyastroleaflet/static',
             libraryTarget: 'amd'
         }
     },
@@ -44,7 +44,7 @@ module.exports = [
         entry: './src/index.js',
         output: {
             filename: 'index.js',
-            path: '../ipydesleaflet/static',
+            path: '../ipyastroleaflet/static',
             libraryTarget: 'amd'
         },
         devtool: 'source-map',

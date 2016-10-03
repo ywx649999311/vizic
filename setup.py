@@ -69,8 +69,8 @@ class NPM(Command):
     node_modules = os.path.join(node_root, 'node_modules')
 
     targets = [
-        os.path.join(here, 'ipydesleaflet', 'static', 'extension.js'),
-        os.path.join(here, 'ipydesleaflet', 'static', 'index.js')
+        os.path.join(here, 'ipyastroleaflet', 'static', 'extension.js'),
+        os.path.join(here, 'ipyastroleaflet', 'static', 'index.js')
     ]
 
     def initialize_options(self):
@@ -115,11 +115,11 @@ class NPM(Command):
         update_package_data(self.distribution)
 
 version_ns = {}
-with open(os.path.join(here, 'ipydesleaflet', '_version.py')) as f:
+with open(os.path.join(here, 'ipyastroleaflet', '_version.py')) as f:
     exec(f.read(), {}, version_ns)
 
 setup_args = {
-    'name': 'ipydesleaflet',
+    'name': 'ipyastroleaflet',
     'version': version_ns['__version__'],
     'description': 'A Jupyter widget for dynamic Leaflet maps',
     'long_description': LONG_DESCRIPTION,
@@ -127,10 +127,10 @@ setup_args = {
     'include_package_data': True,
     'data_files': [
         ('share/jupyter/nbextensions/jupyter-des-leaflet', [
-            'ipydesleaflet/static/extension.js',
-            'ipydesleaflet/static/index.js',
-            'ipydesleaflet/static/index.js.map',
-        ] + glob('ipydesleaflet/static/*.png')),
+            'ipyastroleaflet/static/extension.js',
+            'ipyastroleaflet/static/index.js',
+            'ipyastroleaflet/static/index.js.map',
+        ] + glob('ipyastroleaflet/static/*.png')),
     ],
     'install_requires': ['ipywidgets>=5.1.5'],
     'packages': find_packages(),
@@ -143,7 +143,7 @@ setup_args = {
     },
     'author': 'Weixiang Yu',
     'author_email': 'wyu16@illinois.edu',
-    'url': 'https://github.com/ywx649999311/ipydesleaflet.git',
+    'url': 'https://github.com/ywx649999311/ipyastroleaflet.git',
     'keywords': ['ipython', 'jupyter', 'widgets', 'graphics', '3d'],
     'classifiers': [
         'Development Status :: 2 - Pre-Alpha',

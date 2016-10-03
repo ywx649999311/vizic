@@ -8,5 +8,5 @@ require('leaflet/images/marker-icon.png');
 require('leaflet/images/marker-icon-2x.png');
 
 // Export everything from jupyter-leaflet and the npm package version number.
-module.exports = require('./jupyter-des-leaflet.js');
+module.exports = require('./jupyter-astro-leaflet.js');
 module.exports['version'] = require('../package.json').version;

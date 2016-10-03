@@ -3,7 +3,7 @@ if (window.require) {
     window.require.config({
         map: {
             "*" : {
-                "jupyter-des-leaflet": "nbextensions/jupyter-des-leaflet/index",
+                "jupyter-astro-leaflet": "nbextensions/jupyter-astro-leaflet/index",
                 "jupyter-js-widgets": "nbextensions/jupyter-js-widgets/extension"
             }
         }
