@@ -126,7 +126,7 @@ setup_args = {
     'License': 'MIT License',
     'include_package_data': True,
     'data_files': [
-        ('share/jupyter/nbextensions/jupyter-des-leaflet', [
+        ('share/jupyter/nbextensions/jupyter-astro-leaflet', [
             'ipyastroleaflet/static/extension.js',
             'ipyastroleaflet/static/index.js',
             'ipyastroleaflet/static/index.js.map',
