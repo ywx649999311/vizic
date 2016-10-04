@@ -1,8 +1,8 @@
 L.CRS.RADEC = L.extend({}, L.CRS, {
             projection: L.Projection.LonLat,
             transformation: new L.Transformation(1, 0, 1, 0),
-            wrapLat : [-90, 90],
-            wrapLng : [0, 360],
+            // wrapLat : [-90, 90],
+            // wrapLng : [0, 360],
 
             scale: function (zoom) {
                 return Math.pow(2, zoom);
