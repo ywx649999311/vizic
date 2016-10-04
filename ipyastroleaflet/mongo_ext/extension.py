@@ -1,16 +1,20 @@
 from notebook.utils import url_path_join
 from notebook.base.handlers import IPythonHandler
-from . import db_util as du
+# from . import db_util as du
+from .db_connect import MongoConnect
 from tornado import gen
 import json
 
 class tileHandler(IPythonHandler):
 
+    connection = MongoConnect()
+
     @gen.coroutine
     def get(self, zoom, xc, yc):
         # start = time.time()
         # print ('start', start)
-        tile_gen = yield du.getTileData(xc, yc, zoom)
+        cc = self.connection
+        tile_gen = yield cc.getTileData(xc, yc, zoom)
         tile_list = yield tile_gen.to_list(length = 100000000)
         tile_json = json.dumps(tile_list)
         # end = time.time()
@@ -18,6 +22,7 @@ class tileHandler(IPythonHandler):
         self.set_status(200)
         self.set_header('Content-Type', 'application/json')
         self.write(tile_json)
+
 
 def load_jupyter_server_extension(nbapp):
     """
