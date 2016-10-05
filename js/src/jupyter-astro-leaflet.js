@@ -20,20 +20,25 @@ function camel_case(input) {
 }
 
 var NotebookUrlView = widgets.WidgetView.extend({
-    
+
     render: function(){
+
         this.host = document.location.origin;
         this.base_url = document.querySelector('body').getAttribute('data-base-url');
         this.nb_url = this.host + this.base_url;
-        this.update();
-        // this.nb_url = __webpack_public_path__;
         this.el.textContent = this.nb_url;
+        this.update();
+
     },
     update:function(){
-        this.model.set('nb_url', this.nb_url);
+        var that = this;
+        this.model.set('nb_url', that.nb_url);
+        this.touch();
     },
 
 });
+
+
 
 var LeafletLayerView = widgets.WidgetView.extend({
 
@@ -495,13 +500,24 @@ var LeafletMapView = widgets.DOMWidgetView.extend({
 
 var def_loc = [0.0, 0.0];
 
+var NotebookUrlModel = widgets.WidgetModel.extend({
+    defaults: _.extend({}, widgets.WidgetModel.prototype.defaults, {
+        _view_name : 'NotebookUrlView',
+        _model_name : 'NotebookUrlModel',
+        _view_module : 'jupyter-astro-leaflet',
+        _model_module : 'jupyter-astro-leaflet',
+        // bottom : false,
+        options:[],
+        nb_url : ''
+    })
+});
 
 var LeafletLayerModel = widgets.WidgetModel.extend({
     defaults: _.extend({}, widgets.WidgetModel.prototype.defaults, {
         _view_name : 'LeafletLayerView',
         _model_name : 'LeafletLayerModel',
-        _view_module : 'jupyter-leaflet',
-        _model_module : 'jupyter-leaflet',
+        _view_module : 'jupyter-astro-leaflet',
+        _model_module : 'jupyter-astro-leaflet',
         // bottom : false,
         options : []
     })
@@ -727,8 +743,8 @@ var LeafletControlModel = widgets.WidgetModel.extend({
     defaults: _.extend({}, widgets.WidgetModel.prototype.defaults, {
         _view_name : 'LeafletControlView',
         _model_name : 'LeafletControlModel',
-        _view_module : 'jupyter-leaflet',
-        _model_module : 'jupyter-leaflet',
+        _view_module : 'jupyter-astro-leaflet',
+        _model_module : 'jupyter-astro-leaflet',
         options : []
     })
 });
@@ -759,8 +775,8 @@ var LeafletMapModel = widgets.DOMWidgetModel.extend({
     defaults: _.extend({}, widgets.DOMWidgetModel.prototype.defaults, {
         _view_name : "LeafletMapView",
         _model_name : "LeafletMapModel",
-        _model_module : "jupyter-leaflet",
-        _view_module : "jupyter-leaflet",
+        _model_module : "jupyter-astro-leaflet",
+        _view_module : "jupyter-astro-leaflet",
 
         center : def_loc,
         width : "600px",
@@ -836,6 +852,7 @@ module.exports = {
     LeafletMapView : LeafletMapView,
     NotebookUrlView:NotebookUrlView,
     // models
+    NotebookUrlModel:NotebookUrlModel,
     LeafletLayerModel : LeafletLayerModel,
     LeafletUILayerModel : LeafletUILayerModel,
     LeafletGridLayerModel : LeafletGridLayerModel,
