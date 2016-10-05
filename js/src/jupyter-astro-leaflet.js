@@ -6,7 +6,7 @@ require('leaflet-draw');
 require('leaflet/scripts/L.canvasLayer');
 require('leaflet/scripts/L.DesCRS');
 require('leaflet/scripts/L.SvgTile');
-
+// var utils = require('base/js/utils');
 // console.log(L.CRS.RADEC);
 
 
@@ -19,6 +19,21 @@ function camel_case(input) {
     });
 }
 
+var NotebookUrlView = widgets.WidgetView.extend({
+    
+    render: function(){
+        this.host = document.location.origin;
+        this.base_url = document.querySelector('body').getAttribute('data-base-url');
+        this.nb_url = this.host + this.base_url;
+        this.update();
+        // this.nb_url = __webpack_public_path__;
+        this.el.textContent = this.nb_url;
+    },
+    update:function(){
+        this.model.set('nb_url', this.nb_url);
+    },
+
+});
 
 var LeafletLayerView = widgets.WidgetView.extend({
 
@@ -819,6 +834,7 @@ module.exports = {
     LeafletControlView : LeafletControlView,
     LeafletDrawControlView : LeafletDrawControlView,
     LeafletMapView : LeafletMapView,
+    NotebookUrlView:NotebookUrlView,
     // models
     LeafletLayerModel : LeafletLayerModel,
     LeafletUILayerModel : LeafletUILayerModel,
