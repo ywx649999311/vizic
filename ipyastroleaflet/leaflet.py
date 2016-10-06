@@ -36,8 +36,8 @@ class InteractMixin(object):
 class Layer(Widget, InteractMixin):
     _view_name = Unicode('LeafletLayerView').tag(sync=True)
     _model_name = Unicode('LeafletLayerModel').tag(sync=True)
-    _view_module = Unicode('jupyter-leaflet').tag(sync=True)
-    _model_module = Unicode('jupyter-leaflet').tag(sync=True)
+    _view_module = Unicode('jupyter-astro-leaflet').tag(sync=True)
+    _model_module = Unicode('jupyter-astro-leaflet').tag(sync=True)
 
     # bottom = Bool().tag(sync=True)
     options = List(trait=Unicode).tag(sync=True)
@@ -116,18 +116,6 @@ class TileLayer(RasterLayer):
     attribution = Unicode('Map data (c) <a href="https://openstreetmap.org">OpenStreetMap</a> contributors').tag(sync=True, o=True)
     opacity = Float(1.0).tag(sync=True, o=True)
     detect_retina = Bool(False).tag(sync=True, o=True)
-
-class GridLayer(RasterLayer):
-    _view_name = Unicode('LeafletGridLayerView').tag(sync=True)
-    _model_name = Unicode('LeafletGridLayerModel').tag(sync=True)
-
-    # bottom = Bool(False).tag(sync=True)
-    # min_zoom = Int(0).tag(sync=True, o=True)
-    # max_zoom = Int(18).tag(sync=True, o=True)
-    # tile_size = Int(256).tag(sync=True, o=True)
-    # xc = Int(3).tag(sync=True, o=True)
-    # yc = Int(3).tag(sync=True, o=True)
-    # detect_retina = Bool(False).tag(sync=True, o=True)
 
 class ImageOverlay(RasterLayer):
     _view_name = Unicode('LeafletImageOverlayView').tag(sync=True)
@@ -263,8 +251,8 @@ class ControlException(TraitError):
 class Control(Widget):
     _view_name = Unicode('LeafletControlView').tag(sync=True)
     _model_name = Unicode('LeafletControlModel').tag(sync=True)
-    _view_module = Unicode('jupyter-leaflet').tag(sync=True)
-    _model_module = Unicode('jupyter-leaflet').tag(sync=True)
+    _view_module = Unicode('jupyter-astro-leaflet').tag(sync=True)
+    _model_module = Unicode('jupyter-astro-leaflet').tag(sync=True)
 
     options = List(trait=Unicode).tag(sync=True)
 
@@ -354,12 +342,12 @@ class Map(DOMWidget, InteractMixin):
 
     _view_name = Unicode('LeafletMapView').tag(sync=True)
     _model_name = Unicode('LeafletMapModel').tag(sync=True)
-    _view_module = Unicode('jupyter-leaflet').tag(sync=True)
-    _model_module = Unicode('jupyter-leaflet').tag(sync=True)
+    _view_module = Unicode('jupyter-astro-leaflet').tag(sync=True)
+    _model_module = Unicode('jupyter-astro-leaflet').tag(sync=True)
 
     # Map options
     center = List(def_loc).tag(sync=True, o=True)
-    zoom_start = Int(12).tag(sync=True, o=True)
+    # zoom_start = Int(12).tag(sync=True, o=True)
     zoom = Int(12).tag(sync=True, o=True)
     max_zoom = Int(18).tag(sync=True, o=True)
     min_zoom = Int(0).tag(sync=True, o=True)
@@ -532,4 +520,3 @@ class Map(DOMWidget, InteractMixin):
 
     def _handle_leaflet_event(self, _, content):
         pass
-

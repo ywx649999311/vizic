@@ -25,7 +25,7 @@ log.set_verbosity(log.DEBUG)
 log.info('setup.py entered')
 log.info('$PATH=%s' % os.environ['PATH'])
 
-LONG_DESCRIPTION = 'A Jupyter widget for dynamic Leaflet maps'
+LONG_DESCRIPTION = 'A Jupyter widget for dynamic Leaflet maps (DES)'
 
 def js_prerelease(command, strict=False):
     """decorator for building minified js/css prior to another command"""
@@ -69,8 +69,8 @@ class NPM(Command):
     node_modules = os.path.join(node_root, 'node_modules')
 
     targets = [
-        os.path.join(here, 'ipyleaflet', 'static', 'extension.js'),
-        os.path.join(here, 'ipyleaflet', 'static', 'index.js')
+        os.path.join(here, 'ipyastroleaflet', 'static', 'extension.js'),
+        os.path.join(here, 'ipyastroleaflet', 'static', 'index.js')
     ]
 
     def initialize_options(self):
@@ -115,22 +115,22 @@ class NPM(Command):
         update_package_data(self.distribution)
 
 version_ns = {}
-with open(os.path.join(here, 'ipyleaflet', '_version.py')) as f:
+with open(os.path.join(here, 'ipyastroleaflet', '_version.py')) as f:
     exec(f.read(), {}, version_ns)
 
 setup_args = {
-    'name': 'ipyleaflet',
+    'name': 'ipyastroleaflet',
     'version': version_ns['__version__'],
     'description': 'A Jupyter widget for dynamic Leaflet maps',
     'long_description': LONG_DESCRIPTION,
     'License': 'MIT License',
     'include_package_data': True,
     'data_files': [
-        ('share/jupyter/nbextensions/jupyter-leaflet', [
-            'ipyleaflet/static/extension.js',
-            'ipyleaflet/static/index.js',
-            'ipyleaflet/static/index.js.map',
-        ] + glob('ipyleaflet/static/*.png')),
+        ('share/jupyter/nbextensions/jupyter-astro-leaflet', [
+            'ipyastroleaflet/static/extension.js',
+            'ipyastroleaflet/static/index.js',
+            'ipyastroleaflet/static/index.js.map',
+        ] + glob('ipyastroleaflet/static/*.png')),
     ],
     'install_requires': ['ipywidgets>=5.1.5'],
     'packages': find_packages(),
@@ -141,12 +141,12 @@ setup_args = {
         'sdist': js_prerelease(sdist, strict=True),
         'jsdeps': NPM,
     },
-    'author': 'Brian E. Granger',
-    'author_email': 'ellisonbg@gmail.com',
-    'url': 'https://github.com/ellisonbg/ipyleaflet',
+    'author': 'Weixiang Yu',
+    'author_email': 'wyu16@illinois.edu',
+    'url': 'https://github.com/ywx649999311/ipyastroleaflet.git',
     'keywords': ['ipython', 'jupyter', 'widgets', 'graphics', '3d'],
     'classifiers': [
-        'Development Status :: 4 - Beta',
+        'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Developers',
         'Intended Audience :: Science/Research',
         'Topic :: Multimedia :: Graphics',

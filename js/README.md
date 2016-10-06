@@ -1,4 +1,4 @@
-Jupyter Leaflet Widget
+Jupyter Leaflet Widget for Astronomy data visualizations
 ======================
 
 Interactive leaflet widget for the Jupyter notebook

@@ -7,8 +7,6 @@ require('leaflet/scripts/L.canvasLayer');
 require('leaflet/scripts/L.DesCRS');
 require('leaflet/scripts/L.SvgTile');
 
-// console.log(L.CRS.RADEC);
-
 
 L.Icon.Default.imagePath = __webpack_public_path__;
 
@@ -18,6 +16,27 @@ function camel_case(input) {
         return group1.toUpperCase();
     });
 }
+
+var NotebookUrlView = widgets.WidgetView.extend({
+
+    render: function(){
+
+        this.host = document.location.origin;
+        this.base_url = document.querySelector('body').getAttribute('data-base-url');
+        this.nb_url = this.host + this.base_url;
+        this.el.textContent = this.nb_url;
+        this.update();
+
+    },
+    update:function(){
+        var that = this;
+        this.model.set('nb_url', that.nb_url);
+        console.log(this.model);
+        this.touch();
+    },
+
+});
+
 
 
 var LeafletLayerView = widgets.WidgetView.extend({
@@ -480,16 +499,17 @@ var LeafletMapView = widgets.DOMWidgetView.extend({
 
 var def_loc = [0.0, 0.0];
 
-
 var LeafletLayerModel = widgets.WidgetModel.extend({
     defaults: _.extend({}, widgets.WidgetModel.prototype.defaults, {
         _view_name : 'LeafletLayerView',
         _model_name : 'LeafletLayerModel',
-        _view_module : 'jupyter-leaflet',
-        _model_module : 'jupyter-leaflet',
+        _view_module : 'jupyter-astro-leaflet',
+        _model_module : 'jupyter-astro-leaflet',
         // bottom : false,
         options : []
-    })
+    }),
+
+
 });
 
 
@@ -564,7 +584,12 @@ var LeafletGridLayerModel = LeafletRasterLayerModel.extend({
         // attribution : 'Map data (c) <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
         // opacity : 1.0,
         // detect_retina : false
-    })
+    }),
+    initialize(attributes,options){
+        widgets.WidgetModel.prototype.initialize(this, attributes, options);
+        console.log(this.attributes);
+    }
+
 });
 
 
@@ -712,8 +737,8 @@ var LeafletControlModel = widgets.WidgetModel.extend({
     defaults: _.extend({}, widgets.WidgetModel.prototype.defaults, {
         _view_name : 'LeafletControlView',
         _model_name : 'LeafletControlModel',
-        _view_module : 'jupyter-leaflet',
-        _model_module : 'jupyter-leaflet',
+        _view_module : 'jupyter-astro-leaflet',
+        _model_module : 'jupyter-astro-leaflet',
         options : []
     })
 });
@@ -744,21 +769,23 @@ var LeafletMapModel = widgets.DOMWidgetModel.extend({
     defaults: _.extend({}, widgets.DOMWidgetModel.prototype.defaults, {
         _view_name : "LeafletMapView",
         _model_name : "LeafletMapModel",
-        _model_module : "jupyter-leaflet",
-        _view_module : "jupyter-leaflet",
+        _model_module : "jupyter-astro-leaflet",
+        _view_module : "jupyter-astro-leaflet",
 
         center : def_loc,
-        width : "600px",
-        height : "400px",
-        zoom_start : 12,
-        zoom : 12,
-        max_zoom : 18,
+        width : "512px",
+        height : "512px",
+        // zoom_start : 12,
+        zoom : 1,
+        max_zoom : 12,
         min_zoom : 0,
         max_bounds: [[-90, 0], [90, 360]],
 
         dragging : true,
         touch_zoom : true,
-        scroll_wheel_zoom : false,
+        scroll_wheel_zoom : true,
+        wheel_debounce_time: 80,
+        wheel_px_per_zoom_level: 80,
         double_click_zoom : true,
         box_zoom : true,
         tap : true,
@@ -768,7 +795,6 @@ var LeafletMapModel = widgets.DOMWidgetModel.extend({
         bounce_at_zoom_limits : true,
         keyboard : true,
         keyboardPanDelta : 80,
-        // keyboard_zoom_offset : 1,
         inertia : true,
         inertia_deceleration : 3000,
         inertia_max_speed : 1500,
@@ -819,6 +845,7 @@ module.exports = {
     LeafletControlView : LeafletControlView,
     LeafletDrawControlView : LeafletDrawControlView,
     LeafletMapView : LeafletMapView,
+    NotebookUrlView:NotebookUrlView,
     // models
     LeafletLayerModel : LeafletLayerModel,
     LeafletUILayerModel : LeafletUILayerModel,
