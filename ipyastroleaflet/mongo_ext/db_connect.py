@@ -1,13 +1,9 @@
 #database util library for des data
-# import numpy as np
-# import pandas as pd
 import motor
 from tornado import gen
 import concurrent.futures as cfs
 import time
 
-# client = motor.motor_tornado.MotorClient()
-# db = client.vis
 # coll = db['des']
 # mst_coll = db['mst']
 

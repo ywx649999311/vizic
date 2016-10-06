@@ -6,8 +6,6 @@ require('leaflet-draw');
 require('leaflet/scripts/L.canvasLayer');
 require('leaflet/scripts/L.DesCRS');
 require('leaflet/scripts/L.SvgTile');
-// var utils = require('base/js/utils');
-// console.log(L.CRS.RADEC);
 
 
 L.Icon.Default.imagePath = __webpack_public_path__;
@@ -33,6 +31,7 @@ var NotebookUrlView = widgets.WidgetView.extend({
     update:function(){
         var that = this;
         this.model.set('nb_url', that.nb_url);
+        console.log(this.model);
         this.touch();
     },
 
@@ -500,18 +499,6 @@ var LeafletMapView = widgets.DOMWidgetView.extend({
 
 var def_loc = [0.0, 0.0];
 
-var NotebookUrlModel = widgets.WidgetModel.extend({
-    defaults: _.extend({}, widgets.WidgetModel.prototype.defaults, {
-        _view_name : 'NotebookUrlView',
-        _model_name : 'NotebookUrlModel',
-        _view_module : 'jupyter-astro-leaflet',
-        _model_module : 'jupyter-astro-leaflet',
-        // bottom : false,
-        options:[],
-        nb_url : ''
-    })
-});
-
 var LeafletLayerModel = widgets.WidgetModel.extend({
     defaults: _.extend({}, widgets.WidgetModel.prototype.defaults, {
         _view_name : 'LeafletLayerView',
@@ -520,7 +507,9 @@ var LeafletLayerModel = widgets.WidgetModel.extend({
         _model_module : 'jupyter-astro-leaflet',
         // bottom : false,
         options : []
-    })
+    }),
+
+
 });
 
 
@@ -595,7 +584,12 @@ var LeafletGridLayerModel = LeafletRasterLayerModel.extend({
         // attribution : 'Map data (c) <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
         // opacity : 1.0,
         // detect_retina : false
-    })
+    }),
+    initialize(attributes,options){
+        widgets.WidgetModel.prototype.initialize(this, attributes, options);
+        console.log(this.attributes);
+    }
+
 });
 
 
@@ -779,17 +773,19 @@ var LeafletMapModel = widgets.DOMWidgetModel.extend({
         _view_module : "jupyter-astro-leaflet",
 
         center : def_loc,
-        width : "600px",
-        height : "400px",
-        zoom_start : 12,
-        zoom : 12,
-        max_zoom : 18,
+        width : "512px",
+        height : "512px",
+        // zoom_start : 12,
+        zoom : 1,
+        max_zoom : 12,
         min_zoom : 0,
         max_bounds: [[-90, 0], [90, 360]],
 
         dragging : true,
         touch_zoom : true,
-        scroll_wheel_zoom : false,
+        scroll_wheel_zoom : true,
+        wheel_debounce_time: 80,
+        wheel_px_per_zoom_level: 80,
         double_click_zoom : true,
         box_zoom : true,
         tap : true,
@@ -799,7 +795,6 @@ var LeafletMapModel = widgets.DOMWidgetModel.extend({
         bounce_at_zoom_limits : true,
         keyboard : true,
         keyboardPanDelta : 80,
-        // keyboard_zoom_offset : 1,
         inertia : true,
         inertia_deceleration : 3000,
         inertia_max_speed : 1500,
@@ -852,7 +847,6 @@ module.exports = {
     LeafletMapView : LeafletMapView,
     NotebookUrlView:NotebookUrlView,
     // models
-    NotebookUrlModel:NotebookUrlModel,
     LeafletLayerModel : LeafletLayerModel,
     LeafletUILayerModel : LeafletUILayerModel,
     LeafletGridLayerModel : LeafletGridLayerModel,

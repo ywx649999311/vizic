@@ -117,18 +117,6 @@ class TileLayer(RasterLayer):
     opacity = Float(1.0).tag(sync=True, o=True)
     detect_retina = Bool(False).tag(sync=True, o=True)
 
-class GridLayer(RasterLayer):
-    _view_name = Unicode('LeafletGridLayerView').tag(sync=True)
-    _model_name = Unicode('LeafletGridLayerModel').tag(sync=True)
-
-    # bottom = Bool(False).tag(sync=True)
-    # min_zoom = Int(0).tag(sync=True, o=True)
-    # max_zoom = Int(18).tag(sync=True, o=True)
-    # tile_size = Int(256).tag(sync=True, o=True)
-    # xc = Int(3).tag(sync=True, o=True)
-    # yc = Int(3).tag(sync=True, o=True)
-    # detect_retina = Bool(False).tag(sync=True, o=True)
-
 class ImageOverlay(RasterLayer):
     _view_name = Unicode('LeafletImageOverlayView').tag(sync=True)
     _model_name = Unicode('LeafletImageOverlayModel').tag(sync=True)
@@ -359,7 +347,7 @@ class Map(DOMWidget, InteractMixin):
 
     # Map options
     center = List(def_loc).tag(sync=True, o=True)
-    zoom_start = Int(12).tag(sync=True, o=True)
+    # zoom_start = Int(12).tag(sync=True, o=True)
     zoom = Int(12).tag(sync=True, o=True)
     max_zoom = Int(18).tag(sync=True, o=True)
     min_zoom = Int(0).tag(sync=True, o=True)
