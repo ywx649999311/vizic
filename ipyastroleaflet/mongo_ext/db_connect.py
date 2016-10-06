@@ -11,13 +11,11 @@ import time
 class MongoConnect:
 
 	def __init__(self, host, port, db, coll='des'):
-		print ('init Mongo connection')
 		self.client = motor.motor_tornado.MotorClient(host, port)
 		self.db = self.client[db]
 		self.coll = self.db[coll]
 
 	def close(self):
-		print ('close old Mongo connection')
 		self.client.close()
 
 	@gen.coroutine
@@ -28,7 +26,6 @@ class MongoConnect:
 
 		result = self.getCoordRange(xc, yc, zoom)
 		minR = self.getMinRadius(zoom, 0.714)
-		print (self.coll)
 		cursor = self.coll.find({
 
 			'$and': [
