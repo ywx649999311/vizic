@@ -14,15 +14,15 @@ import time
 # executor = cfs.ThreadPoolExecutor(max_workers=20)
 class MongoConnect:
 
-	def __init__(self, host='mongodb', port=27017, db='vis', coll='des'):
+	def __init__(self, host, port, db, coll='des'):
+		print ('init Mongo connection')
+		self.client = motor.motor_tornado.MotorClient(host, port)
+		self.db = self.client[db]
+		self.coll = self.db[coll]
 
-		try:
-			self.client = motor.motor_tornado.MotorClient(host, port)
-			self.db = self.client[db]
-			self.coll = self.db[coll]
-		except Exception as e:
-			print (str(e))
-
+	def close(self):
+		print ('close old Mongo connection')
+		self.client.close()
 
 	@gen.coroutine
 	def getTileData(self, xc, yc, zoom):
@@ -32,7 +32,7 @@ class MongoConnect:
 
 		result = self.getCoordRange(xc, yc, zoom)
 		minR = self.getMinRadius(zoom, 0.714)
-
+		print (self.coll)
 		cursor = self.coll.find({
 
 			'$and': [
