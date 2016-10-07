@@ -21,7 +21,7 @@ $ jupyter nbextension enable --py --sys-prefix ipyastroleaflet
 For a development installation (requires npm):
 
 ```
-$ git clone https://github.com/ellisonbg/ipyastroleaflet.git
+$ git clone https://github.com/ywx649999311/ipyastroleaflet.git
 $ cd ipyastroleaflet
 $ pip install -e .
 $ jupyter nbextension install --py --symlink --sys-prefix ipyastroleaflet
