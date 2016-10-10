@@ -3,6 +3,7 @@ from ipywidgets import (
     Widget, Layout
 )
 from traitlets import Unicode
+import pymongo
 
 class AstroMap(Map):
 
@@ -11,8 +12,8 @@ class AstroMap(Map):
         return Layout(height='512px', width='512px')
 
     scroll_wheel_zoom = Bool(True).tag(sync=True, o=True)
-    wheel_debounce_time = Int(80).tag(sync=True, o=True)
-    wheel_px_per_zoom_level = Int(80).tag(sync=True, o=True)
+    wheel_debounce_time = Int(60).tag(sync=True, o=True)
+    wheel_px_per_zoom_level = Int(60).tag(sync=True, o=True)
     zoom = Int(1).tag(sync=True, o=True)
     max_zoom = Int(12).tag(sync=True, o=True)
     _des_crs = List().tag(sync=True)
@@ -54,6 +55,11 @@ class GridLayer(RasterLayer):
     # min_zoom = Int(0).tag(sync=True, o=True)
     # max_zoom = Int(18).tag(sync=True, o=True)
     # tile_size = Int(256).tag(sync=True, o=True)
-    # xc = Int(3).tag(sync=True, o=True)
-    # yc = Int(3).tag(sync=True, o=True)
     # detect_retina = Bool(False).tag(sync=True, o=True)
+
+    def __init__(self, connection, collection = None, **kwargs):
+
+        super().__init__(**kwargs)
+        self.db = connection.db
+        if collection is not None:
+            _des_crs = self.db[collection].find_one({'_id':'meta'})['adjust']
