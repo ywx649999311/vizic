@@ -1,6 +1,6 @@
 var d3 = require("d3");
 L.SvgTile = L.GridLayer.extend({
-            
+
             options: {
 
                 maxZoom: 18,
@@ -32,19 +32,16 @@ L.SvgTile = L.GridLayer.extend({
                 tile.alt = '';
 
                 var tile_url = this.getTileUrl(coords);
-                //var layerClass = this,
                 key = this._tileCoordsToKey(coords);
-                              
                 d3.json(tile_url, function (error, json){
 
                     if (error) {
-                        
+
                         return console.log(error);
                     }
-                    
                     // console.log(json);
                     json.forEach(function (d){
-                        
+
                         var latlng = new L.LatLng(d.DEC, d.RA);
                         var map_point = layerClass._map.project(latlng, coords.z).round();
 
@@ -53,15 +50,11 @@ L.SvgTile = L.GridLayer.extend({
                         d.rotate=['rotate(', d.THETA_IMAGE+90, d.cx, d.cy, ')'].join(' ');
 
                     });
-
                     layerClass._drawShapes(json, tile, coords);
                     layerClass._data[key]=json;
                     done(null, tile);
                 });
-                
-                
                 return tile;
-
             },
 
             getTileUrl: function (coords) {
@@ -124,7 +117,7 @@ L.SvgTile = L.GridLayer.extend({
 
                 if (!this.options.bounds) { return true; }
 
-        
+
                 // don't load tile if it doesn't intersect the bounds in options
                 var tileBounds = this._tileCoordsToBounds(coords);
                 return L.latLngBounds(this.options.bounds).overlaps(tileBounds);
@@ -139,11 +132,11 @@ L.SvgTile = L.GridLayer.extend({
                     // callback(null);
                     return ;
                 }
-               
+
                 var tile = this.createTile(this._wrapCoords(coords), L.bind(this._tileReady, this, coords));
 
                 this._initTile(tile);
-               
+
                 // if createTile is defined with a second argument ("done" callback),
                 // we know that tile is async and will be ready later; otherwise
                 if (this.createTile.length < 2) {
@@ -159,7 +152,7 @@ L.SvgTile = L.GridLayer.extend({
                     coords: coords,
                     current: true
                 };
-                
+
                 container.appendChild(tile);
                 this.fire('tileloadstart', {
                     tile: tile,
@@ -217,26 +210,24 @@ L.SvgTile = L.GridLayer.extend({
                 var level = this._levels[zoom],
                     map = this._map;
 
-                
+
 
                 if (!level) {
                     level = this._levels[zoom] = {};
 
                     level.el = L.DomUtil.create('div', 'leaflet-tile-container leaflet-zoom-animated', this._container);
                     level.el.style.zIndex = maxZoom;
-                    
-                    //different size of div for different zooms, and set it to balck 
+
+                    //different size of div for different zooms, and set it to balck
                     width_height = Math.pow(2,zoom)*256+'px';
                     level.el.style.width = width_height;
                     level.el.style.height = width_height;
                     level.el.style.background = 'black';
 
-                    //avoid extra shift to make the level well aligned with the tile divs 
+                    //avoid extra shift to make the level well aligned with the tile divs
                     level.origin = L.point(0,0);
                     level.zoom = zoom;
-
-                    this._setZoomTransform(level, map.getCenter(), map.getZoom());
-
+                    this._setZoomTransform(level, this._map.getCenter(), this._map.getZoom());
                     // force the browser to consider the newly added element for transition
                     //L.Util.falseFn(level.el.offsetWidth);
                 }
@@ -246,8 +237,24 @@ L.SvgTile = L.GridLayer.extend({
                 return level;
             },
 
-            _drawShapes: function(data, tile, coords){  
-                
+            // _setZoomTransform: function (level, center, zoom) {
+            //     var viewHalf = this._map.getSize()._divideBy(2);
+            //     var projectedCenter = this._map.project(center, zoom);
+            //     var newOrigin = projectedCenter._subtract(viewHalf)._add(this._map._getMapPanePos()).round();
+        	// 	var scale = this._map.getZoomScale(zoom, level.zoom),
+        	// 	    translate = level.origin.multiplyBy(scale)
+        	// 	        .subtract(newOrigin).round();
+            //
+        	// 	if (L.Browser.any3d) {
+        	// 		L.DomUtil.setTransform(level.el, translate, scale);
+        	// 	} else {
+        	// 		L.DomUtil.setPosition(level.el, translate);
+        	// 	}
+        	// },
+
+
+            _drawShapes: function(data, tile, coords){
+
                 //0.714 is the ra and dec range for the map
                 var zoom = coords.z;
                 var multi_X = (256*Math.pow(2,zoom))/0.714,
@@ -258,7 +265,7 @@ L.SvgTile = L.GridLayer.extend({
                     .style('overflow', 'visible');
                     //.attr('height', 256)
                     //.attr('width', 256);
-                
+
                 var svg_g = svg_pane.append('g').attr('class', 'leaflet-zoom-hide');
 
                 var ellipses = svg_g.selectAll('ellipse')
@@ -284,16 +291,16 @@ L.SvgTile = L.GridLayer.extend({
                 var html='';
 
                d3.json(object_url, function(error,json){
-                    
+
                     if (error) {return console.log(error);}
-                    
+
                     json = json[0];
 
                     for (var key in json){
                         if (key!=='_id'){
                             html+=key+':'+json[key]+'<br>';
                         }
-                        
+
                     }
 
                     document.getElementById('object_display').innerHTML=html;
@@ -354,6 +361,3 @@ L.SvgTile = L.GridLayer.extend({
 L.svgTile = function (options){
     return new L.SvgTile(options);
 };
-
-
-

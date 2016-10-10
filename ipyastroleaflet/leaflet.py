@@ -351,7 +351,7 @@ class Map(DOMWidget, InteractMixin):
     zoom = Int(12).tag(sync=True, o=True)
     max_zoom = Int(18).tag(sync=True, o=True)
     min_zoom = Int(0).tag(sync=True, o=True)
-    max_bounds = List([[-90, 0],[90, 360]]).tag(sync=True, o=True)
+    # max_bounds = List([[-90, 0],[90, 360]]).tag(sync=True, o=True)
     # Interaction options
     dragging = Bool(True).tag(sync=True, o=True)
     touch_zoom = Bool(True).tag(sync=True, o=True)

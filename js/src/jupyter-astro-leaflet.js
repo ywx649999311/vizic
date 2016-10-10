@@ -31,7 +31,6 @@ var NotebookUrlView = widgets.WidgetView.extend({
     update:function(){
         var that = this;
         this.model.set('nb_url', that.nb_url);
-        console.log(this.model);
         this.touch();
     },
 
@@ -441,7 +440,6 @@ var LeafletMapView = widgets.DOMWidgetView.extend({
             options[camel_case(key)] = this.model.get(key);
         }
         options.crs = L.CRS.RADEC;
-        // console.log(L.CRS.RADEC);
         return options;
     },
 
@@ -462,6 +460,7 @@ var LeafletMapView = widgets.DOMWidgetView.extend({
     },
 
     update_bounds: function () {
+        var that = this;
         var b = this.obj.getBounds();
         this.model.set('_north', b.getNorth());
         this.model.set('_south', b.getSouth());
@@ -487,6 +486,22 @@ var LeafletMapView = widgets.DOMWidgetView.extend({
             this.obj.panTo(this.model.get('center'));
             this.update_bounds();
         }, this);
+        this.listenTo(this.model, 'change:_des_crs', function() {
+            this.update_crs();
+            this.update_bounds();
+        }, this);
+    },
+
+    update_crs: function(){
+        var that = this;
+        // that.obj.options.crs.adjust = that.model.get('_des_crs');
+        if (this.model.get('_des_crs') == []){
+            that.obj.options.crs.adjust = [0, 90, 0.3515625, 0.3515625];
+        }else{
+            that.obj.options.crs.adjust = that.model.get('_des_crs');
+        }
+        // Force the new crs options to be propagated to the end
+        that.obj._pixelOrigin = that.obj._getNewPixelOrigin(that.model.get('center'), that.model.get('zoom'));
     },
 
     handle_msg: function (content) {
@@ -576,6 +591,7 @@ var LeafletGridLayerModel = LeafletRasterLayerModel.extend({
         _view_name : 'LeafletGridLayerView',
         _model_name : 'LeafletGridLayerModel',
 
+        _des_crs : []
         // bottom : false,
         // url : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
         // min_zoom : 0,
@@ -779,7 +795,7 @@ var LeafletMapModel = widgets.DOMWidgetModel.extend({
         zoom : 1,
         max_zoom : 12,
         min_zoom : 0,
-        max_bounds: [[-90, 0], [90, 360]],
+        // max_bounds: [[-90, 0], [90, 360]],
 
         dragging : true,
         touch_zoom : true,
@@ -811,7 +827,8 @@ var LeafletMapModel = widgets.DOMWidgetModel.extend({
         _west : def_loc[1],
         options : [],
         layers : [],
-        controls : []
+        controls : [],
+        _des_crs : []
     })
 }, {
     serializers: _.extend({
