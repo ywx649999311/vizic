@@ -1,6 +1,6 @@
 from ._version import version_info, __version__
 
-from .astroleaflet import *
+from .astroleaflet import AstroMap, GridLayer, NotebookUrl
 from .connection import Connection
 
 def _jupyter_nbextension_paths():

@@ -28,6 +28,10 @@ $ jupyter nbextension install --py --symlink --sys-prefix ipyastroleaflet
 $ jupyter nbextension enable --py --sys-prefix ipyastroleaflet
 ```
 
+To run the Jupyter Notebook with:
+```
+$ jupyter notebook --NotebookApp.server_extensions="['ipyastroleaflet.mongo_ext.extension']"
+```
 Note for developers: the `--symlink` argument on Linux or OS X allows one to
 modify the JavaScript code in-place. This feature is not available
 with Windows.

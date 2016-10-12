@@ -132,7 +132,14 @@ setup_args = {
             'ipyastroleaflet/static/index.js.map',
         ] + glob('ipyastroleaflet/static/*.png')),
     ],
-    'install_requires': ['ipywidgets>=5.1.5'],
+    'install_requires': [
+        'ipywidgets>=5.1.5',
+        'pymongo>=2.9.4,<3',
+        'pandas',
+        'numpy',
+        'uuid',
+        'requests'
+    ],
     'packages': find_packages(),
     'zip_safe': False,
     'cmdclass': {
