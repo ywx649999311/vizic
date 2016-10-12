@@ -21,7 +21,7 @@ L.CRS.RADEC = L.extend({}, L.CRS.Simple, {
                 latlng.lat = (latlng.lat*this.adjust[3])+this.adjust[1];
                 return latlng;
             },
-            adjust: [0, 90, 0.3515625, 0.3515625]
+            adjust: [0, 0, 1, 1]
             // adjust: {
             //     x: 322.477471, //min RA
             //     y: 0.713879+0.3736110, //Delta DEC + min_DEC

@@ -413,7 +413,6 @@ var LeafletMapView = widgets.DOMWidgetView.extend({
 
     render_leaflet: function () {
         this.create_obj();
-        this.update_crs();
         this.layer_views.update(this.model.get('layers'));
         this.control_views.update(this.model.get('controls'));
         this.leaflet_events();
@@ -423,6 +422,7 @@ var LeafletMapView = widgets.DOMWidgetView.extend({
         var that = this;
         window.setTimeout(function () {
             that.obj.invalidateSize();
+            that.update_crs();
         }, 1000);
         return that;
     },
@@ -495,13 +495,15 @@ var LeafletMapView = widgets.DOMWidgetView.extend({
 
     update_crs: function(){
         var that = this;
-        // that.obj.options.crs.adjust = that.model.get('_des_crs');
+
         if (this.model.get('_des_crs') == []){
-            that.obj.options.crs.adjust = [0, 90, 0.3515625, 0.3515625];
+
         }else{
             that.obj.options.crs.adjust = that.model.get('_des_crs');
         }
+
         // Force the new crs options to be propagated to the end
+        c = that.model.get('center');
         that.obj._pixelOrigin = that.obj._getNewPixelOrigin(that.model.get('center'), that.model.get('zoom'));
     },
 

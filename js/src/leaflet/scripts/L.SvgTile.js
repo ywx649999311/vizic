@@ -31,7 +31,6 @@ L.SvgTile = L.GridLayer.extend({
                 tile.alt = '';
 
                 var tile_url = this.getTileUrl(coords);
-                console.log(tile_url);
                 key = this._tileCoordsToKey(coords);
                 d3.json(tile_url, function (error, json){
 

@@ -4,6 +4,8 @@ from ipywidgets import (
 )
 from traitlets import Unicode
 import pymongo
+import pandas as pd
+import numpy as np
 from pandas import DataFrame
 import uuid
 from notebook.utils import url_path_join
@@ -40,14 +42,14 @@ class AstroMap(Map):
         if layer.model_id not in self.layer_ids:
             raise LayerException('layer not on map: %r' % layer)
         if isinstance(layer, GridLayer):
-            self._des_crs = []
+            self._des_crs = [0, 90, 0.3515625, 0.3515625]
             self.max_zoom = 12
         self.layers = tuple([l for l in self.layers if l.model_id != layer.model_id])
         layer.visible = False
 
     def clear_layers(self):
         self.layers = ()
-        self._des_crs = []
+        # self._des_crs = []
 
 class NotebookUrl(Widget):
     _view_name = Unicode('NotebookUrlView').tag(sync=True)
@@ -94,7 +96,7 @@ class GridLayer(RasterLayer):
             df_r, self._des_crs = self._data_prep(self.max_zoom, self.df)
             self.x_range = self._des_crs[2]*256
             self.y_range = self._des_crs[3]*256
-            self._insert_data()
+            self._insert_data(df_r)
         else:
             raise Exception('Need to provide a collection name or a pandas dataframe!')
 
@@ -118,7 +120,8 @@ class GridLayer(RasterLayer):
 
     def _insert_data(self, df):
 
-        if not self.collection == '':
+        if self.collection == '':
+            print ('no coll name')
             coll_id = str(uuid.uuid4())
             self.collection = coll_id
 
