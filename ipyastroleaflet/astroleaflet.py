@@ -23,6 +23,8 @@ class AstroMap(Map):
     zoom = Int(1).tag(sync=True, o=True)
     max_zoom = Int(12).tag(sync=True, o=True)
     _des_crs = List().tag(sync=True)
+    # gird_added = Bool(False)
+    # tiles_center = List().tag(sync=True)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -35,21 +37,22 @@ class AstroMap(Map):
         if isinstance(layer, GridLayer):
             self._des_crs = layer._des_crs
             self.max_zoom = layer.max_zoom
+            self.center = layer.center
         self.layers = tuple([l for l in self.layers] + [layer])
         layer.visible = True
+        # print (self.layers)
 
     def remove_layer(self, layer):
         if layer.model_id not in self.layer_ids:
             raise LayerException('layer not on map: %r' % layer)
-        if isinstance(layer, GridLayer):
-            self._des_crs = [0, 90, 0.3515625, 0.3515625]
-            self.max_zoom = 12
+        # if isinstance(layer, GridLayer):
+        #     self._des_crs = [0, 0, 1, 1]
         self.layers = tuple([l for l in self.layers if l.model_id != layer.model_id])
         layer.visible = False
 
     def clear_layers(self):
         self.layers = ()
-        # self._des_crs = []
+
 
 class NotebookUrl(Widget):
     _view_name = Unicode('NotebookUrlView').tag(sync=True)
@@ -70,14 +73,15 @@ class GridLayer(RasterLayer):
     collection = Unicode().tag(sync=True, o=True)
     x_range = Float(1.0).tag(sync=True, o=True)
     y_range = Float(1.0).tag(sync=True, o=True)
+    center = List().tag(sync=True)
 
     def __init__(self, connection, coll_name = None, **kwargs):
         super().__init__(**kwargs)
         self.db = connection.db
-        if coll_name is not None:
-            self.collection = coll_name
+        self.coll_name = coll_name
         self._checkInput()
         self.push_data(connection._url)
+        print ('Mongodb collection name is {}'.format(self.collection))
 
     def _checkInput(self):
         if not self.collection == '':
@@ -119,9 +123,9 @@ class GridLayer(RasterLayer):
         return dff, [xMin, yMax, xScale, yScale]
 
     def _insert_data(self, df):
-
+        if self.coll_name is not None:
+            self.collection = self.coll_name
         if self.collection == '':
-            print ('no coll name')
             coll_id = str(uuid.uuid4())
             self.collection = coll_id
 
@@ -133,6 +137,7 @@ class GridLayer(RasterLayer):
     def push_data(self, url):
 
         mRange = (self.x_range + self.y_range)/2
+        self.center = [self._des_crs[1]-self.y_range/2,self._des_crs[0]+self.x_range/2]
         body = {
             'collection': self.collection,
             'mrange':mRange

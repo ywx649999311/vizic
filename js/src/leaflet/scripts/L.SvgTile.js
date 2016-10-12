@@ -20,14 +20,13 @@ L.SvgTile = L.GridLayer.extend({
                 //this._xhrs = [];
                 this._cTiles={};
                 this._data={};
-                layerClass=this;
 
             },
 
             createTile: function (coords, done){
 
                 var tile = L.DomUtil.create('div','leaflet-tile');
-
+                var that = this;
                 tile.alt = '';
 
                 var tile_url = this.getTileUrl(coords);
@@ -40,17 +39,16 @@ L.SvgTile = L.GridLayer.extend({
                     }
                     // console.log(json);
                     json.forEach(function (d){
-
                         var latlng = new L.LatLng(d.DEC, d.RA);
-                        var map_point = layerClass._map.project(latlng, coords.z).round();
+                        var map_point = that._map.project(latlng, coords.z).round();
 
                         d.cx=map_point.x-coords.x*256;
                         d.cy=map_point.y-coords.y*256;
                         d.rotate=['rotate(', d.THETA_IMAGE+90, d.cx, d.cy, ')'].join(' ');
 
                     });
-                    layerClass._drawShapes(json, tile, coords);
-                    layerClass._data[key]=json;
+                    that._drawShapes(json, tile, coords);
+                    that._data[key]=json;
                     done(null, tile);
                 });
                 return tile;

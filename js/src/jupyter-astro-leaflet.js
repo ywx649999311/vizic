@@ -418,12 +418,16 @@ var LeafletMapView = widgets.DOMWidgetView.extend({
         this.leaflet_events();
         this.model_events();
         this.update_bounds();
+        // console.log(this.obj.options.crs.adjust);
         // TODO: hack to get all the tiles to show.
         var that = this;
-        window.setTimeout(function () {
-            that.obj.invalidateSize();
-            that.update_crs();
-        }, 1000);
+
+        this.update_crs()
+        // window.setTimeout(function () {
+        //     // that.update_crs();
+        //     that.obj.invalidateSize();
+        //     // that.update_crs();
+        // }, 1000);
         return that;
     },
 
@@ -440,7 +444,7 @@ var LeafletMapView = widgets.DOMWidgetView.extend({
             // Convert from foo_bar to fooBar that Leaflet.js uses
             options[camel_case(key)] = this.model.get(key);
         }
-        options.crs = L.CRS.RADEC;
+        options.crs = L.extend({},L.CRS.RADEC);
         return options;
     },
 
@@ -488,22 +492,16 @@ var LeafletMapView = widgets.DOMWidgetView.extend({
             this.update_bounds();
         }, this);
         this.listenTo(this.model, 'change:_des_crs', function() {
-            this.update_crs();
+            _.bind(this.update_crs(), this);
             this.update_bounds();
         }, this);
     },
 
     update_crs: function(){
+        console.log(this.obj.options.zoom);
         var that = this;
-
-        if (this.model.get('_des_crs') == []){
-
-        }else{
-            that.obj.options.crs.adjust = that.model.get('_des_crs');
-        }
-
-        // Force the new crs options to be propagated to the end
-        c = that.model.get('center');
+        that.obj.options.crs.adjust = that.model.get('_des_crs');
+        // // Force the new crs options to be propagated to the end
         that.obj._pixelOrigin = that.obj._getNewPixelOrigin(that.model.get('center'), that.model.get('zoom'));
     },
 
@@ -601,6 +599,7 @@ var LeafletGridLayerModel = LeafletRasterLayerModel.extend({
         collection: '',
         x_range: 1.0,
         y_range: 1.0,
+        center: [],
         // tile_size : 256,
         // opacity : 1.0,
         detect_retina : false
@@ -795,6 +794,7 @@ var LeafletMapModel = widgets.DOMWidgetModel.extend({
         center : def_loc,
         width : "512px",
         height : "512px",
+        // grid_added = false,
         // zoom_start : 12,
         zoom : 1,
         max_zoom : 12,

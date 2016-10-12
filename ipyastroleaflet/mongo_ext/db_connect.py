@@ -24,7 +24,7 @@ class MongoConnect:
 		# multiThread is not stable
 		# result = executor.submit(getCoordRange, xc, yc, zoom).result()
 		# minR = executor.submit(getMinRadius,zoom, 0.714).result()
-
+		print (coll)
 		result = self.getCoordRange(xc, yc, zoom)
 		minR = self.getMinRadius(zoom, self.range_dict[coll])
 		cursor = self.db[coll].find({

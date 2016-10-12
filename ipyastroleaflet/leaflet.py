@@ -446,25 +446,27 @@ class Map(DOMWidget, InteractMixin):
         layers list.
         """
         self.layer_ids = [l.model_id for l in proposal['value']]
+        # print (proposal['value'])
+        # print (self.layer_ids)
         if len(set(self.layer_ids)) != len(self.layer_ids):
             raise LayerException('duplicate layer detected, only use each layer once')
         return proposal['value']
 
-    def add_layer(self, layer):
-        if layer.model_id in self.layer_ids:
-            raise LayerException('layer already on map: %r' % layer)
-        layer._map = self
-        self.layers = tuple([l for l in self.layers] + [layer])
-        layer.visible = True
+    # def add_layer(self, layer):
+    #     if layer.model_id in self.layer_ids:
+    #         raise LayerException('layer already on map: %r' % layer)
+    #     layer._map = self
+    #     self.layers = tuple([l for l in self.layers] + [layer])
+    #     layer.visible = True
 
-    def remove_layer(self, layer):
-        if layer.model_id not in self.layer_ids:
-            raise LayerException('layer not on map: %r' % layer)
-        self.layers = tuple([l for l in self.layers if l.model_id != layer.model_id])
-        layer.visible = False
+    # def remove_layer(self, layer):
+    #     if layer.model_id not in self.layer_ids:
+    #         raise LayerException('layer not on map: %r' % layer)
+    #     self.layers = tuple([l for l in self.layers if l.model_id != layer.model_id])
+    #     layer.visible = False
 
-    def clear_layers(self):
-        self.layers = ()
+    # def clear_layers(self):
+    #     self.layers = ()
 
     controls = Tuple(trait=Instance(Control)).tag(sync=True, **widget_serialization)
     control_ids = List()
