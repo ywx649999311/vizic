@@ -9,24 +9,25 @@ import time
 
 # executor = cfs.ThreadPoolExecutor(max_workers=20)
 class MongoConnect:
+	range_dict = {}
 
-	def __init__(self, host, port, db, coll='des'):
+	def __init__(self, host, port, db):
 		self.client = motor.motor_tornado.MotorClient(host, port)
 		self.db = self.client[db]
-		self.coll = self.db[coll]
-
+		# self.coll = self.db['des']
+		# self.coll = None
 	def close(self):
 		self.client.close()
 
 	@gen.coroutine
-	def getTileData(self, xc, yc, zoom):
+	def getTileData(self, coll, xc, yc, zoom):
 		# multiThread is not stable
 		# result = executor.submit(getCoordRange, xc, yc, zoom).result()
 		# minR = executor.submit(getMinRadius,zoom, 0.714).result()
 
 		result = self.getCoordRange(xc, yc, zoom)
-		minR = self.getMinRadius(zoom, 0.714)
-		cursor = self.coll.find({
+		minR = self.getMinRadius(zoom, self.range_dict[coll])
+		cursor = self.db[coll].find({
 
 			'$and': [
 				{'tile_x': {"$lt":result[0]}},

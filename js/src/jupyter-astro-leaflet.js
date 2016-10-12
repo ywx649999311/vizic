@@ -121,7 +121,7 @@ var LeafletTileLayerView = LeafletRasterLayerView.extend({
 
 var LeafletGridLayerView = LeafletRasterLayerView.extend({
     create_obj: function (){
-        this.obj = L.svgTile();
+        this.obj = L.svgTile(this.get_options());
     },
 
 });
@@ -413,6 +413,7 @@ var LeafletMapView = widgets.DOMWidgetView.extend({
 
     render_leaflet: function () {
         this.create_obj();
+        this.update_crs();
         this.layer_views.update(this.model.get('layers'));
         this.control_views.update(this.model.get('controls'));
         this.leaflet_events();
@@ -591,19 +592,20 @@ var LeafletGridLayerModel = LeafletRasterLayerModel.extend({
         _view_name : 'LeafletGridLayerView',
         _model_name : 'LeafletGridLayerModel',
 
-        _des_crs : []
-        // bottom : false,
-        // url : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-        // min_zoom : 0,
-        // max_zoom : 18,
+        _des_crs : [],
+        bottom : false,
+        min_zoom : 0,
+        max_zoom : 8,
+        collection: '',
+        x_range: 1.0,
+        y_range: 1.0,
         // tile_size : 256,
-        // attribution : 'Map data (c) <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
         // opacity : 1.0,
-        // detect_retina : false
+        detect_retina : false
     }),
     initialize(attributes,options){
         widgets.WidgetModel.prototype.initialize(this, attributes, options);
-        console.log(this.attributes);
+        // console.log(this.attributes);
     }
 
 });

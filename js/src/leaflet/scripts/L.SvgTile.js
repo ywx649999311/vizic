@@ -2,18 +2,17 @@ var d3 = require("d3");
 L.SvgTile = L.GridLayer.extend({
 
             options: {
-
-                maxZoom: 18,
-
-                //subdomains: 'abc',
+                maxZoom: 12,
                 errorTileUrl: '',
                 zoomOffset: 0,
-
                 maxNativeZoom: null, // Number
                 //tms: false,
                 //zoomReverse: false,
                 detectRetina: false,
-                crossOrigin: true
+                crossOrigin: true,
+                collection: '',
+                xRange: 1,
+                yRange: 1,
             },
 
             initialize: function (options){
@@ -32,6 +31,7 @@ L.SvgTile = L.GridLayer.extend({
                 tile.alt = '';
 
                 var tile_url = this.getTileUrl(coords);
+                console.log(tile_url);
                 key = this._tileCoordsToKey(coords);
                 d3.json(tile_url, function (error, json){
 
@@ -59,15 +59,14 @@ L.SvgTile = L.GridLayer.extend({
 
             getTileUrl: function (coords) {
 
-                return L.Util.template('/tiles/{z}/{x}/{y}.json', L.extend({
+                return L.Util.template('/tiles/{coll}/{z}/{x}/{y}.json', L.extend({
                     //r: this.options.detectRetina && L.Browser.retina && this.options.maxZoom > 0 ? '@2x' : '',
                     //s: this._getSubdomain(coords),
-                    // host: document.location.origin,
                     x: coords.x,
                     y: coords.y,
-                    z: this._getZoomForUrl()
+                    z: this._getZoomForUrl(),
+                    coll: this.options.collection,
                 }, this.options));
-                // return document.location.origin+'/hello';
             },
 
             _pruneTiles: function () {
@@ -255,10 +254,9 @@ L.SvgTile = L.GridLayer.extend({
 
             _drawShapes: function(data, tile, coords){
 
-                //0.714 is the ra and dec range for the map
                 var zoom = coords.z;
-                var multi_X = (256*Math.pow(2,zoom))/0.714,
-                    multi_Y = (256*Math.pow(2,zoom))/0.714;
+                var multi_X = (256*Math.pow(2,zoom))/this.options.xRange,
+                    multi_Y = (256*Math.pow(2,zoom))/this.options.yRange;
 
                 var svg_pane=d3.select(tile).append('svg')
                     .attr('viewBox', '0 0 256 256')
@@ -306,8 +304,6 @@ L.SvgTile = L.GridLayer.extend({
                     document.getElementById('object_display').innerHTML=html;
 
                });
-
-
             },
 
             _removeOldLevel: function(zoom){
