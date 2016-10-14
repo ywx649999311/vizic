@@ -8,16 +8,12 @@ Note
 
 Part of the project was orginally forked from [ipyleaflet](https://github.com/ellisonbg/ipyleaflet), which is a Jupyter / Leaflet bridge enabling interactive maps in the Jupyter notebook. As a major component of ipyastroleaflet, ipyleaflet has been modified and improved in a way to better suite the needs of ipyastroleaflet.
 
+Dependencies:
+
+    Node.js
+
 Installation
 ------------
-
-Using pip:
-
-```
-$ pip install ipyastroleaflet
-$ jupyter nbextension enable --py --sys-prefix ipyastroleaflet
-```
-
 For a development installation (requires npm):
 
 ```

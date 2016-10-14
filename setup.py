@@ -134,7 +134,7 @@ setup_args = {
     ],
     'install_requires': [
         'ipywidgets>=5.1.5',
-        'pymongo>=2.9.4,<3',
+        'motor',
         'pandas',
         'numpy',
         'uuid',

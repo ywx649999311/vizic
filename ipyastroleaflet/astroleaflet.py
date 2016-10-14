@@ -94,7 +94,7 @@ class GridLayer(RasterLayer):
 
             if not set(['RA', 'DEC']).issubset(set(clms)):
                 raise Exception("RA, DEC is required for visualization!")
-            if not set(['A_IMAGE, B_IMAGE, THETA_IMAGE']).issubset(set(clms)):
+            if not set(['A_IMAGE', 'B_IMAGE', 'THETA_IMAGE']).issubset(set(clms)):
                 print ('Without data for the object shape, every object will appear as a point')
 
             df_r, self._des_crs = self._data_prep(self.max_zoom, self.df)
