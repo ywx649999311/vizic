@@ -388,11 +388,11 @@ class Map(DOMWidget, InteractMixin):
     _east = Float(def_loc[1]).tag(sync=True)
     _west = Float(def_loc[1]).tag(sync=True)
 
-    default_tiles = Instance(TileLayer, allow_none=True)
+    default_tiles = Instance(RasterLayer, allow_none=True)
 
-    @default('default_tiles')
-    def _default_tiles(self):
-        return TileLayer()
+    # @default('default_tiles')
+    # def _default_tiles(self):
+    #     return TileLayer()
 
     @property
     def north(self):

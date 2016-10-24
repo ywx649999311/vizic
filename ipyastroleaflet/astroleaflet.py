@@ -11,6 +11,7 @@ import uuid
 from notebook.utils import url_path_join
 import requests
 
+
 class AstroMap(Map):
 
     @default('layout')
@@ -28,7 +29,9 @@ class AstroMap(Map):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.clear_layers()
+        if self.default_tiles is not None:
+            self._des_crs = self.default_tiles._des_crs
+            self.center = self.default_tiles.center
 
     def add_layer(self, layer):
         if layer.model_id in self.layer_ids:
@@ -59,6 +62,7 @@ class NotebookUrl(Widget):
     _view_module = Unicode('jupyter-astro-leaflet').tag(sync=True)
     nb_url = Unicode().tag(sync=True)
 
+
 class GridLayer(RasterLayer):
     _view_name = Unicode('LeafletGridLayerView').tag(sync=True)
     _model_name = Unicode('LeafletGridLayerModel').tag(sync=True)
@@ -75,17 +79,17 @@ class GridLayer(RasterLayer):
     y_range = Float(1.0).tag(sync=True, o=True)
     center = List().tag(sync=True)
 
-    def __init__(self, connection, coll_name = None, **kwargs):
+    def __init__(self, connection, coll_name=None, **kwargs):
         super().__init__(**kwargs)
         self.db = connection.db
         self.coll_name = coll_name
         self._checkInput()
         self.push_data(connection._url)
-        print ('Mongodb collection name is {}'.format(self.collection))
+        print('Mongodb collection name is {}'.format(self.collection))
 
     def _checkInput(self):
         if not self.collection == '':
-            meta = self.db[self.collection].find_one({'_id':'meta'})
+            meta = self.db[self.collection].find_one({'_id': 'meta'})
             self._des_crs = meta['adjust']
             self.x_range = meta['xRange']
             self.y_range = meta['yRange']
@@ -95,7 +99,7 @@ class GridLayer(RasterLayer):
             if not set(['RA', 'DEC']).issubset(set(clms)):
                 raise Exception("RA, DEC is required for visualization!")
             if not set(['A_IMAGE', 'B_IMAGE', 'THETA_IMAGE']).issubset(set(clms)):
-                print ('Without data for the object shape, every object will appear as a point')
+                print('Without data for the object shape, every object will appear as a point')
 
             df_r, self._des_crs = self._data_prep(self.max_zoom, self.df)
             self.x_range = self._des_crs[2]*256
@@ -106,16 +110,16 @@ class GridLayer(RasterLayer):
 
     def _data_prep(self, zoom, df):
         dff = df.copy()
-        (xMax, xMin) = (dff['RA'].max(),dff['RA'].min())
-        (yMax, yMin) = (dff['DEC'].max(),dff['DEC'].min())
+        (xMax, xMin) = (dff['RA'].max(), dff['RA'].min())
+        (yMax, yMin) = (dff['DEC'].max(), dff['DEC'].min())
         scaleMax = 2**int(zoom)
         x_range = xMax - xMin
         y_range = yMax - yMin
 
         dff['tile_x'] = ((dff.RA-xMin)*scaleMax/x_range).apply(np.floor).astype(int)
         dff['tile_y'] = ((yMax-dff.DEC)*scaleMax/y_range).apply(np.floor).astype(int)
-        dff.loc[:,'a']=dff.loc[:,'A_IMAGE'].apply(lambda x: x*0.267/3600)
-        dff.loc[:,'b']=dff.loc[:,'B_IMAGE'].apply(lambda x: x*0.267/3600)
+        dff.loc[:, 'a'] = dff.loc[:, 'A_IMAGE'].apply(lambda x: x*0.267/3600)
+        dff.loc[:, 'b'] = dff.loc[:, 'B_IMAGE'].apply(lambda x: x*0.267/3600)
         dff['zoom'] = int(zoom)
 
         xScale = x_range/256
@@ -132,15 +136,15 @@ class GridLayer(RasterLayer):
         data_d = df.to_dict(orient='records')
         coll = self.db[self.collection]
         coll.insert_many(data_d, ordered=False)
-        coll.insert_one({'_id':'meta', 'adjust':self._des_crs, 'xRange':self.x_range, 'yRange':self.y_range})
+        coll.insert_one({'_id': 'meta', 'adjust': self._des_crs, 'xRange': self.x_range, 'yRange': self.y_range})
 
     def push_data(self, url):
 
         mRange = (self.x_range + self.y_range)/2
-        self.center = [self._des_crs[1]-self.y_range/2,self._des_crs[0]+self.x_range/2]
+        self.center = [self._des_crs[1]-self.y_range/2, self._des_crs[0]+self.x_range/2]
         body = {
             'collection': self.collection,
-            'mrange':mRange
+            'mrange': mRange
         }
 
         push_url = url_path_join(url, '/rangeinfo/')
