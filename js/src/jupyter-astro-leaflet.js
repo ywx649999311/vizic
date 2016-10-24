@@ -6,6 +6,7 @@ require('leaflet-draw');
 require('leaflet/scripts/L.DesCRS');
 require('leaflet/scripts/L.SvgTile');
 require('leaflet/scripts/L.Control.MousePosition');
+require('leaflet-fullscreen');
 
 
 L.Icon.Default.imagePath = __webpack_public_path__;
@@ -824,6 +825,7 @@ var LeafletMapModel = widgets.DOMWidgetModel.extend({
         zoom_animation_threshold : 4,
         // marker_zoom_animation : bool(?),
         position_control : true,
+        fullscreen_control : true,
         _south : def_loc[0],
         _north : def_loc[0],
         _east : def_loc[1],

@@ -27,6 +27,7 @@
     "jquery": "^2.1.4",
     "jupyter-js-widgets": "^1.0.0",
     "leaflet-draw": "^0.3.0",
+    "leaflet-fullscreen": "git+https://git@github.com/Leaflet/Leaflet.fullscreen.git#gh-pages",
     "underscore": "^1.8.3"
   }
 }

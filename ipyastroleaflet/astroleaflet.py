@@ -24,6 +24,7 @@ class AstroMap(Map):
     zoom = Int(1).tag(sync=True, o=True)
     max_zoom = Int(12).tag(sync=True, o=True)
     position_control = Bool(True).tag(sync=True, o=True)
+    fullscreen_control = Bool(True).tag(sync=True, o=True)
     _des_crs = List().tag(sync=True)
     # gird_added = Bool(False)
     # tiles_center = List().tag(sync=True)
@@ -33,6 +34,7 @@ class AstroMap(Map):
         if self.default_tiles is not None:
             self._des_crs = self.default_tiles._des_crs
             self.center = self.default_tiles.center
+            self.max_zoom = self.default_tiles.max_zoom
 
     def add_layer(self, layer):
         if layer.model_id in self.layer_ids:

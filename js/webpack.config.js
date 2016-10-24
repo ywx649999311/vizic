@@ -2,7 +2,7 @@ var version = require('./package.json').version;
 
 var leaflet_marker_selector = /leaflet\/images\/marker-.*\.png/;
 var leaflet_layer_icon = /leaflet\/images\/layers.*\.png/;
-
+var fullscreen_icon = /leaflet-fullscreen\/dist\/fullscreen.*\.png/;
 var path = require('path');
 
 var loaders = [
@@ -11,7 +11,7 @@ var loaders = [
 
     // Generic file loader, Should be used for anything but leaflet's
     // marker-icon.png, marker-icon-2x.png or marker-shadow.png
-    { test: /\.(jpg|png|gif|svg)$/, loader: 'file', exclude: leaflet_marker_selector },
+    { test: /\.(jpg|png|gif|svg)$/, loader: 'file', exclude: leaflet_marker_selector,fullscreen_icon},
 
     // Files marker-icon.png, marker-icon-2x.png or marker-shadow.png
     // should be copied over to the bundle without being changed.
@@ -29,6 +29,7 @@ var loaders = [
     //
     { test: leaflet_marker_selector, loader: 'file?name=[name].[ext]' },
     { test: leaflet_layer_icon, loader: 'file?name=[name].[ext]' },
+    { test: fullscreen_icon, loader: 'file?name=[name].[ext]' },
 ];
 
 module.exports = [
