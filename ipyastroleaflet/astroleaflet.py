@@ -82,7 +82,10 @@ class GridLayer(RasterLayer):
 
     def __init__(self, connection, coll_name=None, **kwargs):
         super().__init__(**kwargs)
-        self.db = connection.db
+        try:
+            self.db = connection.db
+        except:
+            raise Exception('Mongodb connection error! Check connection object!')
         self.coll_name = coll_name
         self._checkInput()
         self.push_data(connection._url)
