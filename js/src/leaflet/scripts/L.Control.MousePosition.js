@@ -3,11 +3,11 @@ L.Control.MousePosition = L.Control.extend({
     position: 'bottomleft',
     separator: ' : ',
     emptyString: 'Unavailable',
-    lngFirst: false,
+    lngFirst: true,
     numDigits: 5,
     lngFormatter: undefined,
     latFormatter: undefined,
-    prefix: ""
+    prefix: "RA, DEC = "
   },
 
   onAdd: function (map) {

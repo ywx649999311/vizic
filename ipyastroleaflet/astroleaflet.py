@@ -23,6 +23,7 @@ class AstroMap(Map):
     wheel_px_per_zoom_level = Int(60).tag(sync=True, o=True)
     zoom = Int(1).tag(sync=True, o=True)
     max_zoom = Int(12).tag(sync=True, o=True)
+    position_control = Bool(True).tag(sync=True, o=True)
     _des_crs = List().tag(sync=True)
     # gird_added = Bool(False)
     # tiles_center = List().tag(sync=True)

@@ -347,7 +347,6 @@ class Map(DOMWidget, InteractMixin):
 
     # Map options
     center = List(def_loc).tag(sync=True, o=True)
-    # zoom_start = Int(12).tag(sync=True, o=True)
     zoom = Int(12).tag(sync=True, o=True)
     max_zoom = Int(18).tag(sync=True, o=True)
     min_zoom = Int(0).tag(sync=True, o=True)
@@ -369,7 +368,6 @@ class Map(DOMWidget, InteractMixin):
     inertia = Bool(True).tag(sync=True, o=True)
     inertia_deceleration = Int(3000).tag(sync=True, o=True)
     inertia_max_speed = Int(1500).tag(sync=True, o=True)
-    # inertia_threshold = Int(?, o=True).tag(sync=True)
     zoom_control = Bool(True).tag(sync=True, o=True)
     attribution_control = Bool(True).tag(sync=True, o=True)
     # fade_animation = Bool(?).tag(sync=True, o=True)

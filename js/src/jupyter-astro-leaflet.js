@@ -3,9 +3,9 @@ var _ = require('underscore');
 var L = require('leaflet/leaflet-src');
 var d3 = require("d3");
 require('leaflet-draw');
-require('leaflet/scripts/L.canvasLayer');
 require('leaflet/scripts/L.DesCRS');
 require('leaflet/scripts/L.SvgTile');
+require('leaflet/scripts/L.Control.MousePosition');
 
 
 L.Icon.Default.imagePath = __webpack_public_path__;
@@ -795,7 +795,6 @@ var LeafletMapModel = widgets.DOMWidgetModel.extend({
         width : "512px",
         height : "512px",
         // grid_added = false,
-        // zoom_start : 12,
         zoom : 1,
         max_zoom : 12,
         min_zoom : 0,
@@ -818,13 +817,13 @@ var LeafletMapModel = widgets.DOMWidgetModel.extend({
         inertia : true,
         inertia_deceleration : 3000,
         inertia_max_speed : 1500,
-        // inertia_threshold : int(?)
         zoom_control : true,
         attribution_control : true,
         // fade_animation : bool(?),
         // zoom_animation : bool(?),
         zoom_animation_threshold : 4,
         // marker_zoom_animation : bool(?),
+        position_control : true,
         _south : def_loc[0],
         _north : def_loc[0],
         _east : def_loc[1],
