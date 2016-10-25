@@ -124,7 +124,18 @@ var LeafletGridLayerView = LeafletRasterLayerView.extend({
     create_obj: function (){
         this.obj = L.svgTile(this.get_options());
     },
+    model_events: function () {
+        var that = this;
+        this.listenTo(this.model, 'change:color', function(){
+            var c = this.model.get('color');
+            d3.selectAll('.leaflet-tile').selectAll('ellipse').attr('fill', c);
+            this.obj.options.color = c;
+            for (key in that.obj._cTiles){
+                d3.select(that.obj._cTiles[key].el).selectAll('ellipse').attr('fill', c);
+            }
+        }, this);
 
+    },
 });
 
 
@@ -601,6 +612,7 @@ var LeafletGridLayerModel = LeafletRasterLayerModel.extend({
         x_range: 1.0,
         y_range: 1.0,
         center: [],
+        color: 'red',
         // tile_size : 256,
         // opacity : 1.0,
         detect_retina : false

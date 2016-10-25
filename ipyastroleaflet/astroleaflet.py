@@ -80,7 +80,9 @@ class GridLayer(RasterLayer):
     collection = Unicode().tag(sync=True, o=True)
     x_range = Float(1.0).tag(sync=True, o=True)
     y_range = Float(1.0).tag(sync=True, o=True)
+    color = Unicode('red').tag(sync=True, o=True)
     center = List().tag(sync=True)
+    _leaflet_id = Unicode().tag(sync=True)
 
     def __init__(self, connection, coll_name=None, **kwargs):
         super().__init__(**kwargs)

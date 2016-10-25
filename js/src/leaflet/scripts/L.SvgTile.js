@@ -13,6 +13,7 @@ L.SvgTile = L.GridLayer.extend({
                 collection: '',
                 xRange: 1,
                 yRange: 1,
+                color: undefined,
             },
 
             initialize: function (options){
@@ -252,6 +253,7 @@ L.SvgTile = L.GridLayer.extend({
             _drawShapes: function(data, tile, coords){
 
                 var zoom = coords.z;
+                var c = this.options.color;
                 var multi_X = (256*Math.pow(2,zoom))/this.options.xRange,
                     multi_Y = (256*Math.pow(2,zoom))/this.options.yRange;
 
@@ -272,7 +274,7 @@ L.SvgTile = L.GridLayer.extend({
                                 .attr('rx', function (d) {return d.a*multi_X;})
                                 .attr('ry', function (d){ return d.b*multi_Y;})
                                 .attr('transform', function (d){return d.rotate;})
-                                .attr('fill', 'red');
+                                .attr('fill', c);
 
                 // d3.select(tile).selectAll('ellipse').on('click', L.DomEvent.stop)
                                                     // .on('click', function(e){layerClass._displayObject(e);});
