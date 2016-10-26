@@ -1,6 +1,6 @@
 from ._version import version_info, __version__
 
-from .astroleaflet import AstroMap, GridLayer, NotebookUrl
+from .astroleaflet import AstroMap, GridLayer, NotebookUrl, AstroColorPicker
 from .connection import Connection
 
 

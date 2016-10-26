@@ -1,8 +1,8 @@
 from ipyastroleaflet.leaflet import *
 from ipywidgets import (
-    Widget, Layout
+    Widget, Layout, ColorPicker
 )
-from traitlets import Unicode
+from traitlets import Unicode, dlink, link
 import pymongo
 import pandas as pd
 import numpy as np
@@ -157,3 +157,24 @@ class GridLayer(RasterLayer):
 
         push_url = url_path_join(url, '/rangeinfo/')
         req = requests.post(push_url, data=body)
+
+
+class AstroColorPicker(ColorPicker):
+
+    layer = Instance(GridLayer)
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.value = 'red'
+        self.link(self.layer)
+        # if not isinstance(g, GridLayer):
+        #     raise Exception('Please pass in the target GridLayer!')
+        # else:
+        #     self.dlink = dlink((self, 'value'), (g, 'color'))
+
+    def unlink(self):
+        self.dlink.unlink()
+
+    def link(self, g):
+        self.layer = g
+        self.dlink = dlink((self, 'value'), (self.layer, 'color'))
