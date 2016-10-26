@@ -71,6 +71,63 @@ var LeafletLayerView = widgets.WidgetView.extend({
     },
 });
 
+// RasterLayer
+var LeafletRasterLayerView = LeafletLayerView.extend({
+});
+
+var LeafletGridLayerView = LeafletRasterLayerView.extend({
+    create_obj: function (){
+        this.obj = L.svgTile(this.get_options());
+
+    },
+    model_events: function () {
+        var that = this;
+        this.listenTo(this.model, 'change:color', function(){
+            var c = this.model.get('color');
+            d3.selectAll('.leaflet-tile').selectAll('ellipse').attr('fill', c);
+            this.obj.options.color = c;
+            for (key in that.obj._cTiles){
+                d3.select(that.obj._cTiles[key].el).selectAll('ellipse').attr('fill', c);
+            }
+        }, this);
+
+    },
+    leaflet_events: function(){
+        var that = this;
+        this.obj.on('load', function(){
+            console.log('load');
+            d3.select(that.obj._level.el).selectAll('ellipse').on('click', function(d){
+                that.send({
+                    'event': 'popup: click',
+                    'RA': d.RA,
+                    'DEC': d.DEC
+                });
+            });
+        });
+    }
+});
+
+var LeafletTileLayerView = LeafletRasterLayerView.extend({
+
+    create_obj: function () {
+        this.obj = L.tileLayer(
+            this.model.get('url'),
+            this.get_options()
+        );
+    },
+});
+
+var LeafletImageOverlayView = LeafletRasterLayerView.extend({
+
+    create_obj: function () {
+        this.obj = L.imageOverlay(
+            this.model.get('url'),
+            this.model.get('bounds'),
+            this.get_options()
+        );
+    },
+});
+
 
 // UILayer
 var LeafletUILayerView = LeafletLayerView.extend({
@@ -105,50 +162,6 @@ var LeafletPopupView = LeafletUILayerView.extend({
 });
 
 
-// RasterLayer
-var LeafletRasterLayerView = LeafletLayerView.extend({
-});
-
-
-var LeafletTileLayerView = LeafletRasterLayerView.extend({
-
-    create_obj: function () {
-        this.obj = L.tileLayer(
-            this.model.get('url'),
-            this.get_options()
-        );
-    },
-});
-
-var LeafletGridLayerView = LeafletRasterLayerView.extend({
-    create_obj: function (){
-        this.obj = L.svgTile(this.get_options());
-    },
-    model_events: function () {
-        var that = this;
-        this.listenTo(this.model, 'change:color', function(){
-            var c = this.model.get('color');
-            d3.selectAll('.leaflet-tile').selectAll('ellipse').attr('fill', c);
-            this.obj.options.color = c;
-            for (key in that.obj._cTiles){
-                d3.select(that.obj._cTiles[key].el).selectAll('ellipse').attr('fill', c);
-            }
-        }, this);
-
-    },
-});
-
-
-var LeafletImageOverlayView = LeafletRasterLayerView.extend({
-
-    create_obj: function () {
-        this.obj = L.imageOverlay(
-            this.model.get('url'),
-            this.model.get('bounds'),
-            this.get_options()
-        );
-    },
-});
 
 
 // VectorLayer
@@ -510,7 +523,6 @@ var LeafletMapView = widgets.DOMWidgetView.extend({
                 this.obj.setView([loc[0], loc[1]], loc[2]);
                 this.update_bounds();
             }
-
         },this)
         this.listenTo(this.model, 'change:_des_crs', function() {
             _.bind(this.update_crs(), this);

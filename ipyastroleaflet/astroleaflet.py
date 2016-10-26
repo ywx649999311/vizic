@@ -6,10 +6,11 @@ from traitlets import Unicode, dlink, link
 import pymongo
 import pandas as pd
 import numpy as np
-from pandas import DataFrame
+from pandas import DataFrame, Series
 import uuid
 from notebook.utils import url_path_join
 import requests
+import json
 
 
 class AstroMap(Map):
@@ -67,12 +68,10 @@ class AstroMap(Map):
         except:
             print('No base tiles added!')
 
-
     def fly_to(self, latlng, zoom):
         latlng.append(zoom)
         self.pan_loc = latlng
         self.pan_loc = []
-
 
 
 class NotebookUrl(Widget):
@@ -97,6 +96,9 @@ class GridLayer(RasterLayer):
     y_range = Float(1.0).tag(sync=True, o=True)
     color = Unicode('red').tag(sync=True, o=True)
     center = List().tag(sync=True)
+    pop = Instance(Series, allow_none=True)
+
+    _popup_callbacks = Instance(CallbackDispatcher, ())
 
     def __init__(self, connection, coll_name=None, **kwargs):
         super().__init__(**kwargs)
@@ -104,9 +106,14 @@ class GridLayer(RasterLayer):
             self.db = connection.db
         except:
             raise Exception('Mongodb connection error! Check connection object!')
+
         self.coll_name = coll_name
+        self._server_url = connection._url
         self._checkInput()
-        self.push_data(connection._url)
+        self.push_data(self._server_url)
+        self._popup_callbacks.register_callback(self._query_obj, remove=False)
+        self.on_msg(self._handle_leaflet_event)
+
         print('Mongodb collection name is {}'.format(self.collection))
 
     def _checkInput(self):
@@ -168,9 +175,19 @@ class GridLayer(RasterLayer):
             'collection': self.collection,
             'mrange': mRange
         }
-
         push_url = url_path_join(url, '/rangeinfo/')
         req = requests.post(push_url, data=body)
+
+    def _handle_leaflet_event(self, _, content, buffers):
+        if content.get('event', '') == 'popup: click':
+            self._popup_callbacks(**content)
+
+    def _query_obj(self, **kwargs):
+        body = {'coll': self.collection,'RA': kwargs['RA'], 'DEC': kwargs['DEC']}
+        popup_url = url_path_join(self._server_url, '/objectPop/')
+        result = requests.get(popup_url, data=body)
+        pop_dict = json.loads(result.text[1:-1])
+        self.pop = Series(pop_dict)
 
 
 class AstroColorPicker(ColorPicker):

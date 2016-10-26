@@ -117,6 +117,7 @@ class TileLayer(RasterLayer):
     opacity = Float(1.0).tag(sync=True, o=True)
     detect_retina = Bool(False).tag(sync=True, o=True)
 
+
 class ImageOverlay(RasterLayer):
     _view_name = Unicode('LeafletImageOverlayView').tag(sync=True)
     _model_name = Unicode('LeafletImageOverlayModel').tag(sync=True)

@@ -215,7 +215,7 @@ L.SvgTile = L.GridLayer.extend({
                     level.el = L.DomUtil.create('div', 'leaflet-tile-container leaflet-zoom-animated', this._container);
                     level.el.style.zIndex = maxZoom;
 
-                    //different size of div for different zooms, and set it to balck
+                    //different size of div for different zooms, and set it to black
                     width_height = Math.pow(2,zoom)*256+'px';
                     level.el.style.width = width_height;
                     level.el.style.height = width_height;
@@ -233,22 +233,6 @@ L.SvgTile = L.GridLayer.extend({
 
                 return level;
             },
-
-            // _setZoomTransform: function (level, center, zoom) {
-            //     var viewHalf = this._map.getSize()._divideBy(2);
-            //     var projectedCenter = this._map.project(center, zoom);
-            //     var newOrigin = projectedCenter._subtract(viewHalf)._add(this._map._getMapPanePos()).round();
-        	// 	var scale = this._map.getZoomScale(zoom, level.zoom),
-        	// 	    translate = level.origin.multiplyBy(scale)
-        	// 	        .subtract(newOrigin).round();
-            //
-        	// 	if (L.Browser.any3d) {
-        	// 		L.DomUtil.setTransform(level.el, translate, scale);
-        	// 	} else {
-        	// 		L.DomUtil.setPosition(level.el, translate);
-        	// 	}
-        	// },
-
 
             _drawShapes: function(data, tile, coords){
 
@@ -275,22 +259,24 @@ L.SvgTile = L.GridLayer.extend({
                                 .attr('ry', function (d){ return d.b*multi_Y;})
                                 .attr('transform', function (d){return d.rotate;})
                                 .attr('fill', c);
-
-                // d3.select(tile).selectAll('ellipse').on('click', L.DomEvent.stop)
-                                                    // .on('click', function(e){layerClass._displayObject(e);});
-
+                var that = this;
                 return ellipses;
-
             },
 
             _displayObject: function(e){
-                var object_url = 'object/'+e.RA+'/'+e.DEC+'.json';
+                console.log(e);
+                var object_url = L.Util.template('/object/{coll}/{ra}/{dec}.json', {
+                    coll: this.options.collection,
+                    ra: e.RA,
+                    dec: e.DEC
+                })
+                console.log(object_url);
                 var html='';
 
                d3.json(object_url, function(error,json){
 
                     if (error) {return console.log(error);}
-
+                    console.log(json);
                     json = json[0];
 
                     for (var key in json){
@@ -299,8 +285,8 @@ L.SvgTile = L.GridLayer.extend({
                         }
 
                     }
-
-                    document.getElementById('object_display').innerHTML=html;
+                    console.log(html);
+                    // document.getElementById('object_display').innerHTML=html;
 
                });
             },

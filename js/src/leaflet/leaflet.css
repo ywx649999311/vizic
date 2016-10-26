@@ -223,6 +223,9 @@
 .leaflet-tile-container {
 	pointer-events: none;
 	}
+.leaflet-tile-container svg ellipse {
+	pointer-events: visible;
+}
 
 .leaflet-marker-icon.leaflet-interactive,
 .leaflet-image-layer.leaflet-interactive,

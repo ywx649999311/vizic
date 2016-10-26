@@ -4,7 +4,7 @@ from pymongo.errors import AutoReconnect, ConnectionFailure
 from notebook.utils import url_path_join
 
 
-class Connection:
+class Connection(object):
 
     def __init__(self, host="localhost", port=27017, db="vis", url='http://localhost:8888/'):
 
