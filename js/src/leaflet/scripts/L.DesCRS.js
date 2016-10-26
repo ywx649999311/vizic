@@ -31,7 +31,3 @@ L.CRS.RADEC = L.extend({}, L.CRS.Simple, {
             //     }
             // }
         });
-// L.CRS.S = L.extend({}, L.CRS.Simple, {
-//             projection : L.Projection.LonLat,
-//             transformation: new L.Transformation(1, 0, 1, 0),
-//         });

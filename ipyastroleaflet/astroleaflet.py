@@ -26,8 +26,8 @@ class AstroMap(Map):
     position_control = Bool(True).tag(sync=True, o=True)
     fullscreen_control = Bool(True).tag(sync=True, o=True)
     _des_crs = List().tag(sync=True)
-    # gird_added = Bool(False)
-    # tiles_center = List().tag(sync=True)
+    pan_loc = List().tag(sync=True)
+    # pan_ready = Bool(False).tag(sync=True)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -46,7 +46,6 @@ class AstroMap(Map):
             self.center = layer.center
         self.layers = tuple([l for l in self.layers] + [layer])
         layer.visible = True
-        # print (self.layers)
 
     def remove_layer(self, layer):
         if layer.model_id not in self.layer_ids:
@@ -58,6 +57,18 @@ class AstroMap(Map):
 
     def clear_layers(self):
         self.layers = ()
+
+    def go_center(self):
+        center = []
+        center.append(self._des_crs[1]-128*self._des_crs[3])
+        center.append(self._des_crs[0]+128*self._des_crs[2])
+        self.fly_to(center, 1)
+
+    def fly_to(self, latlng, zoom):
+        latlng.append(zoom)
+        self.pan_loc = latlng
+        self.pan_loc = []
+
 
 
 class NotebookUrl(Widget):
@@ -82,7 +93,6 @@ class GridLayer(RasterLayer):
     y_range = Float(1.0).tag(sync=True, o=True)
     color = Unicode('red').tag(sync=True, o=True)
     center = List().tag(sync=True)
-    _leaflet_id = Unicode().tag(sync=True)
 
     def __init__(self, connection, coll_name=None, **kwargs):
         super().__init__(**kwargs)
@@ -165,12 +175,8 @@ class AstroColorPicker(ColorPicker):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.value = 'red'
+        self.value = self.layer.color
         self.link(self.layer)
-        # if not isinstance(g, GridLayer):
-        #     raise Exception('Please pass in the target GridLayer!')
-        # else:
-        #     self.dlink = dlink((self, 'value'), (g, 'color'))
 
     def unlink(self):
         self.dlink.unlink()

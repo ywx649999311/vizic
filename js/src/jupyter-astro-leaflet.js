@@ -503,6 +503,15 @@ var LeafletMapView = widgets.DOMWidgetView.extend({
             this.obj.panTo(this.model.get('center'));
             this.update_bounds();
         }, this);
+        this.listenTo(this.model, 'change:pan_loc', function(){
+            var loc = this.model.get('pan_loc');
+            if (loc.length != 0){
+                console.log(loc.length);
+                this.obj.setView([loc[0], loc[1]], loc[2]);
+                this.update_bounds();
+            }
+
+        },this)
         this.listenTo(this.model, 'change:_des_crs', function() {
             _.bind(this.update_crs(), this);
             this.update_bounds();
@@ -510,7 +519,6 @@ var LeafletMapView = widgets.DOMWidgetView.extend({
     },
 
     update_crs: function(){
-        console.log(this.obj.options.zoom);
         var that = this;
         that.obj.options.crs.adjust = that.model.get('_des_crs');
         // // Force the new crs options to be propagated to the end
@@ -845,7 +853,8 @@ var LeafletMapModel = widgets.DOMWidgetModel.extend({
         options : [],
         layers : [],
         controls : [],
-        _des_crs : []
+        _des_crs : [],
+        _pan_loc : []
     })
 }, {
     serializers: _.extend({
