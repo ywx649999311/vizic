@@ -60,9 +60,13 @@ class AstroMap(Map):
 
     def go_center(self):
         center = []
-        center.append(self._des_crs[1]-128*self._des_crs[3])
-        center.append(self._des_crs[0]+128*self._des_crs[2])
-        self.fly_to(center, 1)
+        try:
+            center.append(self._des_crs[1]-128*self._des_crs[3])
+            center.append(self._des_crs[0]+128*self._des_crs[2])
+            self.fly_to(center, 1)
+        except:
+            print('No base tiles added!')
+
 
     def fly_to(self, latlng, zoom):
         latlng.append(zoom)
