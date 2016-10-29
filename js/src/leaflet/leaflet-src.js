@@ -3199,7 +3199,7 @@ L.Map = L.Evented.extend({
 	_onResize: function () {
 		L.Util.cancelAnimFrame(this._resizeRequest);
 		this._resizeRequest = L.Util.requestAnimFrame(
-		        function () { this.invalidateSize({debounceMoveend: true}); }, this);
+		        function () { this.invalidateSize({debounceMoveend: false}); }, this);
 	},
 
 	_onScroll: function () {

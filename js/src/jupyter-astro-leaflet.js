@@ -487,6 +487,13 @@ var LeafletMapView = widgets.DOMWidgetView.extend({
             that.touch();
             that.update_bounds();
         });
+        this.obj.on('resize', function(e){
+            if (document.webkitIsFullScreen) {
+                window.setTimeout(function(){
+                    that.obj.invalidateSize();
+                }, 150);
+            }
+        });
     },
 
     update_bounds: function () {

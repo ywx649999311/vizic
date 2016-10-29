@@ -75,7 +75,6 @@ class popupHandler(IPythonHandler):
     '''
     def get(self):
         arguments = {k.lower(): self.get_argument(k) for k in self.request.arguments}
-        print(arguments)
         coll = arguments['coll']
         ra = arguments['ra']
         dec = arguments['dec']
