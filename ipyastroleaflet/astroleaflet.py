@@ -40,8 +40,9 @@ class AstroMap(Map):
         super().__init__(**kwargs)
         if self.default_tiles is not None:
             self._des_crs = self.default_tiles._des_crs
-            self.center = self.default_tiles.center
             self.max_zoom = self.default_tiles.max_zoom
+            if self.center == [0.0, 0.0]:
+                self.center = self.default_tiles.center
 
     def add_layer(self, layer):
         if layer.model_id in self.layer_ids:
@@ -65,7 +66,7 @@ class AstroMap(Map):
     def clear_layers(self):
         self.layers = ()
 
-    def go_center(self):
+    def center_map(self):
         center = []
         try:
             center.append(self._des_crs[1]-128*self._des_crs[3])
