@@ -42,14 +42,8 @@ class MongoConnect(object):
         },
 
             {
-            'RA':1,
-                'DEC':1,
-                'THETA_IMAGE':1,
-                'COADD_OBJECTS_ID':1,
-                'a':1,
-                'b':1,
-                '_id':0
-
+            '_id':0,
+            'zoom':0
         })
 
         # print ('query', time.time())

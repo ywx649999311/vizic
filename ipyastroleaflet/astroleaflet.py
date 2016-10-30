@@ -2,7 +2,7 @@ from ipyastroleaflet.leaflet import *
 from ipywidgets import (
     Widget, Layout, ColorPicker
 )
-from traitlets import Unicode, dlink, link
+from traitlets import Unicode, dlink, link, Dict, Undefined
 import pymongo
 import pandas as pd
 import numpy as np
@@ -11,6 +11,12 @@ import uuid
 from notebook.utils import url_path_join
 import requests
 import json
+
+
+class NotebookUrl(Widget):
+    _view_name = Unicode('NotebookUrlView').tag(sync=True)
+    _view_module = Unicode('jupyter-astro-leaflet').tag(sync=True)
+    nb_url = Unicode().tag(sync=True)
 
 
 class AstroMap(Map):
@@ -74,12 +80,6 @@ class AstroMap(Map):
         self.pan_loc = []
 
 
-class NotebookUrl(Widget):
-    _view_name = Unicode('NotebookUrlView').tag(sync=True)
-    _view_module = Unicode('jupyter-astro-leaflet').tag(sync=True)
-    nb_url = Unicode().tag(sync=True)
-
-
 class GridLayer(RasterLayer):
     _view_name = Unicode('LeafletGridLayerView').tag(sync=True)
     _model_name = Unicode('LeafletGridLayerModel').tag(sync=True)
@@ -96,7 +96,7 @@ class GridLayer(RasterLayer):
     y_range = Float(1.0).tag(sync=True, o=True)
     color = Unicode('red').tag(sync=True, o=True)
     center = List().tag(sync=True)
-    pop = Instance(Series, allow_none=True)
+    obj_catalog = Instance(Series, allow_none=True)
 
     _popup_callbacks = Instance(CallbackDispatcher, ())
 
@@ -187,7 +187,7 @@ class GridLayer(RasterLayer):
         popup_url = url_path_join(self._server_url, '/objectPop/')
         result = requests.get(popup_url, data=body)
         pop_dict = json.loads(result.text[1:-1])
-        self.pop = Series(pop_dict)
+        self.obj_catalog = Series(pop_dict)
 
 
 class AstroColorPicker(ColorPicker):
@@ -205,3 +205,27 @@ class AstroColorPicker(ColorPicker):
     def link(self, g):
         self.layer = g
         self.dlink = dlink((self, 'value'), (self.layer, 'color'))
+
+
+class PopupDis(Widget):
+    """Popup display Widget"""
+    _view_name = Unicode('PopupDisView').tag(sync=True)
+    _view_module = Unicode('jupyter-astro-leaflet').tag(sync=True)
+    object_info = Dict().tag(sync=True)
+    layer = Instance(GridLayer)
+    data = Instance(Series, allow_none=True)
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.dlink = dlink((self.layer, 'obj_catalog'), (self, 'data'))
+
+    @observe('data')
+    def _update_data(self,change):
+        old = change['old']
+        new = change['new']
+
+        if old is Undefined:
+            return
+
+        if new is not None and not new.equals(old):
+            self.object_info = new.to_dict()

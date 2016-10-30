@@ -37,6 +37,43 @@ var NotebookUrlView = widgets.WidgetView.extend({
 
 });
 
+var PopupDisView = widgets.WidgetView.extend({
+
+    render: function(){
+        this.create_obj();
+        this.model_events();
+    },
+
+    model_events: function(){
+        var that = this;
+        this.listenTo(this.model, 'change:object_info', function(){
+            that.create_obj();
+        },this);
+    },
+    create_obj: function(){
+        var that = this;
+        while (that.el.hasChildNodes()){
+            that.el.removeChild(that.el.lastChild);
+        }
+        var table = document.createElement('TABLE');
+        var jObj = this.model.get('object_info');
+        var keys = Object.keys(jObj);
+        keys.forEach(function(d){
+            var row = table.insertRow();
+            row.insertCell().textContent = d;
+            row.insertCell().textContent = jObj[d];
+        });
+        d3.select(table).style('font-size', '13px').style('border', '1px solid black').style('border-collapse', 'collapse');
+        d3.select(table).selectAll('td').style('border','1px solid black');
+        d3.select(table).selectAll('tr').on('mouseover', function(){
+            d3.select(this).style('background-color', '#d5d5d5');
+        });
+        d3.select(table).selectAll('tr').on('mouseout', function(){
+            d3.select(this).style('background-color', 'white');
+        });
+        this.el.append(table);
+    }
+});
 
 
 var LeafletLayerView = widgets.WidgetView.extend({
@@ -911,6 +948,7 @@ module.exports = {
     LeafletDrawControlView : LeafletDrawControlView,
     LeafletMapView : LeafletMapView,
     NotebookUrlView:NotebookUrlView,
+    PopupDisView : PopupDisView,
     // models
     LeafletLayerModel : LeafletLayerModel,
     LeafletUILayerModel : LeafletUILayerModel,
