@@ -37,6 +37,11 @@ var NotebookUrlView = widgets.WidgetView.extend({
 
 });
 
+// var HomeButtonView = widgets.WidgetView.extend({
+//
+//     render: function()
+// });
+
 var PopupDisView = widgets.WidgetView.extend({
 
     render: function(){
@@ -46,7 +51,7 @@ var PopupDisView = widgets.WidgetView.extend({
 
     model_events: function(){
         var that = this;
-        this.listenTo(this.model, 'change:object_info', function(){
+        this.listenTo(this.model, 'change:_object_info', function(){
             that.create_obj();
         },this);
     },
@@ -56,7 +61,7 @@ var PopupDisView = widgets.WidgetView.extend({
             that.el.removeChild(that.el.lastChild);
         }
         var table = document.createElement('TABLE');
-        var jObj = this.model.get('object_info');
+        var jObj = this.model.get('_object_info');
         var keys = Object.keys(jObj);
         keys.forEach(function(d){
             var row = table.insertRow();

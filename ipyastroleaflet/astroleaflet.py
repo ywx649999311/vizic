@@ -1,7 +1,5 @@
 from ipyastroleaflet.leaflet import *
-from ipywidgets import (
-    Widget, Layout, ColorPicker
-)
+from ipywidgets import *
 from traitlets import Unicode, dlink, link, Dict, Undefined
 import pymongo
 import pandas as pd
@@ -11,12 +9,6 @@ import uuid
 from notebook.utils import url_path_join
 import requests
 import json
-
-
-class NotebookUrl(Widget):
-    _view_name = Unicode('NotebookUrlView').tag(sync=True)
-    _view_module = Unicode('jupyter-astro-leaflet').tag(sync=True)
-    nb_url = Unicode().tag(sync=True)
 
 
 class AstroMap(Map):
@@ -189,44 +181,3 @@ class GridLayer(RasterLayer):
         result = requests.get(popup_url, data=body)
         pop_dict = json.loads(result.text[1:-1])
         self.obj_catalog = Series(pop_dict)
-
-
-class AstroColorPicker(ColorPicker):
-
-    layer = Instance(GridLayer)
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.value = self.layer.color
-        self.link(self.layer)
-
-    def unlink(self):
-        self.dlink.unlink()
-
-    def link(self, g):
-        self.layer = g
-        self.dlink = dlink((self, 'value'), (self.layer, 'color'))
-
-
-class PopupDis(Widget):
-    """Popup display Widget"""
-    _view_name = Unicode('PopupDisView').tag(sync=True)
-    _view_module = Unicode('jupyter-astro-leaflet').tag(sync=True)
-    object_info = Dict().tag(sync=True)
-    layer = Instance(GridLayer)
-    data = Instance(Series, allow_none=True)
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.dlink = dlink((self.layer, 'obj_catalog'), (self, 'data'))
-
-    @observe('data')
-    def _update_data(self,change):
-        old = change['old']
-        new = change['new']
-
-        if old is Undefined:
-            return
-
-        if new is not None and not new.equals(old):
-            self.object_info = new.to_dict()
