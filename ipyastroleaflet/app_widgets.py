@@ -16,6 +16,8 @@ class AstroColorPicker(ColorPicker):
         super().__init__(**kwargs)
         self.value = self.layer.color
         self.link(self.layer)
+        if self.concise:
+            self.width = '30px'
 
     def unlink(self):
         self.dlink.unlink()
@@ -51,14 +53,14 @@ class PopupDis(Widget):
 
 class HomeButton(Button):
     '''Home button Widget'''
-    # _view_name = Unicode('HomeButtonView').tag(sync=True)
-    # _view_module = Unicode('jupyter-astro-leaflet').tag(sync=True)
+    _view_name = Unicode('HomeButtonView').tag(sync=True)
+    _view_module = Unicode('jupyter-astro-leaflet').tag(sync=True)
     _map = Instance(AstroMap, allow_none=True)
 
     def __init__(self, map, **kwargs):
         super().__init__(**kwargs)
         self._map = map
-        self.layout = Layout(height='32px', width='28px')
+        self.layout = Layout(height='30px', width='30px')
         self.on_click(self.handle_click)
 
     def handle_click(self, b):

@@ -3,7 +3,7 @@ require('leaflet/leaflet.css');
 require('leaflet/css/L.Control.MousePosition.css');
 require('leaflet-fullscreen/dist/leaflet.fullscreen.css');
 require('leaflet-draw/dist/leaflet.draw.css');
-
+require('./jupyter-astro-leaflet.css');
 // Forcibly load the marker icon images to be in the bundle.
 require('leaflet/images/marker-shadow.png');
 require('leaflet/images/marker-icon.png');

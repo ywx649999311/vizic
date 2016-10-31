@@ -37,10 +37,14 @@ var NotebookUrlView = widgets.WidgetView.extend({
 
 });
 
-// var HomeButtonView = widgets.WidgetView.extend({
-//
-//     render: function()
-// });
+var HomeButtonView = widgets.ButtonView.extend({
+    render: function(){
+        HomeButtonView.__super__.render.call(this);
+        var i = document.createElement('i');
+    
+        this.el.className += " home-button";
+    }
+});
 
 var PopupDisView = widgets.WidgetView.extend({
 
@@ -954,6 +958,7 @@ module.exports = {
     LeafletMapView : LeafletMapView,
     NotebookUrlView:NotebookUrlView,
     PopupDisView : PopupDisView,
+    HomeButtonView: HomeButtonView,
     // models
     LeafletLayerModel : LeafletLayerModel,
     LeafletUILayerModel : LeafletUILayerModel,
