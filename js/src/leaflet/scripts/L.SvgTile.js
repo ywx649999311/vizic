@@ -1,4 +1,5 @@
 var d3 = require("d3");
+var d3SC = require('d3-scale-chromatic');
 L.SvgTile = L.GridLayer.extend({
 
             options: {
@@ -241,7 +242,7 @@ L.SvgTile = L.GridLayer.extend({
             _drawShapes: function(data, tile, coords){
                 var that = this;
                 var color = this.options.color;
-                var intepolate = d3.scaleSequential(d3.interpolateSpectral);
+                var interpolate = d3.scaleSequential(d3SC.interpolateSpectral);
 
                 if (this.options.customC){
                     var cMinMax = that.options.cMinMax;

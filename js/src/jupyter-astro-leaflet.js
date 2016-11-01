@@ -141,17 +141,23 @@ var LeafletGridLayerView = LeafletRasterLayerView.extend({
             var custom_c = this.model.get('custom_c');
             var c_min_max = this.model.get('c_min_max');
             var interpolate = d3.scaleSequential(d3SC.interpolateSpectral).domain(c_min_max);
-            console.log(custom_c);
             if (custom_c == true){
                 var c_field = this.model.get('c_field');
                 d3.selectAll('.leaflet-tile').selectAll('ellipse').attr('fill', function(d){
                     return interpolate(d[c_field]);});
+                for (key in that.obj._cTiles){
+                    d3.select(that.obj._cTiles[key].el).selectAll('ellipse').attr('fill', function(d){
+                        return interpolate(d[c_field]);});
+                }
                 that.obj.options.customC = true;
                 that.obj.options.cMinMax = c_min_max;
                 that.obj.options.cField = c_field;
             }
             else{
                 d3.selectAll('.leaflet-tile').selectAll('ellipse').attr('fill', that.model.get('color'));
+                for (key in that.obj._cTiles){
+                    d3.select(that.obj._cTiles[key].el).selectAll('ellipse').attr('fill', that.model.get('color'));
+                }
                 that.obj.options.customC = false;
                 that.obj.options.cMinMax = [];
                 that.obj.options.cField = undefined;
