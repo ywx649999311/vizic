@@ -49,6 +49,7 @@ class MongoConnect(object):
         # print ('query', time.time())
         return cursor
 
+    # remeber to exclude the meta document
     @gen.coroutine
     def getVoronoi(self, tile):
 

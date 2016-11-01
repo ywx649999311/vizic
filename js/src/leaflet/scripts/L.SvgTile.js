@@ -14,6 +14,9 @@ L.SvgTile = L.GridLayer.extend({
                 xRange: 1,
                 yRange: 1,
                 color: undefined,
+                cMinMax: [],
+                customC: false,
+                cField: undefined,
             },
 
             initialize: function (options){
@@ -50,6 +53,7 @@ L.SvgTile = L.GridLayer.extend({
                     });
                     that._drawShapes(json, tile, coords);
                     that._data[key]=json;
+                    tile._data = json;
                     done(null, tile);
                 });
                 return tile;
@@ -235,9 +239,19 @@ L.SvgTile = L.GridLayer.extend({
             },
 
             _drawShapes: function(data, tile, coords){
+                var that = this;
+                var color = this.options.color;
+                var intepolate = d3.scaleSequential(d3.interpolateSpectral);
+
+                if (this.options.customC){
+                    var cMinMax = that.options.cMinMax;
+                    var cField = that.options.cField;
+                    color = function(d) {
+                        return interpolate.domain(cMinMax)(d[cField]);
+                    }
+                }
 
                 var zoom = coords.z;
-                var c = this.options.color;
                 var multi_X = (256*Math.pow(2,zoom))/this.options.xRange,
                     multi_Y = (256*Math.pow(2,zoom))/this.options.yRange;
 
@@ -258,38 +272,37 @@ L.SvgTile = L.GridLayer.extend({
                                 .attr('rx', function (d) {return d.a*multi_X;})
                                 .attr('ry', function (d){ return d.b*multi_Y;})
                                 .attr('transform', function (d){return d.rotate;})
-                                .attr('fill', c);
-                var that = this;
+                                .attr('fill', color);
                 return ellipses;
             },
 
-            _displayObject: function(e){
-                console.log(e);
-                var object_url = L.Util.template('/object/{coll}/{ra}/{dec}.json', {
-                    coll: this.options.collection,
-                    ra: e.RA,
-                    dec: e.DEC
-                })
-                console.log(object_url);
-                var html='';
-
-               d3.json(object_url, function(error,json){
-
-                    if (error) {return console.log(error);}
-                    console.log(json);
-                    json = json[0];
-
-                    for (var key in json){
-                        if (key!=='_id'){
-                            html+=key+':'+json[key]+'<br>';
-                        }
-
-                    }
-                    console.log(html);
-                    // document.getElementById('object_display').innerHTML=html;
-
-               });
-            },
+            // _displayObject: function(e){
+            //     console.log(e);
+            //     var object_url = L.Util.template('/object/{coll}/{ra}/{dec}.json', {
+            //         coll: this.options.collection,
+            //         ra: e.RA,
+            //         dec: e.DEC
+            //     })
+            //     console.log(object_url);
+            //     var html='';
+            //
+            //    d3.json(object_url, function(error,json){
+            //
+            //         if (error) {return console.log(error);}
+            //         console.log(json);
+            //         json = json[0];
+            //
+            //         for (var key in json){
+            //             if (key!=='_id'){
+            //                 html+=key+':'+json[key]+'<br>';
+            //             }
+            //
+            //         }
+            //         console.log(html);
+            //         // document.getElementById('object_display').innerHTML=html;
+            //
+            //    });
+            // },
 
             _removeOldLevel: function(zoom){
 

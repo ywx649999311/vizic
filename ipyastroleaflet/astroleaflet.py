@@ -88,10 +88,23 @@ class GridLayer(RasterLayer):
     x_range = Float(1.0).tag(sync=True, o=True)
     y_range = Float(1.0).tag(sync=True, o=True)
     color = Unicode('red').tag(sync=True, o=True)
+    c_min_max = List().tag(sync=True)
+    custom_c = Bool(False).tag(sync=True)
+    c_field = Unicode().tag(sync=True)
     center = List().tag(sync=True)
     obj_catalog = Instance(Series, allow_none=True)
-
+    __minMax = {}
     _popup_callbacks = Instance(CallbackDispatcher, ())
+
+    @observe('custom_c')
+    def _update_c_min_max(self, change):
+        print('am changeing')
+        if change['new'] is True and self.c_field != '':
+            self.c_min_max = self.__minMax[self.c_field]
+        else:
+            self.custom_c = False
+            self.c_field = ''
+            self.c_min_max = []
 
     def __init__(self, connection, coll_name=None, **kwargs):
         super().__init__(**kwargs)
@@ -115,6 +128,7 @@ class GridLayer(RasterLayer):
             self._des_crs = meta['adjust']
             self.x_range = meta['xRange']
             self.y_range = meta['yRange']
+            self.__minMax = meta['minmax']
         elif self.df is not None:
             clms = [x.upper() for x in list(self.df.columns)]
 
@@ -138,6 +152,11 @@ class GridLayer(RasterLayer):
         x_range = xMax - xMin
         y_range = yMax - yMin
 
+        # find field min and max
+        for col in self.df.columns:
+            if df[col].dtype.kind == 'f':
+                self.__minMax[col] = [df[col].min(), df[col].max()]
+
         dff['tile_x'] = ((dff.RA-xMin)*scaleMax/x_range).apply(np.floor).astype(int)
         dff['tile_y'] = ((yMax-dff.DEC)*scaleMax/y_range).apply(np.floor).astype(int)
         dff.loc[:, 'a'] = dff.loc[:, 'A_IMAGE'].apply(lambda x: x*0.267/3600)
@@ -158,7 +177,7 @@ class GridLayer(RasterLayer):
         data_d = df.to_dict(orient='records')
         coll = self.db[self.collection]
         coll.insert_many(data_d, ordered=False)
-        coll.insert_one({'_id': 'meta', 'adjust': self._des_crs, 'xRange': self.x_range, 'yRange': self.y_range})
+        coll.insert_one({'_id': 'meta', 'adjust': self._des_crs, 'xRange': self.x_range, 'yRange': self.y_range, 'minmax': self.__minMax})
 
     def push_data(self, url):
 
@@ -181,3 +200,6 @@ class GridLayer(RasterLayer):
         result = requests.get(popup_url, data=body)
         pop_dict = json.loads(result.text[1:-1])
         self.obj_catalog = Series(pop_dict)
+
+    def get(self):
+        return self.__minMax

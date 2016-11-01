@@ -2,6 +2,7 @@ var widgets = require('jupyter-js-widgets');
 var _ = require('underscore');
 var L = require('leaflet/leaflet-src');
 var d3 = require("d3");
+var d3SC = require('d3-scale-chromatic');
 require('leaflet-draw');
 require('leaflet/scripts/L.DesCRS');
 require('leaflet/scripts/L.SvgTile');
@@ -41,7 +42,7 @@ var HomeButtonView = widgets.ButtonView.extend({
     render: function(){
         HomeButtonView.__super__.render.call(this);
         var i = document.createElement('i');
-    
+
         this.el.className += " home-button";
     }
 });
@@ -136,12 +137,31 @@ var LeafletGridLayerView = LeafletRasterLayerView.extend({
                 d3.select(that.obj._cTiles[key].el).selectAll('ellipse').attr('fill', c);
             }
         }, this);
+        this.listenTo(this.model, 'change:c_min_max', function(){
+            var custom_c = this.model.get('custom_c');
+            var c_min_max = this.model.get('c_min_max');
+            var interpolate = d3.scaleSequential(d3SC.interpolateSpectral).domain(c_min_max);
+            console.log(custom_c);
+            if (custom_c == true){
+                var c_field = this.model.get('c_field');
+                d3.selectAll('.leaflet-tile').selectAll('ellipse').attr('fill', function(d){
+                    return interpolate(d[c_field]);});
+                that.obj.options.customC = true;
+                that.obj.options.cMinMax = c_min_max;
+                that.obj.options.cField = c_field;
+            }
+            else{
+                d3.selectAll('.leaflet-tile').selectAll('ellipse').attr('fill', that.model.get('color'));
+                that.obj.options.customC = false;
+                that.obj.options.cMinMax = [];
+                that.obj.options.cField = undefined;
+            }
+        }, this);
 
     },
     leaflet_events: function(){
         var that = this;
         this.obj.on('load', function(){
-            console.log('load');
             d3.select(that.obj._level.el).selectAll('ellipse').on('click', function(d){
                 that.send({
                     'event': 'popup: click',
@@ -689,6 +709,9 @@ var LeafletGridLayerModel = LeafletRasterLayerModel.extend({
         y_range: 1.0,
         center: [],
         color: 'red',
+        c_min_max: [],
+        custom_c: false,
+        c_field: '',
         // tile_size : 256,
         // opacity : 1.0,
         detect_retina : false
