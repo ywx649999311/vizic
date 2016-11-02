@@ -133,6 +133,7 @@ var LeafletGridLayerView = LeafletRasterLayerView.extend({
             callback(null);
         }
         this.listenTo(this.model, 'change:color', function(){
+            var key;
             var q = d3.queue();
             var c = this.model.get('color');
             d3.selectAll('.leaflet-tile').selectAll('ellipse').attr('fill', c);
@@ -154,6 +155,7 @@ var LeafletGridLayerView = LeafletRasterLayerView.extend({
                     return interpolate(d[c_field]);});
                 callback(null);
             }
+            var key;
             var q = d3.queue();
             if (custom_c == true){
                 var c_field = this.model.get('c_field');

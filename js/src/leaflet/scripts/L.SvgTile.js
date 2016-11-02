@@ -22,9 +22,8 @@ L.SvgTile = L.GridLayer.extend({
 
             initialize: function (options){
                 options = L.setOptions(this, options);
-                //this._xhrs = [];
                 this._cTiles={};
-                this._data={};
+                // this._data={};
 
             },
 
@@ -34,8 +33,8 @@ L.SvgTile = L.GridLayer.extend({
                 var that = this;
                 tile.alt = '';
 
-                var tile_url = this.getTileUrl(coords);
-                key = this._tileCoordsToKey(coords);
+                var tile_url = this.getTileUrl(coords),
+                    key = this._tileCoordsToKey(coords);
                 d3.json(tile_url, function (error, json){
 
                     if (error) {
@@ -53,7 +52,7 @@ L.SvgTile = L.GridLayer.extend({
 
                     });
                     that._drawShapes(json, tile, coords);
-                    that._data[key]=json;
+                    // that._data[key]=json;
                     tile._data = json;
                     done(null, tile);
                 });
@@ -96,12 +95,23 @@ L.SvgTile = L.GridLayer.extend({
 
                 for (key in this._tiles) {
                     if (!this._tiles[key].retain) {
+                        this._clean_cTiles();
                         this._cTiles[key]=this._tiles[key];
                         this._removeTile(key);
+                        this._clean_cTiles();
                     }
                 }
             },
 
+            _clean_cTiles: function(){
+                var that = this;
+                var keys = Object.keys(that._cTiles);
+                console.log(keys.length);
+                if (keys.length > 20){
+                    d_key = keys.shift()
+                    delete that._cTiles[d_key];
+                }
+            },
             _resetView: function (e) {
                 var animating = e && (e.pinch || e.flyTo);
                 this._setView(this._map.getCenter(), this._map.getZoom(), animating, animating);
