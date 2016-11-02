@@ -22,7 +22,6 @@ function camel_case(input) {
 var NotebookUrlView = widgets.WidgetView.extend({
 
     render: function(){
-
         this.host = document.location.origin;
         this.base_url = document.querySelector('body').getAttribute('data-base-url');
         this.nb_url = this.host + this.base_url;
@@ -129,35 +128,58 @@ var LeafletGridLayerView = LeafletRasterLayerView.extend({
     },
     model_events: function () {
         var that = this;
+        function single_cTile(key, color, callback){
+            d3.select(that.obj._cTiles[key].el).selectAll('ellipse').attr('fill', color);
+            callback(null);
+        }
         this.listenTo(this.model, 'change:color', function(){
+            var q = d3.queue();
             var c = this.model.get('color');
             d3.selectAll('.leaflet-tile').selectAll('ellipse').attr('fill', c);
             this.obj.options.color = c;
             for (key in that.obj._cTiles){
-                d3.select(that.obj._cTiles[key].el).selectAll('ellipse').attr('fill', c);
+                q.defer(single_cTile, key, c);
             }
+            q.awaitAll(function(error){
+                if (error) throw error;
+                console.log('single color change done');
+            });
         }, this);
         this.listenTo(this.model, 'change:c_min_max', function(){
             var custom_c = this.model.get('custom_c');
             var c_min_max = this.model.get('c_min_max');
             var interpolate = d3.scaleSequential(d3SC.interpolateSpectral).domain(c_min_max);
+            function update_cTile(key, c_field, callback){
+                d3.select(that.obj._cTiles[key].el).selectAll('ellipse').attr('fill', function(d){
+                    return interpolate(d[c_field]);});
+                callback(null);
+            }
+            var q = d3.queue();
             if (custom_c == true){
                 var c_field = this.model.get('c_field');
                 d3.selectAll('.leaflet-tile').selectAll('ellipse').attr('fill', function(d){
                     return interpolate(d[c_field]);});
                 for (key in that.obj._cTiles){
-                    d3.select(that.obj._cTiles[key].el).selectAll('ellipse').attr('fill', function(d){
-                        return interpolate(d[c_field]);});
+                    q.defer(update_cTile, key, c_field);
                 }
+                q.awaitAll(function(error){
+                    if (error) throw error;
+                    console.log('update cTiles for customC');
+                });
                 that.obj.options.customC = true;
                 that.obj.options.cMinMax = c_min_max;
                 that.obj.options.cField = c_field;
             }
             else{
                 d3.selectAll('.leaflet-tile').selectAll('ellipse').attr('fill', that.model.get('color'));
+                var c = this.model.get('color');
                 for (key in that.obj._cTiles){
-                    d3.select(that.obj._cTiles[key].el).selectAll('ellipse').attr('fill', that.model.get('color'));
+                    q.defer(single_cTile, key, c);
                 }
+                q.awaitAll(function(error){
+                    if (error) throw error;
+                    console.log('back to single color');
+                });
                 that.obj.options.customC = false;
                 that.obj.options.cMinMax = [];
                 that.obj.options.cField = undefined;
