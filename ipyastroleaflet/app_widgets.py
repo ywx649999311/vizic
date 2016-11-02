@@ -66,3 +66,30 @@ class HomeButton(Button):
     def handle_click(self, b):
         if self._map is not None:
             self._map.center_map()
+
+
+class CFDropdown(Dropdown):
+
+    _active = Bool(False)
+
+    def __init__(self, layer, **kwargs):
+        super().__init__(**kwargs)
+        self._layer = layer
+        self.description = 'Property: '
+        self.options = list(self._layer.get_fields())
+        dlink((self._layer,'custom_c'), (self, '_active'))
+
+    def link(self):
+        self.link = link((self, 'value'), (self._layer, 'c_field'))
+
+    def unlink(self):
+        self.link.unlink()
+        self._layer.c_field = ''
+        del self.link
+
+    @observe('_active')
+    def update_active(self, change):
+        if change['new'] is False:
+            self.unlink()
+        elif change['new'] is True:
+            self.link()

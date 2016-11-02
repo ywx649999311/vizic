@@ -97,14 +97,16 @@ class GridLayer(RasterLayer):
     _popup_callbacks = Instance(CallbackDispatcher, ())
 
     @observe('custom_c')
-    def _update_c_min_max(self, change):
-        print('am changeing')
+    def _update_color_src(self, change):
         if change['new'] is True and self.c_field != '':
             self.c_min_max = self.__minMax[self.c_field]
         else:
-            self.custom_c = False
-            self.c_field = ''
             self.c_min_max = []
+
+    @observe('c_field')
+    def _update_c_min_max(self, change):
+        if self.custom_c is True and self.c_field in self.get_fields():
+            self.c_min_max = self.__minMax[change['new']]
 
     def __init__(self, connection, coll_name=None, **kwargs):
         super().__init__(**kwargs)
@@ -200,6 +202,9 @@ class GridLayer(RasterLayer):
         result = requests.get(popup_url, data=body)
         pop_dict = json.loads(result.text[1:-1])
         self.obj_catalog = Series(pop_dict)
+
+    def get_fields(self):
+        return self.__minMax.keys()
 
     def get(self):
         return self.__minMax
