@@ -93,3 +93,25 @@ class CFDropdown(Dropdown):
             self.unlink()
         elif change['new'] is True:
             self.link()
+
+
+class Filter(FloatRangeSlider):
+
+    def __init__(self, layer, field, **kwargs):
+        super().__init__(**kwargs)
+        self._layer = layer
+        self.property = self.description = field
+        self.min, self.max = (-1e6, 1e6)
+        self.min, self.max = self._layer.get_min_max(field)
+        self.value = [self.min, self.max]
+        self.readout_format = '.4f'
+        self.step = 0.0001
+
+    def link(self):
+        self._layer.filter_property = self.property
+        self.link = dlink((self, 'value'), (self._layer, 'filter_range'))
+
+    def unlink(self):
+        self.link.unlink()
+        del self.link
+        self._layer.filter_property = ''

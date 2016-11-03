@@ -18,6 +18,9 @@ L.SvgTile = L.GridLayer.extend({
                 cMinMax: [],
                 customC: false,
                 cField: undefined,
+                filterObj:false,
+                filterRange: [],
+                filterProperty: '',
             },
 
             initialize: function (options){
@@ -106,7 +109,7 @@ L.SvgTile = L.GridLayer.extend({
             _clean_cTiles: function(){
                 var that = this;
                 var keys = Object.keys(that._cTiles);
-                console.log(keys.length);
+                // console.log(keys.length);
                 if (keys.length > 20){
                     d_key = keys.shift()
                     delete that._cTiles[d_key];
@@ -251,7 +254,9 @@ L.SvgTile = L.GridLayer.extend({
 
             _drawShapes: function(data, tile, coords){
                 var that = this;
+                var visibility = 'visible';
                 var color = this.options.color;
+                var range = this.options.filterRange;
                 var interpolate = d3.scaleSequential(d3SC.interpolateSpectral);
 
                 if (this.options.customC){
@@ -260,6 +265,18 @@ L.SvgTile = L.GridLayer.extend({
                     color = function(d) {
                         return interpolate.domain(cMinMax)(d[cField]);
                     }
+                }
+                var validate = function(value){
+                    if (value >= range[0] && value < range[1]){
+                        return 'visible';
+                    }
+                    else{
+                        return 'hidden';
+                    }
+                }
+                if (this.options.filterObj){
+                    var property = this.options.filterProperty;
+                    visibility = function(d){return validate(d[property]);}
                 }
 
                 var zoom = coords.z;
@@ -283,7 +300,8 @@ L.SvgTile = L.GridLayer.extend({
                                 .attr('rx', function (d) {return d.a*multi_X;})
                                 .attr('ry', function (d){ return d.b*multi_Y;})
                                 .attr('transform', function (d){return d.rotate;})
-                                .attr('fill', color);
+                                .attr('fill', color)
+                                .style('visibility', visibility);
                 return ellipses;
             },
 

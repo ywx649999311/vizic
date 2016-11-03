@@ -88,9 +88,14 @@ class GridLayer(RasterLayer):
     x_range = Float(1.0).tag(sync=True, o=True)
     y_range = Float(1.0).tag(sync=True, o=True)
     color = Unicode('red').tag(sync=True, o=True)
-    c_min_max = List().tag(sync=True)
+    # color object by property value
     custom_c = Bool(False).tag(sync=True)
+    c_min_max = List().tag(sync=True)
     c_field = Unicode().tag(sync=True)
+    # filter by property range
+    filter_obj = Bool(False, help="Fileter object by property value range").tag(sync=True)
+    filter_property = Unicode(help="The proerty field used to sort objects").tag(sync=True)
+    filter_range = List().tag(sync=True)
     center = List().tag(sync=True)
     obj_catalog = Instance(Series, allow_none=True)
     __minMax = {}
@@ -98,7 +103,7 @@ class GridLayer(RasterLayer):
 
     @observe('custom_c')
     def _update_color_src(self, change):
-        if change['new'] is True and self.c_field != '':
+        if change['new'] is True and self.c_field in self.get_fields():
             self.c_min_max = self.__minMax[self.c_field]
         else:
             self.c_min_max = []
@@ -107,6 +112,21 @@ class GridLayer(RasterLayer):
     def _update_c_min_max(self, change):
         if self.custom_c is True and self.c_field in self.get_fields():
             self.c_min_max = self.__minMax[change['new']]
+
+    @observe('filter_obj')
+    def _update_filter(self, change):
+        if change['new'] is True and self.filter_property in self.get_fields():
+            self.filter_range = self.__minMax[self.filter_property]
+        elif change['new'] is False:
+            self.filter_range = []
+            # self.filter_property = ''
+
+    @observe('filter_property')
+    def __update_property(self, change):
+        if self.filter_obj is True and self.filter_property in self.get_fields():
+            self.filter_range = self.__minMax[change['new']]
+        elif self.filter_property not in self.get_fields():
+            self.filter_property = ''
 
     def __init__(self, connection, coll_name=None, **kwargs):
         super().__init__(**kwargs)
@@ -206,5 +226,8 @@ class GridLayer(RasterLayer):
     def get_fields(self):
         return self.__minMax.keys()
 
-    def get(self):
-        return self.__minMax
+    def get_min_max(self, field):
+        if field in list(self.get_fields()):
+            return self.__minMax[field]
+        else:
+            raise('Error: column name provided not in database!')

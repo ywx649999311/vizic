@@ -132,6 +132,18 @@ var LeafletGridLayerView = LeafletRasterLayerView.extend({
             d3.select(that.obj._cTiles[key].el).selectAll('ellipse').attr('fill', color);
             callback(null);
         }
+        function change_f_options(callback){
+            that.obj.options.filterObj = that.model.get('filter_obj');
+            that.obj.options.filterRange = that.model.get('filter_range');
+            that.obj.options.filterProperty = that.model.get('filter_property');
+            callback(null);
+        }
+        function change_c_options(callback){
+            that.obj.options.customC = that.model.get('custom_c');
+            that.obj.options.cMinMax = that.model.get('c_min_max');
+            that.obj.options.cField = that.model.get('c_field');
+            callback(null);
+        }
         this.listenTo(this.model, 'change:color', function(){
             var key;
             var q = d3.queue();
@@ -157,10 +169,11 @@ var LeafletGridLayerView = LeafletRasterLayerView.extend({
             }
             var key;
             var q = d3.queue();
-            if (custom_c == true){
+            if (custom_c === true){
                 var c_field = this.model.get('c_field');
                 d3.selectAll('.leaflet-tile').selectAll('ellipse').attr('fill', function(d){
                     return interpolate(d[c_field]);});
+                q.defer(change_c_options);
                 for (key in that.obj._cTiles){
                     q.defer(update_cTile, key, c_field);
                 }
@@ -168,13 +181,11 @@ var LeafletGridLayerView = LeafletRasterLayerView.extend({
                     if (error) throw error;
                     console.log('update cTiles for customC');
                 });
-                that.obj.options.customC = true;
-                that.obj.options.cMinMax = c_min_max;
-                that.obj.options.cField = c_field;
             }
             else{
                 d3.selectAll('.leaflet-tile').selectAll('ellipse').attr('fill', that.model.get('color'));
                 var c = this.model.get('color');
+                q.defer(change_c_options);
                 for (key in that.obj._cTiles){
                     q.defer(single_cTile, key, c);
                 }
@@ -182,9 +193,56 @@ var LeafletGridLayerView = LeafletRasterLayerView.extend({
                     if (error) throw error;
                     console.log('back to single color');
                 });
-                that.obj.options.customC = false;
-                that.obj.options.cMinMax = [];
-                that.obj.options.cField = undefined;
+                that.obj.options.color = c;
+            }
+        }, this);
+        this.listenTo(this.model, 'change:filter_range', function(){
+            var that = this;
+            var key;
+            var range = this.model.get('filter_range');
+            var q = d3.queue();
+            function show_all(key, callback){
+                d3.select(that.obj._cTiles[key].el).selectAll('ellipse').style('visibility', 'visible');
+                callback(null);
+            }
+            function validate(value){
+                if (value >= range[0] && value < range[1]){
+                    return 'visible';
+                }
+                else{
+                    return 'hidden';
+                }
+            }
+            function show_hide(key, callback){
+                d3.select(that.obj._cTiles[key].el).selectAll('ellipse').style('visibility', function(d){
+                    return validate(d[property]);
+                });
+                callback(null);
+            }
+            if (this.model.get('filter_obj')){
+                var property = this.model.get('filter_property');
+                d3.selectAll('.leaflet-tile').selectAll('ellipse').style('visibility', function(d){
+                    return validate(d[property]);
+                });
+                q.defer(change_f_options);
+                for (key in that.obj._cTiles){
+                    q.defer(show_hide, key);
+                }
+                q.awaitAll(function(error){
+                    if (error){return error;}
+                    console.log('done hiding');
+                });
+            }
+            else{
+                d3.selectAll('.leaflet-tile').selectAll('ellipse').style('visibility', 'visible');
+                q.defer(change_f_options);
+                for (key in that.obj._cTiles){
+                    q.defer(show_all, key);
+                }
+                q.awaitAll(function(error){
+                    if (error){return error;}
+                    console.log('done showing');
+                });
             }
         }, this);
 
@@ -742,6 +800,9 @@ var LeafletGridLayerModel = LeafletRasterLayerModel.extend({
         c_min_max: [],
         custom_c: false,
         c_field: '',
+        filter_obj: false,
+        filter_range: [],
+        filter_property: '',
         // tile_size : 256,
         // opacity : 1.0,
         detect_retina : false
