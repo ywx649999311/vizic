@@ -96,7 +96,7 @@ class CFDropdown(Dropdown):
 
 
 class FilterSlider(FloatRangeSlider):
-    readout_format = Unicode('.4f').tag(sync=True)
+    readout_format = Unicode('.3f').tag(sync=True)
 
     def __init__(self, layer, field, **kwargs):
         super().__init__(**kwargs)
@@ -130,3 +130,27 @@ class FilterBox(Box):
         self.label.padding = '7px 2px 2px 2px'
         self.slider = FilterSlider(layer, field)
         self.children = (self.label, self.slider)
+
+    def link(self):
+        self.slider.link()
+
+    def unlink(self):
+        self.slider.unlink()
+
+
+class SelectionTrig(ToggleButton):
+    _view_name = Unicode('SelectionButtonView').tag(sync=True)
+    _view_module = Unicode('jupyter-astro-leaflet').tag(sync=True)
+    _map = Instance(AstroMap, allow_none=True)
+
+    def __init__(self, map, **kwargs):
+        super().__init__(**kwargs)
+        self._map = map
+        self.layout = Layout(height='30px', width='30px')
+
+    def link(self):
+        self.link = link((self, 'value'), (self._map, 'selection'))
+
+    def unlink(self):
+        self.link.unlink()
+        del self.link

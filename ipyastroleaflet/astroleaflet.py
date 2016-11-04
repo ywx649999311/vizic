@@ -26,6 +26,8 @@ class AstroMap(Map):
     fullscreen_control = Bool(True).tag(sync=True, o=True)
     _des_crs = List().tag(sync=True)
     pan_loc = List().tag(sync=True)
+    selection = Bool(False).tag(sync=True)
+    s_bounds = List(help='LatLngBounds for selection tool').tag(sync=True)
     # pan_ready = Bool(False).tag(sync=True)
 
     def __init__(self, **kwargs):

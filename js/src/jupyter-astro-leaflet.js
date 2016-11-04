@@ -40,9 +40,14 @@ var NotebookUrlView = widgets.WidgetView.extend({
 var HomeButtonView = widgets.ButtonView.extend({
     render: function(){
         HomeButtonView.__super__.render.call(this);
-        var i = document.createElement('i');
-
         this.el.className += " home-button";
+    }
+});
+
+var SelectionButtonView = widgets.ToggleButtonView.extend({
+    render: function(){
+        SelectionButtonView.__super__.render.call(this);
+        this.el.className += " selection-button";
     }
 });
 
@@ -601,7 +606,7 @@ var LeafletMapView = widgets.DOMWidgetView.extend({
         // TODO: hack to get all the tiles to show.
         var that = this;
 
-        this.update_crs()
+        this.update_crs();
         // window.setTimeout(function () {
         //     // that.update_crs();
         //     that.obj.invalidateSize();
@@ -687,13 +692,87 @@ var LeafletMapView = widgets.DOMWidgetView.extend({
                 this.obj.setView([loc[0], loc[1]], loc[2]);
                 this.update_bounds();
             }
-        },this)
+        },this);
         this.listenTo(this.model, 'change:_des_crs', function() {
             _.bind(this.update_crs(), this);
             this.update_bounds();
         }, this);
+        this.listenTo(this.model, 'change:selection', function(){
+            var selection = this.model.get('selection');
+            if (selection){
+                this.selection_enable();
+            }
+            else{
+                this.selection_disable();
+            }
+        }, this);
     },
 
+    selection_enable: function(){
+        var that = this;
+        this.obj.dragging.disable();
+        this.obj.scrollWheelZoom.disable();
+        this.obj.on('mousedown', L.DomEvent.stop)
+				.on('click', L.DomEvent.stopPropagation)
+				.on('mousedown', this._onMousedown, this);
+    },
+
+    selection_disable: function(){
+        if (this._shape){
+            this._shape.remove();
+            delete this._shape;
+        }
+		this.obj.off('mousedown', L.DomEvent.stop)
+				.off('click')
+				.off('mousedown', this._onMousedown, this)
+				.off('mousemove', this._onMousemove, this)
+				.off('mouseup', this._onMouseUp, this);
+        this.obj.dragging.enable();
+        this.obj.scrollWheelZoom.enable();
+        this.model.set('s_bounds', []);
+        this.touch();
+    },
+
+    _onMousedown: function(e){
+        this._selection_param.isDown = true;
+        this._selection_param.startLatlng = e.latlng;
+		this.obj.on('mousemove', this._onMousemove, this);
+		L.DomEvent
+			.on(document, 'mouseup', this._onMouseUp, this)
+			.preventDefault(e.originalEvent);
+    },
+
+    _onMousemove: function(e){
+		var new_latlng = e.latlng;
+		this._selection_param.lastLatlng = new_latlng;
+		if (this._selection_param.isDown){
+			this._drawRect(new_latlng);
+		}
+		this._selection_param.isDrawing = true;
+	},
+
+    _onMouseUp: function(e){
+		this.obj.off('mousemove', this._onMousemove, this);
+		this._selection_param.isDrawing = false;
+		var rectSelection = this._selection_param;
+		if (this._shape){
+            var bounds = this._shape._bounds;
+            var s_bounds = [bounds.getWest(), bounds.getEast(), bounds.getSouth(), bounds.getNorth()];
+            this.model.set('s_bounds', s_bounds);
+            this.touch();
+        }
+	},
+
+    _drawRect: function (latlng) {
+		var startPoint = this._selection_param.startLatlng;
+		if (!this._shape) {
+			this._shape = new L.Rectangle(new L.LatLngBounds(startPoint, latlng), this.rectOptions);
+			this.obj.addLayer(this._shape);
+		} else {
+			this._shape.setBounds(new L.LatLngBounds(startPoint, latlng));
+		}
+
+	},
     update_crs: function(){
         var that = this;
         that.obj.options.crs.adjust = that.model.get('_des_crs');
@@ -707,6 +786,23 @@ var LeafletMapView = widgets.DOMWidgetView.extend({
                 break;
         }
     },
+
+    _selection_param: {
+        isDown: false,
+        isDrawing: false,
+        startLatlng: undefined,
+        lastLatlng: undefined
+    },
+    rectOptions: {
+			stroke: true,
+			color: '#f06eaa',
+			weight: 2,
+			opacity: 0.5,
+			fill: true,
+			fillColor: null, //same as color by default
+			fillOpacity: 0.2,
+			clickable: false
+	},
 });
 
 var def_loc = [0.0, 0.0];
@@ -1036,7 +1132,9 @@ var LeafletMapModel = widgets.DOMWidgetModel.extend({
         layers : [],
         controls : [],
         _des_crs : [],
-        _pan_loc : []
+        _pan_loc : [],
+        selection: false,
+        s_bounds: [],
     })
 }, {
     serializers: _.extend({
@@ -1073,6 +1171,7 @@ module.exports = {
     NotebookUrlView:NotebookUrlView,
     PopupDisView : PopupDisView,
     HomeButtonView: HomeButtonView,
+    SelectionButtonView: SelectionButtonView,
     // models
     LeafletLayerModel : LeafletLayerModel,
     LeafletUILayerModel : LeafletUILayerModel,
