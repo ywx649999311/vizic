@@ -230,7 +230,7 @@ var LeafletGridLayerView = LeafletRasterLayerView.extend({
                 }
                 q.awaitAll(function(error){
                     if (error){return error;}
-                    console.log('done hiding');
+                    // console.log('done hiding');
                 });
             }
             else{
@@ -241,7 +241,7 @@ var LeafletGridLayerView = LeafletRasterLayerView.extend({
                 }
                 q.awaitAll(function(error){
                     if (error){return error;}
-                    console.log('done showing');
+                    // console.log('done showing');
                 });
             }
         }, this);

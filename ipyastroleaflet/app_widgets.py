@@ -95,17 +95,18 @@ class CFDropdown(Dropdown):
             self.link()
 
 
-class Filter(FloatRangeSlider):
+class FilterSlider(FloatRangeSlider):
+    readout_format = Unicode('.4f').tag(sync=True)
 
     def __init__(self, layer, field, **kwargs):
         super().__init__(**kwargs)
         self._layer = layer
-        self.property = self.description = field
+        self.property = field
         self.min, self.max = (-1e6, 1e6)
         self.min, self.max = self._layer.get_min_max(field)
         self.value = [self.min, self.max]
-        self.readout_format = '.4f'
         self.step = 0.0001
+        self.link()
 
     def link(self):
         self._layer.filter_property = self.property
@@ -115,3 +116,17 @@ class Filter(FloatRangeSlider):
         self.link.unlink()
         del self.link
         self._layer.filter_property = ''
+
+
+class FilterBox(Box):
+
+    @default('layout')
+    def _default_layout(self):
+        return Layout(display='flex', align_items='stretch', justify_content='space_between')
+
+    def __init__(self, layer, field, *pargs, **kwargs):
+        super().__init__(*pargs, **kwargs)
+        self.label = Label(field)
+        self.label.padding = '7px 2px 2px 2px'
+        self.slider = FilterSlider(layer, field)
+        self.children = (self.label, self.slider)
