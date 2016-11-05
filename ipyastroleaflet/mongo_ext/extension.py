@@ -13,8 +13,6 @@ class tileHandler(IPythonHandler):
 
     @gen.coroutine
     def get(self, coll, zoom, xc, yc):
-        # start = time.time()
-        # print ('start', start)
         global connection
         if connection is None:
             self.set_status(403)
@@ -23,14 +21,13 @@ class tileHandler(IPythonHandler):
             tile_gen = yield connection.getTileData(coll, xc, yc, zoom)
             tile_list = yield tile_gen.to_list(length=100000000)
             tile_json = json.dumps(tile_list)
-        # end = time.time()
-        # print('end', end, time.time()-start)
             self.set_status(200)
             self.set_header('Content-Type', 'application/json')
             self.write(tile_json)
 
 
 class dbHandler(IPythonHandler):
+
     @tornado.web.asynchronous
     def post(self):
         '''REST API to change mongodb connection.
@@ -59,6 +56,7 @@ class dbHandler(IPythonHandler):
 
 
 class rangeHandler(IPythonHandler):
+
     def post(self):
         '''API to push range data to adictionary
 
@@ -66,13 +64,16 @@ class rangeHandler(IPythonHandler):
         arguments = {k.lower(): self.get_argument(k) for k in self.request.arguments}
         collection = arguments['collection']
         mRange = arguments['mrange']
+        maxZoom = arguments['maxzoom']
         MongoConnect.range_dict[collection] = float(mRange)
+        MongoConnect.zoom_dict[collection] = int(maxZoom)
 
 
 class popupHandler(IPythonHandler):
     '''API to query catalog data for individual object
 
     '''
+
     def get(self):
         arguments = {k.lower(): self.get_argument(k) for k in self.request.arguments}
         coll = arguments['coll']

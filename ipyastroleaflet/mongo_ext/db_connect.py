@@ -11,6 +11,7 @@ from bson.json_util import dumps
 class MongoConnect(object):
 
     range_dict = {}
+    zoom_dict = {}
 
     def __init__(self, host, port, db):
         self.client = motor.motor_tornado.MotorClient(host, port)
@@ -27,7 +28,8 @@ class MongoConnect(object):
         # multiThread is not stable
         # result = executor.submit(getCoordRange, xc, yc, zoom).result()
         # minR = executor.submit(getMinRadius,zoom, 0.714).result()
-        result = self.getCoordRange(xc, yc, zoom)
+        result = self.getCoordRange(xc, yc, zoom, self.zoom_dict[coll])
+        print(result)
         minR = self.getMinRadius(zoom, self.range_dict[coll])
         cursor = self.db[coll].find({
 
@@ -52,28 +54,23 @@ class MongoConnect(object):
     # remeber to exclude the meta document
     @gen.coroutine
     def getVoronoi(self, tile):
-
         coll_v = db[tile]
-
         cursor_v = coll_v.find({}, {
 
             '_id': 0,
             'RA': 1,
             'DEC': 1,
         })
-
         return cursor_v
 
-    def getCoordRange(self, xc, yc, zoom):
-        # print (8-int(zoom))
-        multi = 2**(8-int(zoom))
+    def getCoordRange(self, xc, yc, zoom, maxZoom):
+        multi = 2**(int(maxZoom)-int(zoom))
         xMin = int(xc)*multi - 1
         xMax = (int(xc)+1)*multi
         yMin = int(yc)*multi - 1
         yMax = (int(yc)+1)*multi
 
         return (xMax, xMin, yMax, yMin)
-        # return result
 
     def getMinRadius(self, zoom, mapSizeV):
 
@@ -86,7 +83,6 @@ class MongoConnect(object):
         return cusor_m
 
     def getOjbectByPos(self, coll, ra, dec):
-
         # inputs from tornado are strings, need to convert
         ra = float(ra)
         dec = float(dec)
