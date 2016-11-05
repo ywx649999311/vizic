@@ -1,7 +1,7 @@
 from ipyastroleaflet.leaflet import *
 from ipywidgets import *
 from traitlets import Unicode, dlink, link, Dict, Undefined
-import pymongo
+import pymongo as pmg
 import pandas as pd
 import numpy as np
 from pandas import DataFrame, Series
@@ -172,6 +172,7 @@ class GridLayer(RasterLayer):
 
     def _data_prep(self, zoom, df):
         dff = df.copy()
+        dff.columns = [x.upper() for x in dff.columns]
         (xMax, xMin) = (dff['RA'].max(), dff['RA'].min())
         (yMax, yMin) = (dff['DEC'].max(), dff['DEC'].min())
         scaleMax = 2**int(zoom)
@@ -187,7 +188,9 @@ class GridLayer(RasterLayer):
         dff['tile_y'] = ((yMax-dff.DEC)*scaleMax/y_range).apply(np.floor).astype(int)
         dff.loc[:, 'a'] = dff.loc[:, 'A_IMAGE'].apply(lambda x: x*0.267/3600)
         dff.loc[:, 'b'] = dff.loc[:, 'B_IMAGE'].apply(lambda x: x*0.267/3600)
-        dff['zoom'] = int(zoom)
+        dff['ra'] = dff['RA']
+        dff['dec'] = dff['DEC']
+        # dff['zoom'] = int(zoom)
 
         xScale = x_range/256
         yScale = y_range/256
@@ -203,7 +206,17 @@ class GridLayer(RasterLayer):
         data_d = df.to_dict(orient='records')
         coll = self.db[self.collection]
         coll.insert_many(data_d, ordered=False)
-        coll.insert_one({'_id': 'meta', 'adjust': self._des_crs, 'xRange': self.x_range, 'yRange': self.y_range, 'minmax': self.__minMax})
+        coll.insert_one({'_id': 'meta', 'adjust': self._des_crs, 'xRange': self.x_range, 'yRange': self.y_range, 'minmax': self.__minMax, 'maxZoom':self.max_zoom})
+        bulk = coll.initialize_unordered_bulk_op()
+        bulk.find({'_id':{'$ne':'meta'}}).update({'$rename':{'dec':'loc.lat'}})
+        bulk.find({'_id':{'$ne':'meta'}}).update({'$rename':{'ra':'loc.lng'}})
+        try:
+            result = bulk.execute()
+        except:
+            print(result)
+        coll.create_index([('loc', pmg.GEO2D)], name='geo_loc_2d', min=-90, max=360)
+        coll.create_index([('RA', pmg.ASCENDING),('DEC', pmg.ASCENDING)], name='ra_dec', unique=True)
+        coll.create_index([('tile_x', pmg.ASCENDING),('tile_y', pmg.ASCENDING)], name='tile_x_y')
 
     def push_data(self, url):
 
