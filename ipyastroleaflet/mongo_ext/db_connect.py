@@ -29,7 +29,6 @@ class MongoConnect(object):
         # result = executor.submit(getCoordRange, xc, yc, zoom).result()
         # minR = executor.submit(getMinRadius,zoom, 0.714).result()
         result = self.getCoordRange(xc, yc, zoom, self.zoom_dict[coll])
-        print(result)
         minR = self.getMinRadius(zoom, self.range_dict[coll])
         cursor = self.db[coll].find({
 
@@ -44,8 +43,7 @@ class MongoConnect(object):
         },
 
             {
-            '_id':0,
-            'zoom':0
+            '_id':0
         })
 
         # print ('query', time.time())
@@ -88,6 +86,6 @@ class MongoConnect(object):
         dec = float(dec)
         pop_cursor = self.stat_db[coll].find({
             '$and':[{'RA':ra},{'DEC':dec}]},
-            {'_id': 0, 'tile_x': 0, 'tile_y': 0, 'a': 0, 'b': 0, 'zoom': 0}
+            {'_id': 0, 'tile_x': 0, 'tile_y': 0, 'a': 0, 'b': 0}
         )
         return dumps(pop_cursor)
