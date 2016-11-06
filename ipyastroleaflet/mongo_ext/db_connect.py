@@ -90,3 +90,28 @@ class MongoConnect(object):
             {'_id': 0, 'tile_x': 0, 'tile_y': 0, 'a': 0, 'b': 0, 'loc':0}
         )
         return dumps(pop_cursor)
+
+    def getRectSelection(self, coll, swLng, swLat, neLng, neLat):
+
+        swLat = float(swLat)
+        swLng = float(swLng)
+        neLat = float(neLat)
+        neLng = float(neLng)
+        minR = self.getMinRadius(self.zoom_dict[coll], self.range_dict[coll])
+        cursor = self.stat_db[coll].find({'$and':[
+            {
+                'loc': {
+                    '$geoWithin':{
+                        '$box': [
+                            [swLng,swLat],
+                            [neLng,neLat]
+                        ]
+                    }
+                }
+            },
+            {'b': {'$gte': minR*0.3}}
+        ]},
+            {'_id':0, 'tile_x': 0, 'tile_y': 0, 'a': 0, 'b': 0, 'loc':0}
+        )
+
+        return list(cursor)

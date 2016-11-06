@@ -208,8 +208,8 @@ class GridLayer(RasterLayer):
         coll.insert_many(data_d, ordered=False)
         coll.insert_one({'_id': 'meta', 'adjust': self._des_crs, 'xRange': self.x_range, 'yRange': self.y_range, 'minmax': self.__minMax, 'maxZoom':self.max_zoom})
         bulk = coll.initialize_unordered_bulk_op()
-        bulk.find({'_id':{'$ne':'meta'}}).update({'$rename':{'dec':'loc.lat'}})
         bulk.find({'_id':{'$ne':'meta'}}).update({'$rename':{'ra':'loc.lng'}})
+        bulk.find({'_id':{'$ne':'meta'}}).update({'$rename':{'dec':'loc.lat'}})
         try:
             result = bulk.execute()
         except:
@@ -249,3 +249,18 @@ class GridLayer(RasterLayer):
             return self.__minMax[field]
         else:
             raise('Error: column name provided not in database!')
+
+    def _query_selection(self):
+        selection_url = url_path_join(self._server_url, '/selection/')
+        if self._map.s_bounds != []:
+            bounds = self._map.s_bounds
+            body = {
+                'coll': self.collection,
+                'swlng': bounds[0],
+                'swlat': bounds[2],
+                'nelng': bounds[1],
+                'nelat': bounds[3],
+            }
+            res = requests.get(selection_url, data=body)
+            selection_dict = json.loads(res.text)
+            self.select_data = DataFrame(selection_dict)

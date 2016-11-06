@@ -10,7 +10,8 @@ Part of the project was orginally forked from [ipyleaflet](https://github.com/el
 
 Dependencies:
 
-    Node.js
+    Node.js, npm
+    MongoDB
 
 Installation
 ------------

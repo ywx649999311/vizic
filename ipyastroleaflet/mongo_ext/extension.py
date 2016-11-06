@@ -85,6 +85,25 @@ class popupHandler(IPythonHandler):
         self.write(content)
 
 
+class selectionHandler(IPythonHandler):
+    '''API to query catalog data for a selection
+
+    '''
+
+    def get(self):
+        arguments = {k.lower(): self.get_argument(k) for k in self.request.arguments}
+        coll = arguments['coll']
+        swLng = arguments['swlng']
+        neLng = arguments['nelng']
+        swLat = arguments['swlat']
+        neLat = arguments['nelat']
+        content = connection.getRectSelection(coll, swLng, swLat, neLng, neLat)
+        json_str = json.dumps(content)
+        self.set_status(200)
+        self.set_header('Content-Type', 'application/json')
+        self.write(json_str)
+
+
 def load_jupyter_server_extension(nbapp):
     """
     nbapp is istance of Jupyter.notebook.notebookapp.NotebookApp
@@ -98,9 +117,11 @@ def load_jupyter_server_extension(nbapp):
     db_pattern = url_path_join(web_app.settings['base_url'], '/connection/?')
     collection_pattern = url_path_join(web_app.settings['base_url'], '/rangeinfo/?')
     popup_pattern = url_path_join(web_app.settings['base_url'], '/objectPop/?')
+    selection_pattern = url_path_join(web_app.settings['base_url'], '/selection/?')
     web_app.add_handlers(host_pattern, [
         (route_pattern, tileHandler),
         (popup_pattern, popupHandler),
         (db_pattern, dbHandler),
-        (collection_pattern, rangeHandler)
+        (collection_pattern, rangeHandler),
+        (selection_pattern, selectionHandler)
     ])
