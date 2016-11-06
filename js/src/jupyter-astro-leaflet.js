@@ -420,7 +420,7 @@ var LeafletGeoJSONView = LeafletFeatureGroupView.extend({
         if (_.isEmpty(style)) {
             style = function (feature) {
                 return feature.properties.style;
-            }
+            };
         }
         this.obj = L.geoJson(this.model.get('data'), {
             style: style,
@@ -498,7 +498,7 @@ var LeafletDrawControlView = LeafletControlView.extend({
         if (_.isEmpty(rectangle)) { rectangle = false; }
         var marker = this.model.get('marker');
         if (_.isEmpty(marker)) { marker = false; }
-        var edit = this.model.get('edit')
+        var edit = this.model.get('edit');
         var remove = this.model.get('remove');
         this.obj = new L.Control.Draw({
             edit: {

@@ -111,7 +111,7 @@ L.SvgTile = L.GridLayer.extend({
                 var keys = Object.keys(that._cTiles);
                 // console.log(keys.length);
                 if (keys.length > 20){
-                    d_key = keys.shift()
+                    d_key = keys.shift();
                     delete that._cTiles[d_key];
                 }
             },
@@ -264,7 +264,7 @@ L.SvgTile = L.GridLayer.extend({
                     var cField = that.options.cField;
                     color = function(d) {
                         return interpolate.domain(cMinMax)(d[cField]);
-                    }
+                    };
                 }
                 var validate = function(value){
                     if (value >= range[0] && value < range[1]){
@@ -273,10 +273,10 @@ L.SvgTile = L.GridLayer.extend({
                     else{
                         return 'hidden';
                     }
-                }
+                };
                 if (this.options.filterObj){
                     var property = this.options.filterProperty;
-                    visibility = function(d){return validate(d[property]);}
+                    visibility = function(d){return validate(d[property]);};
                 }
 
                 var zoom = coords.z;

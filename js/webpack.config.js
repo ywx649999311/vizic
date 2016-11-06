@@ -1,3 +1,4 @@
+require('es6-promise').polyfill();
 var version = require('./package.json').version;
 
 var leaflet_marker_selector = /leaflet\/images\/marker-.*\.png/;
