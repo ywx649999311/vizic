@@ -17,7 +17,7 @@ is_repo = os.path.exists(os.path.join(here, '.git'))
 
 npm_path = os.pathsep.join([
     os.path.join(node_root, 'node_modules', '.bin'),
-                os.environ.get('PATH', os.defpath),
+    os.environ.get('PATH', os.defpath),
 ])
 
 from distutils import log
@@ -27,9 +27,11 @@ log.info('$PATH=%s' % os.environ['PATH'])
 
 LONG_DESCRIPTION = 'A Jupyter widget for dynamic Leaflet maps (DES)'
 
+
 def js_prerelease(command, strict=False):
     """decorator for building minified js/css prior to another command"""
     class DecoratedCommand(command):
+
         def run(self):
             jsdeps = self.distribution.get_command_obj('jsdeps')
             if not is_repo and all(os.path.exists(t) for t in jsdeps.targets):
@@ -52,6 +54,7 @@ def js_prerelease(command, strict=False):
             command.run(self)
             update_package_data(self.distribution)
     return DecoratedCommand
+
 
 def update_package_data(distribution):
     """update package_data to catch changes during setup"""
@@ -101,7 +104,7 @@ class NPM(Command):
 
         if self.should_run_npm_install():
             log.info("Installing build dependencies with npm.  This may take a while...")
-            check_call(['npm', 'install'], cwd=node_root, stdout=sys.stdout, stderr=sys.stderr)
+            check_call(['npm', 'install','--unsafe-perm'], cwd=node_root, stdout=sys.stdout, stderr=sys.stderr)
             os.utime(self.node_modules, None)
 
         for t in self.targets:
