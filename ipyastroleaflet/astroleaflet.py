@@ -33,10 +33,12 @@ class AstroMap(Map):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         if self.default_tiles is not None:
+            self.default_tiles._map = self
             self._des_crs = self.default_tiles._des_crs
             self.max_zoom = self.default_tiles.max_zoom
             if self.center == [0.0, 0.0]:
                 self.center = self.default_tiles.center
+            self.default_tiles.visible = True
 
     def add_layer(self, layer):
         if layer.model_id in self.layer_ids:
