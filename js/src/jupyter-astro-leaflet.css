@@ -25,3 +25,8 @@ button.getData-button{
 	background-size:24px 24px;
 	background-position: center center;
 }
+.widget-hbox div.widget-readout{
+	overflow: scroll;
+	margin-top: 3px;
+	max-width: 8em;
+}
