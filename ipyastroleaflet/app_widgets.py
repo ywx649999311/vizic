@@ -154,3 +154,22 @@ class SelectionTrig(ToggleButton):
     def unlink(self):
         self.link.unlink()
         del self.link
+
+
+class GetDataButton(Button):
+    '''Home button Widget'''
+    _view_name = Unicode('GetDataButtonView').tag(sync=True)
+    _view_module = Unicode('jupyter-astro-leaflet').tag(sync=True)
+    _layer = Instance(GridLayer)
+
+    def __init__(self, layer, **kwargs):
+        super().__init__(**kwargs)
+        self._layer = layer
+        self.layout = Layout(height='30px', width='30px')
+        self.on_click(self.handle_click)
+
+    def handle_click(self, b):
+        if self._layer._map is not None and self._layer._map.selection:
+            self.disabled = True
+            self._layer._query_selection()
+            self.disabled = False

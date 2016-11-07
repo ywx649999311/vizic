@@ -44,6 +44,13 @@ var HomeButtonView = widgets.ButtonView.extend({
     }
 });
 
+var GetDataButtonView = widgets.ButtonView.extend({
+    render: function(){
+        HomeButtonView.__super__.render.call(this);
+        this.el.className += " getData-button";
+    }
+});
+
 var SelectionButtonView = widgets.ToggleButtonView.extend({
     render: function(){
         SelectionButtonView.__super__.render.call(this);
@@ -1172,6 +1179,7 @@ module.exports = {
     PopupDisView : PopupDisView,
     HomeButtonView: HomeButtonView,
     SelectionButtonView: SelectionButtonView,
+    GetDataButtonView: GetDataButtonView,
     // models
     LeafletLayerModel : LeafletLayerModel,
     LeafletUILayerModel : LeafletUILayerModel,

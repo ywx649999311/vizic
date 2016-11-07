@@ -264,3 +264,5 @@ class GridLayer(RasterLayer):
             res = requests.get(selection_url, data=body)
             selection_dict = json.loads(res.text)
             self.select_data = DataFrame(selection_dict)
+        else:
+            print('bounds for selection is empty')

@@ -14,4 +14,14 @@ button.selection-button.btn-default{
 	background:#fff url('noun_482440_cc.png') no-repeat 0 0;
 	background-size:24px 18px;
 	background-position: center center;
+	border-color: #ccc;
+}
+button.selection-button:hover{
+	background-color: #e6e6e6;
+	border-color: #adadad;
+}
+button.getData-button{
+	background:#fff url('download.png') no-repeat 0 0;
+	background-size:24px 24px;
+	background-position: center center;
 }
