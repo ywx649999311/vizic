@@ -216,6 +216,11 @@
 	cursor:    -moz-grabbing;
 	}
 
+#mst_svg{
+	cursor: -webkit-grab;
+	cursor:    -moz-grab;
+}
+
 /* marker & overlays interactivity */
 .leaflet-marker-icon,
 .leaflet-marker-shadow,

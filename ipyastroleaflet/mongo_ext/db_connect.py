@@ -76,9 +76,8 @@ class MongoConnect(object):
         return float(mapSizeV)/(256*(2**(int(zoom))))
 
     @gen.coroutine
-    def getMst(self, tile):
-        cusor_m = mst_coll.find({'tile_id': tile}, {'_id': 0, 'tree': 1})
-
+    def getMst(self, coll):
+        cusor_m = self.db['mst'].find({'_id': coll}, {'_id': 0, 'tree': 1})
         return cusor_m
 
     def getOjbectByPos(self, coll, ra, dec):

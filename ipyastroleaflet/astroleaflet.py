@@ -268,3 +268,18 @@ class GridLayer(RasterLayer):
             self.select_data = DataFrame(selection_dict)
         else:
             print('bounds for selection is empty')
+
+
+class MstLayer(Layer):
+    _view_name = Unicode('LeafletMstLayerView').tag(sync=True)
+    _model_name = Unicode('LeafletMstLayerModel').tag(sync=True)
+    mst_url = Unicode().tag(sync=True)
+
+    def __init__(self, connection, collection, **kwargs):
+        super().__init__(**kwargs)
+        try:
+            self.db = connection.db
+        except:
+            raise Exception('Mongodb connection error! Check connection object!')
+        self._server_url = connection._url
+        self.mst_url = url_path_join(self._server_url, '/mst/{}.json'.format(collection))

@@ -6,6 +6,7 @@ var d3SC = require('d3-scale-chromatic');
 require('leaflet-draw');
 require('leaflet/scripts/L.DesCRS');
 require('leaflet/scripts/L.SvgTile');
+require('leaflet/scripts/L.MST');
 require('leaflet/scripts/L.Control.MousePosition');
 require('leaflet-fullscreen');
 
@@ -126,6 +127,12 @@ var LeafletLayerView = widgets.WidgetView.extend({
             options[camel_case(key)] = this.model.get(key);
         }
         return options;
+    },
+});
+
+var LeafletMstLayerView = LeafletLayerView.extend({
+    create_obj: function (){
+        this.obj = L.mst(this.model.get('mst_url'), this.get_options());
     },
 });
 
@@ -917,7 +924,14 @@ var LeafletGridLayerModel = LeafletRasterLayerModel.extend({
 
 });
 
+var LeafletMstLayerModel = LeafletLayerModel.extend({
+    defaults: _.extend({}, LeafletLayerModel.prototype.defaults, {
+            _view_name : 'LeafletMstLayerView',
+            _model_name : 'LeafletMstLayerModel',
 
+            mst_url : ''
+    })
+});
 var LeafletImageOverlayModel = LeafletRasterLayerModel.extend({
     defaults: _.extend({}, LeafletRasterLayerModel.prototype.defaults, {
         _view_name : 'LeafletImageOverlayView',
@@ -1180,7 +1194,9 @@ module.exports = {
     HomeButtonView: HomeButtonView,
     SelectionButtonView: SelectionButtonView,
     GetDataButtonView: GetDataButtonView,
+    LeafletMstLayerView: LeafletMstLayerView,
     // models
+    LeafletMstLayerModel: LeafletMstLayerModel,
     LeafletLayerModel : LeafletLayerModel,
     LeafletUILayerModel : LeafletUILayerModel,
     LeafletGridLayerModel : LeafletGridLayerModel,
