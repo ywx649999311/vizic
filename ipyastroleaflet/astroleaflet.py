@@ -24,6 +24,7 @@ class AstroMap(Map):
     max_zoom = Int(12).tag(sync=True, o=True)
     position_control = Bool(True).tag(sync=True, o=True)
     fullscreen_control = Bool(True).tag(sync=True, o=True)
+    fade_animation = Bool(False).tag(sync=True, o=True)
     _des_crs = List().tag(sync=True)
     pan_loc = List().tag(sync=True)
     selection = Bool(False).tag(sync=True)
@@ -217,7 +218,7 @@ class GridLayer(RasterLayer):
         except:
             print(result)
         coll.create_index([('loc', pmg.GEO2D)], name='geo_loc_2d', min=-90, max=360)
-        coll.create_index([('RA', pmg.ASCENDING),('DEC', pmg.ASCENDING)], name='ra_dec', unique=True)
+        coll.create_index([('RA', pmg.ASCENDING),('DEC', pmg.ASCENDING)], name='ra_dec')
         coll.create_index([('tile_x', pmg.ASCENDING),('tile_y', pmg.ASCENDING)], name='tile_x_y')
 
     def push_data(self, url):
@@ -274,6 +275,8 @@ class MstLayer(Layer):
     _view_name = Unicode('LeafletMstLayerView').tag(sync=True)
     _model_name = Unicode('LeafletMstLayerModel').tag(sync=True)
     mst_url = Unicode().tag(sync=True)
+    cut_tree = Bool(False).tag(sync=True)
+    max_len = Float().tag(sync=True)
 
     def __init__(self, connection, collection, **kwargs):
         super().__init__(**kwargs)
@@ -283,3 +286,7 @@ class MstLayer(Layer):
             raise Exception('Mongodb connection error! Check connection object!')
         self._server_url = connection._url
         self.mst_url = url_path_join(self._server_url, '/mst/{}.json'.format(collection))
+
+    def cut_tree(self, length):
+        self.cut_tree = True
+        self.max_len = float(length)

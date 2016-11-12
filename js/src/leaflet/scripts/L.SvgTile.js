@@ -101,7 +101,7 @@ L.SvgTile = L.GridLayer.extend({
                         this._clean_cTiles();
                         this._cTiles[key]=this._tiles[key];
                         this._removeTile(key);
-                        this._clean_cTiles();
+                        // this._clean_cTiles();
                     }
                 }
             },
@@ -110,7 +110,7 @@ L.SvgTile = L.GridLayer.extend({
                 var that = this;
                 var keys = Object.keys(that._cTiles);
                 // console.log(keys.length);
-                if (keys.length > 20){
+                if (keys.length > 50){
                     d_key = keys.shift();
                     delete that._cTiles[d_key];
                 }
@@ -119,7 +119,7 @@ L.SvgTile = L.GridLayer.extend({
                 var animating = e && (e.pinch || e.flyTo);
                 this._setView(this._map.getCenter(), this._map.getZoom(), animating, animating);
                 //set a timeout to wait for the animation to finish
-                setTimeout(this._removeOldLevel(this._map.getZoom()), 300);
+                setTimeout(this._removeOldLevel(this._map.getZoom()), 100);
 
             },
 
@@ -193,8 +193,8 @@ L.SvgTile = L.GridLayer.extend({
 
                 });
 
-                //L.Util.requestAnimFrame(L.bind(this._tileReady,this, coords, null, tile));
-                this._tileReady(coords, null, tile);
+                L.Util.requestAnimFrame(L.bind(this._tileReady,this, coords, null, tile));
+                // this._tileReady(coords, null, tile);
 
 
             },

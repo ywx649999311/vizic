@@ -6,7 +6,7 @@ var d3SC = require('d3-scale-chromatic');
 require('leaflet-draw');
 require('leaflet/scripts/L.DesCRS');
 require('leaflet/scripts/L.SvgTile');
-require('leaflet/scripts/L.MST');
+require('leaflet/scripts/L.NMST');
 require('leaflet/scripts/L.Control.MousePosition');
 require('leaflet-fullscreen');
 
@@ -134,6 +134,23 @@ var LeafletMstLayerView = LeafletLayerView.extend({
     create_obj: function (){
         this.obj = L.mst(this.model.get('mst_url'), this.get_options());
     },
+    model_events: function(){
+        var that = this;
+        var max = this.model.get('max_len');
+        function validate(edges){
+            if (edges >= max){
+                return 'visible';
+            }else{
+                return 'hidden';
+            }
+        }
+        this.listenTo(this.model, 'change:max_len', function(){
+            var cut_tree = that.model.get('cut_tree');
+            if (cut_tree){
+                d3.select('#mst_svg').selectAll('path').attr('visible', function(d){return validate(d.edges);});
+            }
+        }, this);
+    }
 });
 
 // RasterLayer
@@ -929,7 +946,9 @@ var LeafletMstLayerModel = LeafletLayerModel.extend({
             _view_name : 'LeafletMstLayerView',
             _model_name : 'LeafletMstLayerModel',
 
-            mst_url : ''
+            mst_url : '',
+            cut_tree: false,
+            max_len: 10
     })
 });
 var LeafletImageOverlayModel = LeafletRasterLayerModel.extend({
