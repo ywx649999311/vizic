@@ -16,7 +16,7 @@ class AstroMap(Map):
     @default('layout')
     def _default_layout(self):
         return Layout(height='512px', width='512px')
-
+    inertia = Bool(False).tag(sync=True, o=True)
     scroll_wheel_zoom = Bool(True).tag(sync=True, o=True)
     wheel_debounce_time = Int(60).tag(sync=True, o=True)
     wheel_px_per_zoom_level = Int(60).tag(sync=True, o=True)

@@ -1,4 +1,4 @@
-// var d3 = require("d3");
+var d3 = require("d3");
 L.MST = L.Layer.extend({
 	options:{
 		color: 'blue',
@@ -16,18 +16,19 @@ L.MST = L.Layer.extend({
 	},
 
 	onAdd: function () {
-		var that = this;
 		this.inertia = this._map.options.inertia;
 		this._map.options.inertia = false;
 		this._el = L.DomUtil.create('div', 'leaflet-zoom-hide');
 		this.getPane().appendChild(this._el);
+		console.log('onAdd');
+	},
+	add: function(){
+		var that = this;
 		this._json = this._projectData(this._json, 1, this._map);
 		this.sortJson(this._json);
 		setTimeout(function(){
 			that.drawSvg();
 		});
-		// var q = d3.queue();
-		console.log('over');	
 	},
 
 	drawSvg: function(){
@@ -51,8 +52,6 @@ L.MST = L.Layer.extend({
 		this.getPane().appendChild(this._el);
 	},
 
-
-	
 	drawGroup: function(key, map){
 		var data = this._msts[key];
 		var g = svg_m.append('g');
@@ -167,6 +166,8 @@ L.MST = L.Layer.extend({
 			if (error) {return console.log(error);}
 			// console.log(json.length);
 			that._json = json;
+			var draw = L.bind(that.add, that);
+			draw();
 		});
 
 	},
