@@ -1,8 +1,9 @@
-var d3 = require("d3");
+// var d3 = require("d3");
 L.MST = L.Layer.extend({
 	options:{
 		color: 'blue',
 		lineWidth: 1,
+		svgZoom: 5,
 	},
 
 	initialize: function(url, options){
@@ -10,64 +11,91 @@ L.MST = L.Layer.extend({
 		this._url = url;
 		this._json = [];
 		this._msts = {};
-		this._els = {};
 		this._getData();
-		this._el = {};
+		this._gs = {};
 	},
 
 	onAdd: function () {
-		console.log('over');
+		var that = this;
+		this.inertia = this._map.options.inertia;
+		this._map.options.inertia = false;
+		this._el = L.DomUtil.create('div', 'leaflet-zoom-hide');
+		this.getPane().appendChild(this._el);
+		this._json = this._projectData(this._json, 1, this._map);
+		this.sortJson(this._json);
+		setTimeout(function(){
+			that.drawSvg();
+		});
+		// var q = d3.queue();
+		console.log('over');	
 	},
 
-	_onAdd: function(){
-		// var that = this,
-		var	key,
+	drawSvg: function(){
+		var that = this,
+			key,
 		    zoom = this._map.getZoom(),
 		    pixOrigin = this._map.getPixelOrigin(),
 		    offset = L.point(0,0).subtract(pixOrigin);
-		this._json = this._projectData(this._json, 1, this._map);
-		this.sortJson(this._json);
-		this._els[zoom] = {};
+		this.zoomOnAdd = zoom;
+		svg_m = d3.select(this._el).append('svg')
+									.style('width', '100000px')
+									.style('height', '100000px')
+									.attr('fill', 'none')
+									.attr('overflow', 'visible')
+									.attr('id', 'mst_svg');
+
 		for (key in this._msts){
-			this._createlayers(zoom, key);
-			L.DomUtil.setPosition(this._el[key], offset);
-			this.getPane().appendChild(this._el[key]);
+			L.Util.requestAnimFrame(L.bind(this.drawGroup, this, key, this._map));
 		}
+		L.DomUtil.setPosition(this._el, offset);
+		this.getPane().appendChild(this._el);
 	},
-	// _creatCurrent: function(zoom, that){
 
-	// 	var el = L.DomUtil.create('div', 'leaflet-zoom-hide mst-el'),
-	// 		pixOrigin = that._map.getPixelOrigin(),
-	// 	   	offset = L.point(0,0).subtract(pixOrigin);
-	// 	el._zoom = zoom;
-	// 	var base = d3.select(el);
-	// 	el.chart = base.append("canvas")
-	// 		.attr('width', Math.pow(2, zoom)*256)
-	// 		.attr('height', Math.pow(2, zoom)*256);
-	// 	el.context = el.chart.node().getContext('2d');
-	// 	el.detachedContainer = document.createElement('custom');
-	// 	el.dataContainer = d3.select(el.detachedContainer);
-	// 	that.drawCustom(that._json, el);
-	// 	that._el = el;
-	// 	that._els[zoom] = el;
-	// 	L.DomUtil.setPosition(that._el, offset);
-	// 	that.getPane().appendChild(that._el);
-	// 	// callback(null);
-	// },
 
+	
+	drawGroup: function(key, map){
+		var data = this._msts[key];
+		var g = svg_m.append('g');
+		g.selectAll('path')
+	    .data(data)
+	    .enter()
+	    .append('path').attr("d", this._buildPathFromPoint)
+	    .attr('stroke','#00ff00')
+	    .attr('stroke-width',1)
+	    .attr('vector-effect','non-scaling-stroke')
+	    .attr("transform", "scale("+Math.pow(2,(map.getZoom()-this.options.svgZoom))+")");
+		// this._gs[key]=g;
+	},
+
+	_buildPathFromPoint: function(d){
+		try{
+		    //console.log(d);
+		    return "M" + d.x1+','+d.y1+'L'+d.x2+','+d.y2 ;
+		  }catch(e){
+		  	console.log(e);
+		  }
+	},
+
+
+	_resetView: function(){
+		var zoom = this._map.getZoom(),
+		    pixOrigin = this._map.getPixelOrigin(),
+			offset = L.point(0,0).subtract(pixOrigin),
+			map = this._map;
+		L.DomUtil.setPosition(this._el, offset);
+		d3.select('#mst_svg').selectAll('g').attr("transform", "scale("+Math.pow(2,(map.getZoom()-this.zoomOnAdd))+")");
+
+	},
 	onRemove: function (){
-		var key;
-		for (key in this._msts){
-			this.getPane().removeChild(this._el[key]);
-		}
-		this._el = [];
+		this.getPane().removeChild(this._el);
+		this._map.options.inertia = this.inertia;
 	},
 
 	getEvents: function (){
 		return {
 			zoomend: this._resetView,
-			dragstart: this._onDrag,
-			moveend: this._onMoveEnd,
+			// dragstart: this._onDrag,
+			// moveend: this._onMoveEnd,
 		};
 	},
 
@@ -78,8 +106,8 @@ L.MST = L.Layer.extend({
 	_onMoveEnd: function(e){
 		// has to be moveend, or scroll zoom event will fire
 		this._map.scrollWheelZoom.enable();
-
 	},
+
 	sortJson: function(json){
 		var canvasData = json;
 		var frameCount = 16,
@@ -104,6 +132,7 @@ L.MST = L.Layer.extend({
 		return a.RA1 - b.RA1;
 	},
 	_createlayers: function(zoom, key){
+		// setTimeout(function(){var key = this.getFrameKey(k, zoom);
 			var el = L.DomUtil.create('div', 'leaflet-zoom-hide mst-el');
 			el._zoom = zoom;
 			var base = d3.select(el);
@@ -116,40 +145,11 @@ L.MST = L.Layer.extend({
 			el.dataContainer = d3.select(el.detachedContainer);
 			this._els[zoom][key] = el;
 			this._el[key]=el;
+			// this._el.json = this._json;
 			var that = this;
 			setTimeout(function(){
-				that.drawCustom(zoom, el, key);
+				that.drawCustom(zoom, that._msts[key], el, key);
 			},0);
-	},
-
-	drawCustom: function(zoom, el, k){
-
-		var scale = Math.pow(2,zoom-1);
-		var canvasKey = this.getCanvasKey(k, zoom);
-		el._key = canvasKey;
-
-		var data = this._msts[k];
-		var dataBinding = el.dataContainer.selectAll('custom.path')
-			.data(data);
-
-		dataBinding
-			.attr('x1', function(d){return d.x1*scale;})
-			.attr('y1', function(d){return d.y1*scale;})
-			.attr('x2', function(d){return d.x2*scale;})
-			.attr('y2', function(d){return d.y2*scale;});
-		dataBinding.enter()
-			.append('custom')
-			.classed('path', true)
-			.attr('x1', function(d){return d.x1*scale;})
-			.attr('y1', function(d){return d.y1*scale;})
-			.attr('x2', function(d){return d.x2*scale;})
-			.attr('y2', function(d){return d.y2*scale;})
-			.attr('remove', false);
-
-		dataBinding.exit()
-			.attr('remove', true);
-
-		L.Util.requestAnimFrame(L.bind(this.drawCanvas, this, zoom, el));
 	},
 
 	getFrameKey: function(i, j){
@@ -160,26 +160,6 @@ L.MST = L.Layer.extend({
 		return zoom+':'+k;
 	},
 
-	drawCanvas: function(zoom, el){
-		var context = el.context;
-		var elements = el.dataContainer.selectAll('custom.path')._groups[0];
-		var that = this;
-		elements.forEach(function(d){
-			var node = d3.select(d);
-			context.beginPath();
-			context.moveTo(node.attr('x1'), node.attr('y1'));
-			context.lineTo(node.attr('x2'), node.attr('y2'));
-			context.lineWidth = that.options.lineWidth;
-			// context.strokeStyle = that.options.color;
-			// context.stroke();
-
-			if (node.attr('remove') === 'false'){
-				context.strokeStyle = that.options.color;
-				context.stroke();
-			}
-		});
-	},
-
 	_getData: function(){
 		var that = this;
 		// var init_z = this.options.init_draw_z;
@@ -187,20 +167,19 @@ L.MST = L.Layer.extend({
 			if (error) {return console.log(error);}
 			// console.log(json.length);
 			that._json = json;
-			var add = L.bind(that._onAdd, that);
-			add();
 		});
 
 	},
 
 	_projectData: function(json, zoom, map){
-
+		var init_z = this.options.svgZoom;
+		console.log(init_z);
 		json.forEach(function (d){
 		  var latlng1 = new L.LatLng(d.DEC1, d.RA1);
 		  var latlng2 = new L.LatLng(d.DEC2, d.RA2);
 
-		  var point1 = map.project(latlng1,1);
-		  var point2 = map.project(latlng2,1);
+		  var point1 = map.project(latlng1,init_z);
+		  var point2 = map.project(latlng2,init_z);
 
 		  d.x1=point1.x;
 		  d.y1=point1.y;
@@ -210,31 +189,6 @@ L.MST = L.Layer.extend({
 		});
 		return json;
 	},
-
-	_resetView: function(){
-		var zoom = this._map.getZoom(),
-		    pixOrigin = this._map.getPixelOrigin(),
-			offset = L.point(0,0).subtract(pixOrigin),
-			key;
-		if (!this._els[zoom]){
-			this.onRemove();
-			this._els[zoom] = {};
-			for (key in this._msts){
-				this._createlayers(zoom, key);
-				L.DomUtil.setPosition(this._el[key], offset);
-				this.getPane().appendChild(this._el[key]);
-			}
-		}else{
-			this.onRemove();
-			this._el = this._els[zoom];
-			for (key in this._msts){
-				L.DomUtil.setPosition(this._el[key], offset);
-				this.getPane().appendChild(this._el[key]);
-			}
-
-		}
-
-	}
 
 });
 
