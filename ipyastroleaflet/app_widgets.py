@@ -112,7 +112,6 @@ class FilterSlider(FloatRangeSlider):
         self.property = field.upper()
         self.min, self.max = (-1e6, 1e6)
         self.min, self.max = self._layer.get_min_max(field)
-        self._layer.filter_property = self.property
         self.value = [self.min, self.max]
 
     def link(self):
@@ -150,7 +149,8 @@ class FilterWidget(Box):
 
     @observe('filter_field')
     def update_field(self, change):
-        if change['old'] != '':
+        if change['new'] != '':
+            self._layer.filter_property = change['new']
             self.slider._change_field(change['new'])
 
     @observe('_active')

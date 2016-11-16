@@ -233,6 +233,7 @@ var LeafletGridLayerView = LeafletRasterLayerView.extend({
             }
         }, this);
         this.listenTo(this.model, 'change:filter_range', function(){
+            console.log(this.model.get('filter_property'));
             var that = this;
             var key;
             var range = this.model.get('filter_range');
@@ -257,7 +258,6 @@ var LeafletGridLayerView = LeafletRasterLayerView.extend({
             }
             if (this.model.get('filter_obj')){
                 var property = this.model.get('filter_property');
-                console.log(property);
                 d3.selectAll('.leaflet-tile').selectAll('ellipse').style('visibility', function(d){
                     return validate(d[property]);
                 });
