@@ -249,10 +249,11 @@ class GridLayer(RasterLayer):
         return self.__minMax.keys()
 
     def get_min_max(self, field):
+        field = field.upper()
         if field in list(self.get_fields()):
             return self.__minMax[field]
         else:
-            raise('Error: column name provided not in database!')
+            raise Exception('Error: column name provided not in database!')
 
     def _query_selection(self):
         selection_url = url_path_join(self._server_url, '/selection/')

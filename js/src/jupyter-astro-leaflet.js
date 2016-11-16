@@ -257,6 +257,7 @@ var LeafletGridLayerView = LeafletRasterLayerView.extend({
             }
             if (this.model.get('filter_obj')){
                 var property = this.model.get('filter_property');
+                console.log(property);
                 d3.selectAll('.leaflet-tile').selectAll('ellipse').style('visibility', function(d){
                     return validate(d[property]);
                 });

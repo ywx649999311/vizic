@@ -101,12 +101,19 @@ class FilterSlider(FloatRangeSlider):
     def __init__(self, layer, field, **kwargs):
         super().__init__(**kwargs)
         self._layer = layer
-        self.property = field
+        self.property = field.upper()
         self.min, self.max = (-1e6, 1e6)
         self.min, self.max = self._layer.get_min_max(field)
         self.value = [self.min, self.max]
         self.step = 0.0001
-        self.link()
+        # self.link()
+
+    def _change_field(self, field):
+        self.property = field.upper()
+        self.min, self.max = (-1e6, 1e6)
+        self.min, self.max = self._layer.get_min_max(field)
+        self._layer.filter_property = self.property
+        self.value = [self.min, self.max]
 
     def link(self):
         self._layer.filter_property = self.property
@@ -118,6 +125,40 @@ class FilterSlider(FloatRangeSlider):
         self._layer.filter_property = ''
 
 
+class FilterWidget(Box):
+    filter_field = Unicode()
+    _active = Bool(False)
+
+    @default('layout')
+    def _default_layout(self):
+        return Layout(display='flex', flex_flow='column',align_items='stretch')
+
+    def __init__(self, layer, *pargs, **kwargs):
+        super().__init__(*pargs, **kwargs)
+        self._layer = layer
+        self.dropDown = Dropdown(options=list(self._layer.get_fields()))
+        self.slider = FilterSlider(layer, self.dropDown.value)
+        self.children = (self.dropDown, self.slider)
+        dlink((self.dropDown, 'value'),(self, 'filter_field'))
+        dlink((self._layer,'filter_obj'), (self, '_active'))
+
+    def link(self):
+        self.slider.link()
+
+    def unlink(self):
+        self.slider.unlink()
+
+    @observe('filter_field')
+    def update_field(self, change):
+        if change['old'] != '':
+            self.slider._change_field(change['new'])
+
+    @observe('_active')
+    def update_active(self, change):
+        if change['new'] is False:
+            self.unlink()
+
+
 class FilterBox(Box):
 
     @default('layout')
@@ -126,7 +167,7 @@ class FilterBox(Box):
 
     def __init__(self, layer, field, *pargs, **kwargs):
         super().__init__(*pargs, **kwargs)
-        self.label = Label(field)
+        self.label = Label(field.upper())
         self.label.padding = '7px 2px 2px 2px'
         self.slider = FilterSlider(layer, field)
         self.children = (self.label, self.slider)
