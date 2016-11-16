@@ -156,6 +156,7 @@ class GridLayer(RasterLayer):
             self.x_range = meta['xRange']
             self.y_range = meta['yRange']
             self.__minMax = meta['minmax']
+            self.db_maxZoom = int(meta['maxZoom'])
             if self.max_zoom > int(meta['maxZoom']):
                 self.max_zoom = int(meta['maxZoom'])
         elif self.df is not None:
@@ -222,13 +223,13 @@ class GridLayer(RasterLayer):
         coll.create_index([('tile_x', pmg.ASCENDING),('tile_y', pmg.ASCENDING)], name='tile_x_y')
 
     def push_data(self, url):
-
-        mRange = (self.x_range + self.y_range)/2
+        # The center is required, don't remove
         self.center = [self._des_crs[1]-self.y_range/2, self._des_crs[0]+self.x_range/2]
+        mRange = (self.x_range + self.y_range)/2
         body = {
             'collection': self.collection,
             'mrange': mRange,
-            'maxzoom': self.max_zoom
+            'maxzoom': self.db_maxZoom
         }
         push_url = url_path_join(url, '/rangeinfo/')
         req = requests.post(push_url, data=body)
