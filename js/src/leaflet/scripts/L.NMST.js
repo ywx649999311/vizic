@@ -17,7 +17,9 @@ L.MST = L.Layer.extend({
 
 	onAdd: function () {
 		this.inertia = this._map.options.inertia;
+		this.fadeAnimation = this._map.options.fadeAnimation;
 		this._map.options.inertia = false;
+		this._map.options.fadeAnimation =false;
 		this._el = L.DomUtil.create('div', 'leaflet-zoom-hide');
 		this.getPane().appendChild(this._el);
 		console.log('onAdd');
@@ -88,13 +90,14 @@ L.MST = L.Layer.extend({
 	onRemove: function (){
 		this.getPane().removeChild(this._el);
 		this._map.options.inertia = this.inertia;
+		this._map.options.fadeAnimation = this.fadeAnimation;
 	},
 
 	getEvents: function (){
 		return {
 			zoomend: this._resetView,
-			// dragstart: this._onDrag,
-			// moveend: this._onMoveEnd,
+			dragstart: this._onDrag,
+			moveend: this._onMoveEnd,
 		};
 	},
 

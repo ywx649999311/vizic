@@ -24,7 +24,7 @@ class AstroMap(Map):
     max_zoom = Int(12).tag(sync=True, o=True)
     position_control = Bool(True).tag(sync=True, o=True)
     fullscreen_control = Bool(True).tag(sync=True, o=True)
-    fade_animation = Bool(False).tag(sync=True, o=True)
+    fade_animation = Bool(True).tag(sync=True, o=True)
     _des_crs = List().tag(sync=True)
     pan_loc = List().tag(sync=True)
     selection = Bool(False).tag(sync=True)
@@ -277,8 +277,9 @@ class MstLayer(Layer):
     _view_name = Unicode('LeafletMstLayerView').tag(sync=True)
     _model_name = Unicode('LeafletMstLayerModel').tag(sync=True)
     mst_url = Unicode().tag(sync=True)
-    cut_tree = Bool(False).tag(sync=True)
-    max_len = Float().tag(sync=True)
+    # cut_tree = Bool(False).tag(sync=True)
+    max_len = Float(0.0).tag(sync=True)
+    visible = Bool(False).tag(sync=True)
 
     def __init__(self, connection, collection, **kwargs):
         super().__init__(**kwargs)
@@ -289,6 +290,8 @@ class MstLayer(Layer):
         self._server_url = connection._url
         self.mst_url = url_path_join(self._server_url, '/mst/{}.json'.format(collection))
 
-    def cut_tree(self, length):
-        self.cut_tree = True
+    def cut(self, length):
         self.max_len = float(length)
+
+    def recover(self):
+        self.max_len = 0.0

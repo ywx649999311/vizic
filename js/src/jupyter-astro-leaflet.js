@@ -136,8 +136,7 @@ var LeafletMstLayerView = LeafletLayerView.extend({
     },
     model_events: function(){
         var that = this;
-        var max = this.model.get('max_len');
-        function validate(edges){
+        function validate(edges, max){
             if (edges >= max){
                 return 'visible';
             }else{
@@ -145,9 +144,15 @@ var LeafletMstLayerView = LeafletLayerView.extend({
             }
         }
         this.listenTo(this.model, 'change:max_len', function(){
-            var cut_tree = that.model.get('cut_tree');
-            if (cut_tree){
-                d3.select('#mst_svg').selectAll('path').attr('visible', function(d){return validate(d.edges);});
+            var visible = that.model.get('visible');
+            var max = this.model.get('max_len');
+            console.log(visible);
+            if (visible){
+                if (max==0){
+                    d3.select('#mst_svg').selectAll('path').attr('visibility', null);
+                }else{
+                    d3.select('#mst_svg').selectAll('path').attr('visibility', function(d){return validate(d.edges, max);});
+                }
             }
         }, this);
     }
@@ -948,8 +953,8 @@ var LeafletMstLayerModel = LeafletLayerModel.extend({
             _model_name : 'LeafletMstLayerModel',
 
             mst_url : '',
-            cut_tree: false,
-            max_len: 10
+            visible: false,
+            max_len: 0.0
     })
 });
 var LeafletImageOverlayModel = LeafletRasterLayerModel.extend({
