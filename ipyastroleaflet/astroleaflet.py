@@ -161,12 +161,14 @@ class GridLayer(RasterLayer):
                 self.max_zoom = int(meta['maxZoom'])
         elif self.df is not None:
             clms = [x.upper() for x in list(self.df.columns)]
+            exist_colls = self.db.collection_names()
 
             if not set(['RA', 'DEC']).issubset(set(clms)):
                 raise Exception("RA, DEC is required for visualization!")
             if not set(['A_IMAGE', 'B_IMAGE', 'THETA_IMAGE']).issubset(set(clms)):
                 print('Without data for the object shape, every object will appear as a point')
-
+            if self.coll_name is not None and self.coll_name in exist_colls:
+                raise Exception('Collectoin name already exists, try to use a different name or remove the df argument.')
             df_r, self._des_crs = self._data_prep(self.max_zoom, self.df)
             self.x_range = self._des_crs[2]*256
             self.y_range = self._des_crs[3]*256
