@@ -125,6 +125,27 @@ class mstHandler(IPythonHandler):
         self.finish()
 
 
+class voronoiHandler(IPythonHandler):
+    '''Listening to request for voronoi data
+    '''
+    @gen.coroutine
+    def get(self, coll):
+        global connection
+        if connection is None:
+            self.set_status(403)
+            self.write({'msg': 'error'})
+        else:
+            voronoi_gen = yield connection.getVoronoi(coll)
+            voronoi_list = yield voronoi_gen.to_list(length=1000000000)
+            voronoi_json = json.dumps(voronoi_list)
+            self.set_status(200)
+            self.set_header('Content-Type', 'application/json')
+            self.write(voronoi_json)
+
+        self.flush()
+        self.finish()
+
+
 def load_jupyter_server_extension(nbapp):
     """
     nbapp is istance of Jupyter.notebook.notebookapp.NotebookApp
@@ -140,11 +161,13 @@ def load_jupyter_server_extension(nbapp):
     popup_pattern = url_path_join(web_app.settings['base_url'], '/objectPop/?')
     selection_pattern = url_path_join(web_app.settings['base_url'], '/selection/?')
     mst_pattern = url_path_join(web_app.settings['base_url'], '/mst/(\S*).json')
+    voronoi_pattern = url_path_join(web_app.settings['base_url'], '/voronoi/(\S*).json')
     web_app.add_handlers(host_pattern, [
         (route_pattern, tileHandler),
         (popup_pattern, popupHandler),
         (db_pattern, dbHandler),
         (collection_pattern, rangeHandler),
         (selection_pattern, selectionHandler),
-        (mst_pattern, mstHandler)
+        (mst_pattern, mstHandler),
+        (voronoi_pattern, voronoiHandler)
     ])

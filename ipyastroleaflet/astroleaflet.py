@@ -297,3 +297,19 @@ class MstLayer(Layer):
 
     def recover(self):
         self.max_len = 0.0
+
+
+class VoronoiLayer(Layer):
+    _view_name = Unicode('LeafletVoronoiLayerView').tag(sync=True)
+    _model_name = Unicode('LeafletVoronoiLayerModel').tag(sync=True)
+    voronoi_url = Unicode().tag(sync=True)
+    visible = Bool(False).tag(sync=True)
+
+    def __init__(self, connection, collection, **kwargs):
+        super().__init__(**kwargs)
+        try:
+            self.db = connection.db
+        except:
+            raise Exception('Mongodb connection error! Check connection object!')
+        self._server_url = connection._url
+        self.voronoi_url = url_path_join(self._server_url, '/voronoi/{}.json'.format(collection))

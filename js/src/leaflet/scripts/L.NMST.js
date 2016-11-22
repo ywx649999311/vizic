@@ -1,7 +1,7 @@
 var d3 = require("d3");
 L.MST = L.Layer.extend({
 	options:{
-		color: 'blue',
+		color: '#0459e2',
 		lineWidth: 1,
 		svgZoom: 5,
 	},
@@ -24,9 +24,10 @@ L.MST = L.Layer.extend({
 		this.getPane().appendChild(this._el);
 		console.log('onAdd');
 	},
+
 	add: function(){
 		var that = this;
-		this._json = this._projectData(this._json, 1, this._map);
+		this._json = this._projectData(this._json, this._map);
 		this.sortJson(this._json);
 		setTimeout(function(){
 			that.drawSvg();
@@ -61,8 +62,8 @@ L.MST = L.Layer.extend({
 	    .data(data)
 	    .enter()
 	    .append('path').attr("d", this._buildPathFromPoint)
-	    .attr('stroke','#00ff00')
-	    .attr('stroke-width',1)
+	    .attr('stroke',this.options.color)
+	    .attr('stroke-width',this.options.lineWidth)
 	    .attr('vector-effect','non-scaling-stroke')
 	    .attr("transform", "scale("+Math.pow(2,(map.getZoom()-this.options.svgZoom))+")");
 		// this._gs[key]=g;
@@ -112,7 +113,7 @@ L.MST = L.Layer.extend({
 
 	sortJson: function(json){
 		var canvasData = json;
-		var frameCount = 16,
+		var frameCount = 4,
 			oneDimCount = Math.sqrt(frameCount);
 		var sortDataRA = canvasData.sort(this.comp_func_ra),
 			chunk = Math.floor(canvasData.length/frameCount),
@@ -132,26 +133,6 @@ L.MST = L.Layer.extend({
 
 	comp_func_ra: function(a, b){
 		return a.RA1 - b.RA1;
-	},
-	_createlayers: function(zoom, key){
-		// setTimeout(function(){var key = this.getFrameKey(k, zoom);
-			var el = L.DomUtil.create('div', 'leaflet-zoom-hide mst-el');
-			el._zoom = zoom;
-			var base = d3.select(el);
-			el.chart = base.append("canvas")
-				.attr('width', Math.pow(2, zoom)*256)
-				.attr('height', Math.pow(2, zoom)*256);
-			el.context = el.chart.node().getContext('2d');
-			el.context.clearRect(0,0,el.chart.attr('width'), el.chart.attr('height'));
-			el.detachedContainer = document.createElement('custom');
-			el.dataContainer = d3.select(el.detachedContainer);
-			this._els[zoom][key] = el;
-			this._el[key]=el;
-			// this._el.json = this._json;
-			var that = this;
-			setTimeout(function(){
-				that.drawCustom(zoom, that._msts[key], el, key);
-			},0);
 	},
 
 	getFrameKey: function(i, j){
@@ -175,7 +156,7 @@ L.MST = L.Layer.extend({
 
 	},
 
-	_projectData: function(json, zoom, map){
+	_projectData: function(json, map){
 		var init_z = this.options.svgZoom;
 		console.log(init_z);
 		json.forEach(function (d){
@@ -193,7 +174,6 @@ L.MST = L.Layer.extend({
 		});
 		return json;
 	},
-
 });
 
 L.mst = function(url, options){

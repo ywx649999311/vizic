@@ -52,15 +52,14 @@ class MongoConnect(object):
 
     # remeber to exclude the meta document
     @gen.coroutine
-    def getVoronoi(self, tile):
-        coll_v = db[tile]
-        cursor_v = coll_v.find({}, {
-
+    def getVoronoi(self, collection):
+        coll = self.db[collection]
+        cursor = coll.find({'_id':{'$ne':'meta'}}, {
             '_id': 0,
             'RA': 1,
             'DEC': 1,
         })
-        return cursor_v
+        return cursor
 
     def getCoordRange(self, xc, yc, zoom, maxZoom):
         multi = 2**(int(maxZoom)-int(zoom))

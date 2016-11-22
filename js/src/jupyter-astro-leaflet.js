@@ -7,6 +7,7 @@ require('leaflet-draw');
 require('leaflet/scripts/L.DesCRS');
 require('leaflet/scripts/L.SvgTile');
 require('leaflet/scripts/L.NMST');
+require('leaflet/scripts/L.Voronoi');
 require('leaflet/scripts/L.Control.MousePosition');
 require('leaflet-fullscreen');
 
@@ -156,6 +157,27 @@ var LeafletMstLayerView = LeafletLayerView.extend({
             }
         }, this);
     }
+});
+
+var LeafletVoronoiLayerView = LeafletLayerView.extend({
+    create_obj: function (){
+        this.obj = L.voronoi(this.model.get('voronoi_url'), this.get_options());
+    },
+    // model_events: function(){
+    //     var that = this;
+    //     this.listenTo(this.model, 'change:max_len', function(){
+    //         var visible = that.model.get('visible');
+    //         var max = this.model.get('max_len');
+    //         console.log(visible);
+    //         if (visible){
+    //             if (max==0){
+    //                 d3.select('#mst_svg').selectAll('path').attr('visibility', null);
+    //             }else{
+    //                 d3.select('#mst_svg').selectAll('path').attr('visibility', function(d){return validate(d.edges, max);});
+    //             }
+    //         }
+    //     }, this);
+    // }
 });
 
 // RasterLayer
@@ -957,6 +979,17 @@ var LeafletMstLayerModel = LeafletLayerModel.extend({
             max_len: 0.0
     })
 });
+
+var LeafletVoronoiLayerModel = LeafletLayerModel.extend({
+    defaults: _.extend({}, LeafletLayerModel.prototype.defaults, {
+            _view_name : 'LeafletVoronoiLayerView',
+            _model_name : 'LeafletVoronoiLayerModel',
+
+            voronoi_url : '',
+            visible: false,
+    })
+});
+
 var LeafletImageOverlayModel = LeafletRasterLayerModel.extend({
     defaults: _.extend({}, LeafletRasterLayerModel.prototype.defaults, {
         _view_name : 'LeafletImageOverlayView',
@@ -1220,8 +1253,10 @@ module.exports = {
     SelectionButtonView: SelectionButtonView,
     GetDataButtonView: GetDataButtonView,
     LeafletMstLayerView: LeafletMstLayerView,
+    LeafletVoronoiLayerView: LeafletVoronoiLayerView,
     // models
     LeafletMstLayerModel: LeafletMstLayerModel,
+    LeafletVoronoiLayerModel: LeafletVoronoiLayerModel,
     LeafletLayerModel : LeafletLayerModel,
     LeafletUILayerModel : LeafletUILayerModel,
     LeafletGridLayerModel : LeafletGridLayerModel,
