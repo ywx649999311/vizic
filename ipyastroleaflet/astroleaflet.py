@@ -282,6 +282,8 @@ class MstLayer(Layer):
     # cut_tree = Bool(False).tag(sync=True)
     max_len = Float(0.0).tag(sync=True)
     visible = Bool(False).tag(sync=True)
+    color = Unicode('#0459e2').tag(sync=True, o=True)
+    svg_zoom = Int(5).tag(sync=True, o=True)
 
     def __init__(self, connection, collection, **kwargs):
         super().__init__(**kwargs)
@@ -304,6 +306,8 @@ class VoronoiLayer(Layer):
     _model_name = Unicode('LeafletVoronoiLayerModel').tag(sync=True)
     voronoi_url = Unicode().tag(sync=True)
     visible = Bool(False).tag(sync=True)
+    color = Unicode('#88b21c').tag(sync=True, o=True)
+    svg_zoom = Int(5).tag(sync=True, o=True)
 
     def __init__(self, connection, collection, **kwargs):
         super().__init__(**kwargs)

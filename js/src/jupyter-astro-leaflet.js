@@ -976,7 +976,9 @@ var LeafletMstLayerModel = LeafletLayerModel.extend({
 
             mst_url : '',
             visible: false,
-            max_len: 0.0
+            max_len: 0.0,
+            svg_zoom: 5,
+            color: '#0459e2'
     })
 });
 
@@ -987,6 +989,8 @@ var LeafletVoronoiLayerModel = LeafletLayerModel.extend({
 
             voronoi_url : '',
             visible: false,
+            svg_zoom: 5,
+            color: '#88b21c'
     })
 });
 
