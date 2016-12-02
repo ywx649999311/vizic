@@ -36,8 +36,8 @@ class InteractMixin(object):
 class Layer(Widget, InteractMixin):
     _view_name = Unicode('LeafletLayerView').tag(sync=True)
     _model_name = Unicode('LeafletLayerModel').tag(sync=True)
-    _view_module = Unicode('jupyter-astro-leaflet').tag(sync=True)
-    _model_module = Unicode('jupyter-astro-leaflet').tag(sync=True)
+    _view_module = Unicode('jupyter-vizic').tag(sync=True)
+    _model_module = Unicode('jupyter-vizic').tag(sync=True)
 
     # bottom = Bool().tag(sync=True)
     options = List(trait=Unicode).tag(sync=True)
@@ -252,8 +252,8 @@ class ControlException(TraitError):
 class Control(Widget):
     _view_name = Unicode('LeafletControlView').tag(sync=True)
     _model_name = Unicode('LeafletControlModel').tag(sync=True)
-    _view_module = Unicode('jupyter-astro-leaflet').tag(sync=True)
-    _model_module = Unicode('jupyter-astro-leaflet').tag(sync=True)
+    _view_module = Unicode('jupyter-vizic').tag(sync=True)
+    _model_module = Unicode('jupyter-vizic').tag(sync=True)
 
     options = List(trait=Unicode).tag(sync=True)
 
@@ -343,8 +343,8 @@ class Map(DOMWidget, InteractMixin):
 
     _view_name = Unicode('LeafletMapView').tag(sync=True)
     _model_name = Unicode('LeafletMapModel').tag(sync=True)
-    _view_module = Unicode('jupyter-astro-leaflet').tag(sync=True)
-    _model_module = Unicode('jupyter-astro-leaflet').tag(sync=True)
+    _view_module = Unicode('jupyter-vizic').tag(sync=True)
+    _model_module = Unicode('jupyter-vizic').tag(sync=True)
 
     # Map options
     center = List(def_loc).tag(sync=True, o=True)

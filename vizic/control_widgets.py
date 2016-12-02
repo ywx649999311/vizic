@@ -4,7 +4,7 @@ from ipywidgets import *
 
 class NotebookUrl(Widget):
     _view_name = Unicode('NotebookUrlView').tag(sync=True)
-    _view_module = Unicode('jupyter-astro-leaflet').tag(sync=True)
+    _view_module = Unicode('jupyter-vizic').tag(sync=True)
     nb_url = Unicode().tag(sync=True)
 
 
@@ -30,7 +30,7 @@ class AstroColorPicker(ColorPicker):
 class PopupDis(Widget):
     """Popup display Widget"""
     _view_name = Unicode('PopupDisView').tag(sync=True)
-    _view_module = Unicode('jupyter-astro-leaflet').tag(sync=True)
+    _view_module = Unicode('jupyter-vizic').tag(sync=True)
     _object_info = Dict().tag(sync=True)
     layer = Instance(GridLayer)
     data = Instance(Series, allow_none=True)
@@ -55,7 +55,7 @@ class PopupDis(Widget):
 class HomeButton(Button):
     '''Home button Widget'''
     _view_name = Unicode('HomeButtonView').tag(sync=True)
-    _view_module = Unicode('jupyter-astro-leaflet').tag(sync=True)
+    _view_module = Unicode('jupyter-vizic').tag(sync=True)
     _map = Instance(AstroMap, allow_none=True)
 
     def __init__(self, map, **kwargs):
@@ -185,7 +185,7 @@ class FilterBox(Box):
 
 class SelectionTrig(ToggleButton):
     _view_name = Unicode('SelectionButtonView').tag(sync=True)
-    _view_module = Unicode('jupyter-astro-leaflet').tag(sync=True)
+    _view_module = Unicode('jupyter-vizic').tag(sync=True)
     _map = Instance(AstroMap, allow_none=True)
 
     def __init__(self, map, **kwargs):
@@ -204,7 +204,7 @@ class SelectionTrig(ToggleButton):
 class GetDataButton(Button):
     '''Home button Widget'''
     _view_name = Unicode('GetDataButtonView').tag(sync=True)
-    _view_module = Unicode('jupyter-astro-leaflet').tag(sync=True)
+    _view_module = Unicode('jupyter-vizic').tag(sync=True)
     _layer = Instance(GridLayer)
 
     def __init__(self, layer, **kwargs):
