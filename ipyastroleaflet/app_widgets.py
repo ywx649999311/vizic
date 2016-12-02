@@ -37,6 +37,7 @@ class PopupDis(Widget):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        # self.layout.width = '100%'
         self.dlink = dlink((self.layer, 'obj_catalog'), (self, 'data'))
 
     @observe('data')
@@ -76,11 +77,13 @@ class CFDropdown(Dropdown):
         super().__init__(**kwargs)
         self._layer = layer
         self.description = 'Property: '
+        self.layout.width = '100%'
         self.options = list(self._layer.get_fields())
         dlink((self._layer,'custom_c'), (self, '_active'))
 
     def link(self):
-        self.link = link((self, 'value'), (self._layer, 'c_field'))
+        # either dlink or use @validate on python side instead
+        self.link = dlink((self, 'value'), (self._layer, 'c_field'))
 
     def unlink(self):
         self.link.unlink()
@@ -106,6 +109,7 @@ class FilterSlider(FloatRangeSlider):
         self.min, self.max = self._layer.get_min_max(field)
         self.value = [self.min, self.max]
         self.step = 0.0001
+        self.layout.width = '100%'
         # self.link()
 
     def _change_field(self, field):
@@ -130,12 +134,12 @@ class FilterWidget(Box):
 
     @default('layout')
     def _default_layout(self):
-        return Layout(display='flex', flex_flow='column',align_items='stretch')
+        return Layout(display='flex', flex_flow='column',align_items='stretch', width='100%')
 
     def __init__(self, layer, *pargs, **kwargs):
         super().__init__(*pargs, **kwargs)
         self._layer = layer
-        self.dropDown = Dropdown(options=list(self._layer.get_fields()))
+        self.dropDown = Dropdown(options=list(self._layer.get_fields()), width='100%')
         self.slider = FilterSlider(layer, self.dropDown.value)
         self.children = (self.dropDown, self.slider)
         dlink((self.dropDown, 'value'),(self, 'filter_field'))

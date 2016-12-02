@@ -113,10 +113,10 @@ class GridLayer(RasterLayer):
         else:
             self.c_min_max = []
 
-    @observe('c_field')
-    def _update_c_min_max(self, change):
-        if self.custom_c is True and self.c_field in self.get_fields():
-            self.c_min_max = self.__minMax[change['new']]
+    @validate('c_field')
+    def _update_c_min_max(self, proposal):
+        if self.custom_c is True and proposal['value'] in self.get_fields():
+            self.c_min_max = self.__minMax[proposal['value']]
 
     @observe('filter_obj')
     def _update_filter(self, change):
@@ -172,6 +172,7 @@ class GridLayer(RasterLayer):
             df_r, self._des_crs = self._data_prep(self.max_zoom, self.df)
             self.x_range = self._des_crs[2]*256
             self.y_range = self._des_crs[3]*256
+            self.db_maxZoom = self.max_zoom
             self._insert_data(df_r)
         else:
             raise Exception('Need to provide a collection name or a pandas dataframe!')
