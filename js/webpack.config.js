@@ -38,7 +38,7 @@ module.exports = [
         entry: './src/extension.js',
         output: {
             filename: 'extension.js',
-            path: '../ipyastroleaflet/static',
+            path: '../vizic/static',
             libraryTarget: 'amd'
         }
     },
@@ -46,7 +46,7 @@ module.exports = [
         entry: './src/index.js',
         output: {
             filename: 'index.js',
-            path: '../ipyastroleaflet/static',
+            path: '../vizic/static',
             libraryTarget: 'amd'
         },
         devtool: 'source-map',

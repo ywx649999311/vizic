@@ -1,13 +1,13 @@
 {
-  "name": "jupyter-astro-leaflet",
+  "name": "jupyter-vizic",
   "version": "0.0.1dev0",
-  "description": "jupyter - leaflet bridge",
+  "description": "Astronomical Catalog Visualization",
   "author": "Weixiang Yu",
   "license": "MIT",
   "main": "src/index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ywx649999311/ipyastroleaflet.git"
+    "url": "https://github.com/ywx649999311/Vizic.git"
   },
   "config":{"unsafe-perm":true},
   "scripts": {

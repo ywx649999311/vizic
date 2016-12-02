@@ -1,1 +1,1 @@
-recursive-include ipyastroleaflet/static *.*
+recursive-include vizic/static *.*

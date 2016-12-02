@@ -7,7 +7,7 @@ build/
 node_modules/
 
 # Compiled javascript
-ipyastroleaflet/static/
+Vizic/static/
 
 # OS X
 .DS_Store

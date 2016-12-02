@@ -25,7 +25,7 @@ log.set_verbosity(log.DEBUG)
 log.info('setup.py entered')
 log.info('$PATH=%s' % os.environ['PATH'])
 
-LONG_DESCRIPTION = 'A Jupyter widget for dynamic Leaflet maps (DES)'
+LONG_DESCRIPTION = 'A Jupyter widget for dynamic Leaflet maps'
 
 
 def js_prerelease(command, strict=False):
@@ -72,8 +72,8 @@ class NPM(Command):
     node_modules = os.path.join(node_root, 'node_modules')
 
     targets = [
-        os.path.join(here, 'ipyastroleaflet', 'static', 'extension.js'),
-        os.path.join(here, 'ipyastroleaflet', 'static', 'index.js')
+        os.path.join(here, 'vizic', 'static', 'extension.js'),
+        os.path.join(here, 'vizic', 'static', 'index.js')
     ]
 
     def initialize_options(self):
@@ -118,22 +118,22 @@ class NPM(Command):
         update_package_data(self.distribution)
 
 version_ns = {}
-with open(os.path.join(here, 'ipyastroleaflet', '_version.py')) as f:
+with open(os.path.join(here, 'vizic', '_version.py')) as f:
     exec(f.read(), {}, version_ns)
 
 setup_args = {
-    'name': 'ipyastroleaflet',
+    'name': 'Vizic',
     'version': version_ns['__version__'],
     'description': 'A Jupyter widget for dynamic Leaflet maps',
     'long_description': LONG_DESCRIPTION,
     'License': 'MIT License',
     'include_package_data': True,
     'data_files': [
-        ('share/jupyter/nbextensions/jupyter-astro-leaflet', [
-            'ipyastroleaflet/static/extension.js',
-            'ipyastroleaflet/static/index.js',
-            'ipyastroleaflet/static/index.js.map',
-        ] + glob('ipyastroleaflet/static/*.png')),
+        ('share/jupyter/nbextensions/jupyter-vizic', [
+            'vizic/static/extension.js',
+            'vizic/static/index.js',
+            'vizic/static/index.js.map',
+        ] + glob('vizic/static/*.png')),
     ],
     'install_requires': [
         'ipywidgets>=5.1.5',
@@ -153,7 +153,7 @@ setup_args = {
     },
     'author': 'Weixiang Yu',
     'author_email': 'wyu16@illinois.edu',
-    'url': 'https://github.com/ywx649999311/ipyastroleaflet.git',
+    'url': 'https://github.com/ywx649999311/Vizic.git',
     'keywords': ['ipython', 'jupyter', 'widgets', 'graphics', '3d'],
     'classifiers': [
         'Development Status :: 2 - Pre-Alpha',

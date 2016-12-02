@@ -1,4 +1,4 @@
-from ipyastroleaflet.leaflet import *
+from Vizic.leaflet import *
 from ipywidgets import *
 from traitlets import Unicode, dlink, link, Dict, Undefined
 import pymongo as pmg
