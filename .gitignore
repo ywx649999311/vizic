@@ -7,7 +7,7 @@ build/
 node_modules/
 
 # Compiled javascript
-Vizic/static/
+vizic/static/
 
 # OS X
 .DS_Store

@@ -7,7 +7,7 @@
   "main": "src/index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ywx649999311/Vizic.git"
+    "url": "https://github.com/ywx649999311/vizic.git"
   },
   "config":{"unsafe-perm":true},
   "scripts": {

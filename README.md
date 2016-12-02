@@ -17,16 +17,16 @@ Installation
 For a development installation (requires npm):
 
 ```
-$ git clone https://github.com/ywx649999311/Vizic.git
-$ cd Vizic
+$ git clone https://github.com/ywx649999311/vizic.git
+$ cd vizic
 $ pip install -e .
-$ jupyter nbextension install --py --symlink --sys-prefix Vizic
-$ jupyter nbextension enable --py --sys-prefix Vizic
+$ jupyter nbextension install --py --symlink --sys-prefix vizic
+$ jupyter nbextension enable --py --sys-prefix vizic
 ```
 
 To run the Jupyter Notebook with:
 ```
-$ jupyter notebook --NotebookApp.server_extensions="['Vizic.mongo_ext.extension']"
+$ jupyter notebook --NotebookApp.server_extensions="['vizic.mongo_ext.extension']"
 ```
 Note for developers: the `--symlink` argument on Linux or OS X allows one to
 modify the JavaScript code in-place. This feature is not available

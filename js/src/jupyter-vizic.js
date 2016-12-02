@@ -870,8 +870,8 @@ var LeafletLayerModel = widgets.WidgetModel.extend({
     defaults: _.extend({}, widgets.WidgetModel.prototype.defaults, {
         _view_name : 'LeafletLayerView',
         _model_name : 'LeafletLayerModel',
-        _view_module : 'jupyter-astro-leaflet',
-        _model_module : 'jupyter-astro-leaflet',
+        _view_module : 'jupyter-vizic',
+        _model_module : 'jupyter-vizic',
         // bottom : false,
         options : []
     }),
@@ -1138,8 +1138,8 @@ var LeafletControlModel = widgets.WidgetModel.extend({
     defaults: _.extend({}, widgets.WidgetModel.prototype.defaults, {
         _view_name : 'LeafletControlView',
         _model_name : 'LeafletControlModel',
-        _view_module : 'jupyter-astro-leaflet',
-        _model_module : 'jupyter-astro-leaflet',
+        _view_module : 'jupyter-vizic',
+        _model_module : 'jupyter-vizic',
         options : []
     })
 });
@@ -1170,8 +1170,8 @@ var LeafletMapModel = widgets.DOMWidgetModel.extend({
     defaults: _.extend({}, widgets.DOMWidgetModel.prototype.defaults, {
         _view_name : "LeafletMapView",
         _model_name : "LeafletMapModel",
-        _model_module : "jupyter-astro-leaflet",
-        _view_module : "jupyter-astro-leaflet",
+        _model_module : "jupyter-vizic",
+        _view_module : "jupyter-vizic",
 
         center : def_loc,
         width : "512px",
