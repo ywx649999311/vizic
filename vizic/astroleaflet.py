@@ -113,10 +113,14 @@ class GridLayer(RasterLayer):
         else:
             self.c_min_max = []
 
-    @validate('c_field')
-    def _update_c_min_max(self, proposal):
-        if self.custom_c is True and proposal['value'] in self.get_fields():
-            self.c_min_max = self.__minMax[proposal['value']]
+    @observe('c_field')
+    def _update_c_min_max(self, change):
+        if self.custom_c is True and self.c_field in self.get_fields():
+            self.c_min_max = self.__minMax[change['new']]
+        else:
+            raise Exception('Color Field not valid!')
+            self.c_field = change['old']
+        # return proposal['value']
 
     @observe('filter_obj')
     def _update_filter(self, change):

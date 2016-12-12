@@ -223,7 +223,7 @@
 .leaflet-tile-container {
 	pointer-events: none;
 	}
-.leaflet-tile-container svg ellipse {
+.leaflet-tile-container svg{
 	pointer-events: visible;
 }
 

@@ -21,6 +21,7 @@ L.SvgTile = L.GridLayer.extend({
                 filterObj:false,
                 filterRange: [],
                 filterProperty: '',
+                background: 'black',
             },
 
             initialize: function (options){
@@ -237,14 +238,14 @@ L.SvgTile = L.GridLayer.extend({
                     width_height = Math.pow(2,zoom)*256+'px';
                     level.el.style.width = width_height;
                     level.el.style.height = width_height;
-                    level.el.style.background = 'black';
+                    level.el.style.background = this.options.background;
 
                     //avoid extra shift to make the level well aligned with the tile divs
                     level.origin = L.point(0,0);
                     level.zoom = zoom;
                     this._setZoomTransform(level, this._map.getCenter(), this._map.getZoom());
                     // force the browser to consider the newly added element for transition
-                    //L.Util.falseFn(level.el.offsetWidth);
+                    // L.Util.falseFn(level.el.offsetWidth);
                 }
 
                 this._level = level;
