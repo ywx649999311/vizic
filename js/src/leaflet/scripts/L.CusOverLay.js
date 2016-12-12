@@ -15,6 +15,15 @@ L.CusOverLay = L.Layer.extend({
         // this._fms = {};
     },
 
+	add: function() {
+        var that = this;
+        this._json = this._projectData(this._json, this._map);
+        this.sortJson(this._json);
+        setTimeout(function() {
+            that.drawSvg();
+        });
+    },
+
     onAdd: function() {
         this.inertia = this._map.options.inertia;
         this.fadeAnimation = this._map.options.fadeAnimation;

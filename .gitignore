@@ -17,3 +17,6 @@ vizic/static/
 
 # test files
 test.py
+
+# old files kept for record
+js/src/leaflet/script/deprecated/

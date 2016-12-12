@@ -8,7 +8,7 @@ L.CusOverLay.Polygons = L.CusOverLay.extend({
 			that.drawSvg();
 		});
 	},
-	
+
     comp_func_y: function(a, b) {
         return a.data.y - b.data.y;
     },
@@ -54,6 +54,56 @@ L.CusOverLay.Polygons = L.CusOverLay.extend({
     },
 });
 
-L.overLayPolygons = function(url, map) {
-    return new L.CusOverLay.Polygons(url, map);
+L.overLayPolygons = function(url, options) {
+    return new L.CusOverLay.Polygons(url, options);
+};
+
+
+L.CusOverLay.Lines = L.CusOverLay.extend({
+	comp_func_y: function(a, b) {
+        return Math.abs(a.DEC1) - Math.abs(b.DEC1);
+    },
+
+    comp_func_x: function(a, b) {
+        return a.RA1 - b.RA1;
+    },
+
+	drawSvg: function() {
+        L.CusOverLay.prototype.drawSvg.call(this, 'svg_lines');
+    },
+
+    drawGroup: function(key, map) {
+        L.CusOverLay.prototype.drawGroup.call(this, key, map, 'path');
+    },
+
+	_buildPathFromPoint: function(d) {
+        try {
+            return "M" + d.x1 + ',' + d.y1 + 'L' + d.x2 + ',' + d.y2;
+        } catch (e) {
+            console.log(e);
+        }
+    },
+
+	_projectData: function(json, map) {
+        var init_z = this.options.svgZoom;
+        // console.log(init_z);
+        json.forEach(function(d) {
+            var latlng1 = new L.LatLng(d.DEC1, d.RA1);
+            var latlng2 = new L.LatLng(d.DEC2, d.RA2);
+
+            var point1 = map.project(latlng1, init_z);
+            var point2 = map.project(latlng2, init_z);
+
+            d.x1 = point1.x;
+            d.y1 = point1.y;
+            d.x2 = point2.x;
+            d.y2 = point2.y;
+
+        });
+        return json;
+    },
+});
+
+L.overLayLines = function(url, options) {
+    return new L.CusOverLay.Lines(url, options);
 };

@@ -6,7 +6,6 @@ var d3SC = require('d3-scale-chromatic');
 require('leaflet-draw');
 require('leaflet/scripts/L.DesCRS');
 require('leaflet/scripts/L.SvgTile');
-require('leaflet/scripts/L.NMST');
 require('leaflet/scripts/L.CusOverLay');
 require('leaflet/scripts/L.OverLayShape');
 require('leaflet/scripts/L.Control.MousePosition');
@@ -132,7 +131,7 @@ var LeafletLayerView = widgets.WidgetView.extend({
 
 var LeafletMstLayerView = LeafletLayerView.extend({
     create_obj: function() {
-        this.obj = L.mst(this.model.get('mst_url'), this.get_options());
+        this.obj = L.overLayLines(this.model.get('mst_url'), this.get_options());
     },
     model_events: function() {
         var that = this;
@@ -148,10 +147,10 @@ var LeafletMstLayerView = LeafletLayerView.extend({
             var visible = that.model.get('visible');
             var max = this.model.get('max_len');
             if (visible) {
-                if (max == 0) {
-                    d3.select('#mst_svg').selectAll('path').attr('visibility', null);
+                if (max === 0) {
+                    d3.select('#svg_lines').selectAll('path').attr('visibility', null);
                 } else {
-                    d3.select('#mst_svg').selectAll('path').attr('visibility', function(d) {
+                    d3.select('#svg_lines').selectAll('path').attr('visibility', function(d) {
                         return validate(d.edges, max);
                     });
                 }
