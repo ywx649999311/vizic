@@ -161,23 +161,14 @@ var LeafletMstLayerView = LeafletLayerView.extend({
 
 var LeafletVoronoiLayerView = LeafletLayerView.extend({
     create_obj: function() {
-        this.obj = L.overLayPolygons(this.model.get('voronoi_url'), this.get_options());
+        this.obj = new Voronoi(this.model.get('voronoi_url'), this.get_options());
     },
-    // model_events: function(){
-    //     var that = this;
-    //     this.listenTo(this.model, 'change:max_len', function(){
-    //         var visible = that.model.get('visible');
-    //         var max = this.model.get('max_len');
-    //         console.log(visible);
-    //         if (visible){
-    //             if (max==0){
-    //                 d3.select('#mst_svg').selectAll('path').attr('visibility', null);
-    //             }else{
-    //                 d3.select('#mst_svg').selectAll('path').attr('visibility', function(d){return validate(d.edges, max);});
-    //             }
-    //         }
-    //     }, this);
-    // }
+});
+
+var LeafletDelaunayLayerView = LeafletLayerView.extend({
+    create_obj: function() {
+        this.obj = new Delaunay(this.model.get('delaunay_url'), this.get_options());
+    },
 });
 
 // RasterLayer
@@ -1008,6 +999,18 @@ var LeafletVoronoiLayerModel = LeafletLayerModel.extend({
     })
 });
 
+var LeafletDelaunayLayerModel = LeafletLayerModel.extend({
+    defaults: _.extend({}, LeafletLayerModel.prototype.defaults, {
+        _view_name: 'LeafletDelaunayLayerView',
+        _model_name: 'LeafletDelaunayLayerModel',
+
+        delaunay_url: '',
+        visible: false,
+        svg_zoom: 5,
+        color: 'blue'
+    })
+});
+
 var LeafletImageOverlayModel = LeafletRasterLayerModel.extend({
     defaults: _.extend({}, LeafletRasterLayerModel.prototype.defaults, {
         _view_name: 'LeafletImageOverlayView',
@@ -1284,7 +1287,9 @@ module.exports = {
     GetDataButtonView: GetDataButtonView,
     LeafletMstLayerView: LeafletMstLayerView,
     LeafletVoronoiLayerView: LeafletVoronoiLayerView,
+    LeafletDelaunayLayerView: LeafletDelaunayLayerView,
     // models
+    LeafletDelaunayLayerModel: LeafletDelaunayLayerModel,
     LeafletMstLayerModel: LeafletMstLayerModel,
     LeafletVoronoiLayerModel: LeafletVoronoiLayerModel,
     LeafletLayerModel: LeafletLayerModel,

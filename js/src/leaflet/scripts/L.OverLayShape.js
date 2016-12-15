@@ -1,5 +1,5 @@
 var d3 = require("d3");
-L.CusOverLay.Polygons = L.CusOverLay.extend({
+Voronoi = L.CusOverLay.extend({
 	add: function() {
 		var that = this;
 		this._voronoi = this._projectData(this._json, this._map);
@@ -18,7 +18,7 @@ L.CusOverLay.Polygons = L.CusOverLay.extend({
     },
 
     drawSvg: function() {
-        L.CusOverLay.prototype.drawSvg.call(this, 'svg_poly');
+        L.CusOverLay.prototype.drawSvg.call(this, 'svg_v');
     },
 
     drawGroup: function(key, map) {
@@ -54,9 +54,38 @@ L.CusOverLay.Polygons = L.CusOverLay.extend({
     },
 });
 
-L.overLayPolygons = function(url, options) {
-    return new L.CusOverLay.Polygons(url, options);
-};
+Delaunay = Voronoi.extend({
+
+	add: function() {
+		var that = this;
+		this._delaunay = this._projectData(this._json, this._map);
+		this.sortJson(this._delaunay.triangles());
+		setTimeout(function() {
+			that.drawSvg();
+		});
+	},
+
+	drawSvg: function() {
+        L.CusOverLay.prototype.drawSvg.call(this, 'svg_d');
+    },
+
+	comp_func_y: function(a, b) {
+        return a[0].y - b[0].y;
+    },
+
+	comp_func_x: function(a, b) {
+        return a[0].x - b[0].x;
+    },
+
+	_buildPathFromPoint: function(d) {
+		var line_gen = d3.line()
+					.x(function(d){return d.x;})
+					.y(function(d){return d.y;});
+        try {
+            return line_gen(d) + "Z";
+        } catch (e) {}
+    },
+});
 
 
 L.CusOverLay.Lines = L.CusOverLay.extend({

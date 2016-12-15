@@ -314,11 +314,29 @@ class VoronoiLayer(Layer):
     color = Unicode('#88b21c').tag(sync=True, o=True)
     svg_zoom = Int(5).tag(sync=True, o=True)
 
-    def __init__(self, connection, collection, **kwargs):
+    def __init__(self, gridLayer, **kwargs):
         super().__init__(**kwargs)
         try:
-            self.db = connection.db
+            self.db = gridLayer.db
         except:
             raise Exception('Mongodb connection error! Check connection object!')
-        self._server_url = connection._url
-        self.voronoi_url = url_path_join(self._server_url, '/voronoi/{}.json'.format(collection))
+        self._server_url = gridLayer._server_url
+        self.voronoi_url = url_path_join(self._server_url, '/voronoi/{}.json'.format(gridLayer.collection))
+
+
+class DelaunayLayer(Layer):
+    _view_name = Unicode('LeafletDelaunayLayerView').tag(sync=True)
+    _model_name = Unicode('LeafletDelaunayLayerModel').tag(sync=True)
+    delaunay_url = Unicode().tag(sync=True)
+    visible = Bool(False).tag(sync=True)
+    color = Unicode('blue').tag(sync=True, o=True)
+    svg_zoom = Int(5).tag(sync=True, o=True)
+
+    def __init__(self, gridLayer, **kwargs):
+        super().__init__(**kwargs)
+        try:
+            self.db = gridLayer.db
+        except:
+            raise Exception('Mongodb connection error! Check connection object!')
+        self._server_url = gridLayer._server_url
+        self.delaunay_url = url_path_join(self._server_url, '/voronoi/{}.json'.format(gridLayer.collection))

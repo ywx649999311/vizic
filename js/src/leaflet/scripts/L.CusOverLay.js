@@ -92,6 +92,8 @@ L.CusOverLay = L.Layer.extend({
 
     drawGroup: function(key, map, type) {
         var data = this._dataR[key];
+        // console.log(data);
+        console.log(data[0]);
         var g = svg_m.append('g');
         g.selectAll(type)
             .data(data)
