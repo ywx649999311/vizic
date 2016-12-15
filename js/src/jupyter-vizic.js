@@ -171,6 +171,12 @@ var LeafletDelaunayLayerView = LeafletLayerView.extend({
     },
 });
 
+var LeafletHealpixLayerView = LeafletLayerView.extend({
+    create_obj: function() {
+        this.obj = new Healpix(this.model.get('healpix_url'), this.get_options());
+    },
+});
+
 // RasterLayer
 var LeafletRasterLayerView = LeafletLayerView.extend({});
 
@@ -1011,6 +1017,18 @@ var LeafletDelaunayLayerModel = LeafletLayerModel.extend({
     })
 });
 
+var LeafletHealpixLayerModel = LeafletLayerModel.extend({
+    defaults: _.extend({}, LeafletLayerModel.prototype.defaults, {
+        _view_name: 'LeafletHealpixLayerView',
+        _model_name: 'LeafletHealpixLayerModel',
+
+        healpix_url: '',
+        visible: false,
+        svg_zoom: 5,
+        color: 'white'
+    })
+});
+
 var LeafletImageOverlayModel = LeafletRasterLayerModel.extend({
     defaults: _.extend({}, LeafletRasterLayerModel.prototype.defaults, {
         _view_name: 'LeafletImageOverlayView',
@@ -1288,7 +1306,9 @@ module.exports = {
     LeafletMstLayerView: LeafletMstLayerView,
     LeafletVoronoiLayerView: LeafletVoronoiLayerView,
     LeafletDelaunayLayerView: LeafletDelaunayLayerView,
+    LeafletHealpixLayerView: LeafletHealpixLayerView,
     // models
+    LeafletHealpixLayerModel: LeafletHealpixLayerModel,
     LeafletDelaunayLayerModel: LeafletDelaunayLayerModel,
     LeafletMstLayerModel: LeafletMstLayerModel,
     LeafletVoronoiLayerModel: LeafletVoronoiLayerModel,

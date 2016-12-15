@@ -146,6 +146,27 @@ class voronoiHandler(IPythonHandler):
         self.finish()
 
 
+class healpixHandler(IPythonHandler):
+    '''Listening to request for healpix data
+    '''
+    @gen.coroutine
+    def get(self, coll):
+        global connection
+        if connection is None:
+            self.set_status(403)
+            self.write({'msg': 'error'})
+        else:
+            healpix_gen = yield connection.getHealpix(coll)
+            healpix_list = yield healpix_gen.to_list(length=1000000000)
+            healpix_json = json.dumps(healpix_list[0]['data'])
+            self.set_status(200)
+            self.set_header('Content-Type', 'application/json')
+            self.write(healpix_json)
+
+        self.flush()
+        self.finish()
+
+
 def load_jupyter_server_extension(nbapp):
     """
     nbapp is istance of Jupyter.notebook.notebookapp.NotebookApp
@@ -161,6 +182,7 @@ def load_jupyter_server_extension(nbapp):
     popup_pattern = url_path_join(web_app.settings['base_url'], '/objectPop/?')
     selection_pattern = url_path_join(web_app.settings['base_url'], '/selection/?')
     mst_pattern = url_path_join(web_app.settings['base_url'], '/mst/(\S*).json')
+    healpix_pattern = url_path_join(web_app.settings['base_url'], '/healpix/(\S*).json')
     voronoi_pattern = url_path_join(web_app.settings['base_url'], '/voronoi/(\S*).json')
     web_app.add_handlers(host_pattern, [
         (route_pattern, tileHandler),
@@ -169,5 +191,6 @@ def load_jupyter_server_extension(nbapp):
         (collection_pattern, rangeHandler),
         (selection_pattern, selectionHandler),
         (mst_pattern, mstHandler),
+        (healpix_pattern, healpixHandler),
         (voronoi_pattern, voronoiHandler)
     ])

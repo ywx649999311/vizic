@@ -9,6 +9,7 @@ import uuid
 from notebook.utils import url_path_join
 import requests
 import json
+from .healpix import get_vert_bbox
 
 
 class AstroMap(Map):
@@ -340,3 +341,35 @@ class DelaunayLayer(Layer):
             raise Exception('Mongodb connection error! Check connection object!')
         self._server_url = gridLayer._server_url
         self.delaunay_url = url_path_join(self._server_url, '/voronoi/{}.json'.format(gridLayer.collection))
+
+
+class HealpixLayer(Layer):
+    _view_name = Unicode('LeafletHealpixLayerView').tag(sync=True)
+    _model_name = Unicode('LeafletHealpixLayerModel').tag(sync=True)
+    healpix_url = Unicode().tag(sync=True)
+    visible = Bool(False).tag(sync=True)
+    color = Unicode('white').tag(sync=True, o=True)
+    svg_zoom = Int(5).tag(sync=True, o=True)
+    nside = Int(1024)
+    nest = Bool(True)
+
+    def __init__(self, gridLayer, **kwargs):
+        super().__init__(**kwargs)
+        try:
+            self.db = gridLayer.db
+        except:
+            raise Exception('Mongodb connection error! Check connection object!')
+        # print(self.collection)
+        if self.db['healpix'].find({'_id':gridLayer.collection}).count() < 1:
+            self.inject_data(gridLayer)
+
+        self._server_url = gridLayer._server_url
+        self.healpix_url = url_path_join(self._server_url, '/healpix/{}.json'.format(gridLayer.collection))
+
+    def inject_data(self, gridLayer):
+        # [xmin, xmax, ymin, ymax]
+        self.bbox = [gridLayer._des_crs[0],gridLayer._des_crs[1]-gridLayer.y_range, gridLayer._des_crs[0]+gridLayer.x_range, gridLayer._des_crs[1]]
+        all_v = get_vert_bbox(self.bbox[0], self.bbox[1], self.bbox[2], self.bbox[3], self.nside, self.nest)
+        polys = [{'ra':x[0].tolist(), 'dec': x[1].tolist()} for x in all_v]
+        # inject data into mongodb
+        self.db['healpix'].insert_one({'_id':gridLayer.collection, 'data':polys})

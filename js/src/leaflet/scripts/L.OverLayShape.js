@@ -87,6 +87,58 @@ Delaunay = Voronoi.extend({
     },
 });
 
+Healpix = L.CusOverLay.extend({
+	add: function() {
+		var that = this;
+		this._healpix = this._projectData(this._json, this._map);
+		console.log(this._healpix);
+		this.sortJson(this._healpix);
+		setTimeout(function() {
+			that.drawSvg();
+		});
+	},
+
+    comp_func_y: function(a, b) {
+        return a[0][0] - b[0][0];
+    },
+
+	comp_func_x: function(a, b) {
+        return a[0][0] - b[0][0];
+    },
+
+    drawSvg: function() {
+        L.CusOverLay.prototype.drawSvg.call(this, 'svg_h');
+    },
+
+    drawGroup: function(key, map) {
+        L.CusOverLay.prototype.drawGroup.call(this, key, map, 'path');
+    },
+
+    _buildPathFromPoint: function(d) {
+        try {
+            return "M" + d.join("L") + "Z";
+        } catch (e) {}
+    },
+
+	_projectData: function(json, map) {
+        var init_z = this.options.svgZoom;
+        // console.log(init_z);
+		var new_j = [];
+		console.log(json);
+        json.forEach(function(d) {
+			var arr = [];
+			for (var i=0; i<4; i++){
+				var latlng = new L.LatLng(d.dec[i], d.ra[i]);
+	            var point = map.project(latlng, init_z);
+				arr.push([point.x, point.y]);
+			}
+			new_j.push(arr);
+        });
+        // var sz = Math.pow(2, init_z) * 256;
+
+        return new_j;
+    },
+});
 
 L.CusOverLay.Lines = L.CusOverLay.extend({
 	comp_func_y: function(a, b) {
