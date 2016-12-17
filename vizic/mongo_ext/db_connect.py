@@ -84,6 +84,11 @@ class MongoConnect(object):
         cursor_h = self.db['healpix'].find({'_id':coll}, {'_id':0, 'data':1})
         return cursor_h
 
+    @gen.coroutine
+    def getCircles(self, coll):
+        cursor_c = self.db['circles'].find({'_id':coll}, {'_id':0, 'data':1})
+        return cursor_c
+
     def getOjbectByPos(self, coll, ra, dec):
         # inputs from tornado are strings, need to convert
         ra = float(ra)

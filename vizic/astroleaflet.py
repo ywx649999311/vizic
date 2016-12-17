@@ -373,3 +373,40 @@ class HealpixLayer(Layer):
         polys = [{'ra':x[0].tolist(), 'dec': x[1].tolist()} for x in all_v]
         # inject data into mongodb
         self.db['healpix'].insert_one({'_id':gridLayer.collection, 'data':polys})
+
+
+class CirclesOverLay(Layer):
+    _view_name = Unicode('LeafletCirclesLayerView').tag(sync=True)
+    _model_name = Unicode('LeafletCirclesLayerModel').tag(sync=True)
+    circles_url = Unicode().tag(sync=True)
+    visible = Bool(False).tag(sync=True)
+    color = Unicode('purple').tag(sync=True, o=True)
+    svg_zoom = Int(5).tag(sync=True, o=True)
+    df = Instance(DataFrame, allow_none=True)
+    radius = Int(2).tag(sync=True, o=True)
+    cols = List(['RA', 'DEC'])
+
+    def __init__(self, gridLayer, name, **kwargs):
+        super().__init__(**kwargs)
+        try:
+            self.db = gridLayer.db
+        except:
+            raise Exception('Mongodb connection error! Check connection object!')
+        self.document_id = name
+
+        if self.db['circles'].find({'_id':name}).count() < 1:
+            if self.df is None:
+                raise Exception('Given overlay data id does not exist, a dataframe is required.')
+            self.inject_data(name)
+
+        self._server_url = gridLayer._server_url
+        self.circles_url = url_path_join(self._server_url, '/circles/{}.json'.format(name))
+
+    def inject_data(self, document_id):
+        dff = self.df.copy()
+        dff.columns = [x.upper() for x in dff.columns]
+        cols = [x.upper() for x in self.cols]
+        data = dff[cols].to_dict(orient='records')
+
+        coll = self.db['circles']
+        coll.insert_one({'_id':document_id, 'data':data})

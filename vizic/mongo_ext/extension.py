@@ -167,6 +167,27 @@ class healpixHandler(IPythonHandler):
         self.finish()
 
 
+class circlesHandler(IPythonHandler):
+    '''Listening to request for circles data
+    '''
+    @gen.coroutine
+    def get(self, coll):
+        global connection
+        if connection is None:
+            self.set_status(403)
+            self.write({'msg': 'error'})
+        else:
+            circles_gen = yield connection.getCircles(coll)
+            circles_list = yield circles_gen.to_list(length=1000000000)
+            circles_json = json.dumps(circles_list[0]['data'])
+            self.set_status(200)
+            self.set_header('Content-Type', 'application/json')
+            self.write(circles_json)
+
+        self.flush()
+        self.finish()
+
+
 def load_jupyter_server_extension(nbapp):
     """
     nbapp is istance of Jupyter.notebook.notebookapp.NotebookApp
@@ -182,6 +203,7 @@ def load_jupyter_server_extension(nbapp):
     popup_pattern = url_path_join(web_app.settings['base_url'], '/objectPop/?')
     selection_pattern = url_path_join(web_app.settings['base_url'], '/selection/?')
     mst_pattern = url_path_join(web_app.settings['base_url'], '/mst/(\S*).json')
+    circles_pattern = url_path_join(web_app.settings['base_url'], '/circles/(\S*).json')
     healpix_pattern = url_path_join(web_app.settings['base_url'], '/healpix/(\S*).json')
     voronoi_pattern = url_path_join(web_app.settings['base_url'], '/voronoi/(\S*).json')
     web_app.add_handlers(host_pattern, [
@@ -191,6 +213,7 @@ def load_jupyter_server_extension(nbapp):
         (collection_pattern, rangeHandler),
         (selection_pattern, selectionHandler),
         (mst_pattern, mstHandler),
+        (circles_pattern, circlesHandler),
         (healpix_pattern, healpixHandler),
         (voronoi_pattern, voronoiHandler)
     ])

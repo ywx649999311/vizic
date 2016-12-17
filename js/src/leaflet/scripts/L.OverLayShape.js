@@ -88,16 +88,6 @@ Delaunay = Voronoi.extend({
 });
 
 Healpix = L.CusOverLay.extend({
-	add: function() {
-		var that = this;
-		this._healpix = this._projectData(this._json, this._map);
-		console.log(this._healpix);
-		this.sortJson(this._healpix);
-		setTimeout(function() {
-			that.drawSvg();
-		});
-	},
-
     comp_func_y: function(a, b) {
         return a[0][0] - b[0][0];
     },
@@ -134,11 +124,62 @@ Healpix = L.CusOverLay.extend({
 			}
 			new_j.push(arr);
         });
-        // var sz = Math.pow(2, init_z) * 256;
 
         return new_j;
     },
 });
+
+L.CusOverLay.Circles = L.CusOverLay.extend({
+
+	comp_func_y: function(a, b) {
+        return Math.abs(a.DEC) - Math.abs(b.DEC);
+    },
+
+    comp_func_x: function(a, b) {
+        return a.RA - b.RA;
+    },
+
+	drawSvg: function() {
+        L.CusOverLay.prototype.drawSvg.call(this, 'svg_circles');
+    },
+
+	drawGroup: function(key, map) {
+        var data = this._dataR[key];
+		console.log(data);
+        var g = svg_m.append('g');
+        g.selectAll('circles')
+            .data(data)
+            .enter()
+            .append('circle')
+			.attr('cx', function(d){return d.x;})
+			.attr('cy', function(d){return d.y;})
+			.attr('r', function(d){return d.r;})
+            .attr('stroke', this.options.color)
+            .attr('stroke-width', this.options.lineWidth)
+            .attr('vector-effect', 'non-scaling-stroke')
+            .attr("transform", "scale(" + Math.pow(2, (map.getZoom() - this.options.svgZoom)) + ")");
+    },
+
+	_projectData: function(json, map) {
+        var init_z = this.options.svgZoom,
+			r = this.options.radius;
+
+        json.forEach(function(d) {
+            var latlng = new L.LatLng(d.DEC, d.RA);
+            var point = map.project(latlng, init_z);
+            d.x = point.x;
+            d.y = point.y;
+			d.r = d.RADIUS === undefined? r:d.RADIUS;
+
+        });
+		console.log(json);
+        return json;
+    },
+});
+
+L.overLayCircles = function(url, options) {
+    return new L.CusOverLay.Circles(url, options);
+};
 
 L.CusOverLay.Lines = L.CusOverLay.extend({
 	comp_func_y: function(a, b) {

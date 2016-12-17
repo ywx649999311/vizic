@@ -177,6 +177,12 @@ var LeafletHealpixLayerView = LeafletLayerView.extend({
     },
 });
 
+var LeafletCirclesLayerView = LeafletLayerView.extend({
+    create_obj: function() {
+        this.obj = new L.overLayCircles(this.model.get('circles_url'), this.get_options());
+    },
+});
+
 // RasterLayer
 var LeafletRasterLayerView = LeafletLayerView.extend({});
 
@@ -1029,6 +1035,19 @@ var LeafletHealpixLayerModel = LeafletLayerModel.extend({
     })
 });
 
+var LeafletCirclesLayerModel = LeafletLayerModel.extend({
+    defaults: _.extend({}, LeafletLayerModel.prototype.defaults, {
+        _view_name: 'LeafletCirclesLayerView',
+        _model_name: 'LeafletCirclesLayerModel',
+
+        circles_url: '',
+        visible: false,
+        svg_zoom: 5,
+        color: 'purple',
+        radius: 50,
+    })
+});
+
 var LeafletImageOverlayModel = LeafletRasterLayerModel.extend({
     defaults: _.extend({}, LeafletRasterLayerModel.prototype.defaults, {
         _view_name: 'LeafletImageOverlayView',
@@ -1307,7 +1326,9 @@ module.exports = {
     LeafletVoronoiLayerView: LeafletVoronoiLayerView,
     LeafletDelaunayLayerView: LeafletDelaunayLayerView,
     LeafletHealpixLayerView: LeafletHealpixLayerView,
+    LeafletCirclesLayerView: LeafletCirclesLayerView,
     // models
+    LeafletCirclesLayerModel: LeafletCirclesLayerModel,
     LeafletHealpixLayerModel: LeafletHealpixLayerModel,
     LeafletDelaunayLayerModel: LeafletDelaunayLayerModel,
     LeafletMstLayerModel: LeafletMstLayerModel,

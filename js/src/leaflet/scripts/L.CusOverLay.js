@@ -54,8 +54,9 @@ L.CusOverLay = L.Layer.extend({
         var frameCount = 4,
             oneDimCount = Math.sqrt(frameCount);
         var sortDataDEC = canvasData.sort(this.comp_func_y),
-            chunk = Math.floor(canvasData.length / frameCount),
+            chunk = Math.ceil(canvasData.length / frameCount),
             // frameData = {},
+
             sortDataRA;
         for (var i = 0, l = 0; i < oneDimCount; l += chunk * oneDimCount, i++) {
             var ra_cut = sortDataDEC.slice(l, l + chunk * oneDimCount).sort(this.comp_func_x);
