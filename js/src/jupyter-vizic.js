@@ -156,28 +156,43 @@ var LeafletMstLayerView = LeafletLayerView.extend({
                 }
             }
         }, this);
+        this.listenTo(this.model, 'change:color', function(){
+            var color = this.model.get('color');
+            var shape = this.model.get('shape');
+            d3.select('#svg_lines').selectAll(shape).attr('stroke', color);
+        }, this);
     }
 });
 
-var LeafletVoronoiLayerView = LeafletLayerView.extend({
+var LeafletOverlayView = LeafletLayerView.extend({
+    model_events:function(){
+        this.listenTo(this.model, 'change:color', function(){
+            var color = this.model.get('color');
+            var shape = this.model.get('shape');
+            d3.select(this.obj._el).selectAll(shape).attr('stroke', color);
+        }, this);
+    }
+});
+
+var LeafletVoronoiLayerView = LeafletOverlayView.extend({
     create_obj: function() {
         this.obj = new Voronoi(this.model.get('voronoi_url'), this.get_options());
     },
 });
 
-var LeafletDelaunayLayerView = LeafletLayerView.extend({
+var LeafletDelaunayLayerView = LeafletOverlayView.extend({
     create_obj: function() {
         this.obj = new Delaunay(this.model.get('delaunay_url'), this.get_options());
     },
 });
 
-var LeafletHealpixLayerView = LeafletLayerView.extend({
+var LeafletHealpixLayerView = LeafletOverlayView.extend({
     create_obj: function() {
         this.obj = new Healpix(this.model.get('healpix_url'), this.get_options());
     },
 });
 
-var LeafletCirclesLayerView = LeafletLayerView.extend({
+var LeafletCirclesLayerView = LeafletOverlayView.extend({
     create_obj: function() {
         this.obj = new L.overLayCircles(this.model.get('circles_url'), this.get_options());
     },
@@ -388,9 +403,6 @@ var LeafletMarkerView = LeafletUILayerView.extend({
 
 
 var LeafletPopupView = LeafletUILayerView.extend({});
-
-
-
 
 // VectorLayer
 var LeafletVectorLayerView = LeafletLayerView.extend({});
@@ -679,7 +691,6 @@ var LeafletMapView = widgets.DOMWidgetView.extend({
         this.leaflet_events();
         this.model_events();
         this.update_bounds();
-        // console.log(this.obj.options.crs.adjust);
         // TODO: hack to get all the tiles to show.
         var that = this;
 
@@ -995,7 +1006,8 @@ var LeafletMstLayerModel = LeafletLayerModel.extend({
         visible: false,
         max_len: 0.0,
         svg_zoom: 5,
-        color: '#0459e2'
+        color: '#0459e2',
+        shape: 'path'
     })
 });
 
@@ -1007,7 +1019,8 @@ var LeafletVoronoiLayerModel = LeafletLayerModel.extend({
         voronoi_url: '',
         visible: false,
         svg_zoom: 5,
-        color: '#88b21c'
+        color: '#88b21c',
+        shape: 'path'
     })
 });
 
@@ -1019,7 +1032,8 @@ var LeafletDelaunayLayerModel = LeafletLayerModel.extend({
         delaunay_url: '',
         visible: false,
         svg_zoom: 5,
-        color: 'blue'
+        color: 'blue',
+        shape: 'path'
     })
 });
 
@@ -1031,7 +1045,8 @@ var LeafletHealpixLayerModel = LeafletLayerModel.extend({
         healpix_url: '',
         visible: false,
         svg_zoom: 5,
-        color: 'white'
+        color: 'white',
+        shape: 'path'
     })
 });
 
@@ -1045,6 +1060,7 @@ var LeafletCirclesLayerModel = LeafletLayerModel.extend({
         svg_zoom: 5,
         color: 'purple',
         radius: 50,
+        shape: 'circle'
     })
 });
 

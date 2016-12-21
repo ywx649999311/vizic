@@ -383,7 +383,7 @@ class CirclesOverLay(Layer):
     color = Unicode('purple').tag(sync=True, o=True)
     svg_zoom = Int(5).tag(sync=True, o=True)
     df = Instance(DataFrame, allow_none=True)
-    radius = Int(2).tag(sync=True, o=True)
+    radius = Int(50).tag(sync=True, o=True)
     cols = List(['RA', 'DEC'])
 
     def __init__(self, gridLayer, name, **kwargs):

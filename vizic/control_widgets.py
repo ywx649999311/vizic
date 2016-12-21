@@ -8,9 +8,8 @@ class NotebookUrl(Widget):
     nb_url = Unicode().tag(sync=True)
 
 
-class AstroColorPicker(ColorPicker):
-
-    layer = Instance(GridLayer)
+class LayerColorPicker(ColorPicker):
+    layer = Instance(Layer)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -22,8 +21,8 @@ class AstroColorPicker(ColorPicker):
     def unlink(self):
         self.dlink.unlink()
 
-    def link(self, g):
-        self.layer = g
+    def link(self, layer):
+        self.layer = layer
         self.dlink = dlink((self, 'value'), (self.layer, 'color'))
 
 
@@ -70,7 +69,6 @@ class HomeButton(Button):
 
 
 class CFDropdown(Dropdown):
-
     _active = Bool(False)
 
     def __init__(self, layer, **kwargs):

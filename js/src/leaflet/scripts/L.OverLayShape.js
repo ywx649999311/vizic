@@ -145,7 +145,7 @@ L.CusOverLay.Circles = L.CusOverLay.extend({
 
 	drawGroup: function(key, map) {
         var data = this._dataR[key];
-		console.log(data);
+		// console.log(data);
         var g = svg_m.append('g');
         g.selectAll('circles')
             .data(data)
@@ -172,7 +172,7 @@ L.CusOverLay.Circles = L.CusOverLay.extend({
 			d.r = d.RADIUS === undefined? r:d.RADIUS;
 
         });
-		console.log(json);
+		// console.log(json);
         return json;
     },
 });
