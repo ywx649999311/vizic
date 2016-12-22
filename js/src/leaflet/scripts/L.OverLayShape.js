@@ -147,7 +147,7 @@ L.CusOverLay.Circles = L.CusOverLay.extend({
         var data = this._dataR[key];
 		// console.log(data);
         var g = svg_m.append('g');
-        g.selectAll('circles')
+        g.selectAll('circle')
             .data(data)
             .enter()
             .append('circle')
@@ -194,8 +194,22 @@ L.CusOverLay.Lines = L.CusOverLay.extend({
         L.CusOverLay.prototype.drawSvg.call(this, 'svg_lines');
     },
 
+	key_func: function(d){
+		return d.line_index;
+	},
+
     drawGroup: function(key, map) {
-        L.CusOverLay.prototype.drawGroup.call(this, key, map, 'path');
+        var data = this._dataR[key];
+        var g = svg_m.append('g');
+        g.selectAll('path')
+            .data(data, this.key_func)
+            .enter()
+            .append('path').attr("d", this._buildPathFromPoint)
+            .attr('stroke', this.options.color)
+            .attr('stroke-width', this.options.lineWidth)
+            .attr('vector-effect', 'non-scaling-stroke')
+            .attr("transform", "scale(" + Math.pow(2, (map.getZoom() - this.options.svgZoom)) + ")");
+        // this._fms[key] = g;
     },
 
 	_buildPathFromPoint: function(d) {

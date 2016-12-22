@@ -143,18 +143,32 @@ var LeafletMstLayerView = LeafletLayerView.extend({
                 return 'visible';
             }
         }
-        this.listenTo(this.model, 'change:max_len', function() {
-            var visible = that.model.get('visible');
+        this.listenTo(this.model, 'change:_cut_count', function() {
+            // var visible = that.model.get('visible');
+            var count = this.model.get('_cut_count');
+            console.log(count);
             var max = this.model.get('max_len');
-            if (visible) {
-                if (max === 0) {
-                    d3.select('#svg_lines').selectAll('path').attr('visibility', null);
-                } else {
-                    d3.select('#svg_lines').selectAll('path').attr('visibility', function(d) {
-                        return validate(d.edges, max);
-                    });
-                }
+            var idx = this.model.get('line_idx');
+            var json_cp = this.obj._json;
+            function comp(a,b) {
+                return a.line_index-b.line_index;
             }
+            function key_func(d){
+                return d.line_index;
+            }
+            json_cp.sort(comp);
+            var new_data=[];
+            for (var i=0; i<idx.length; i++){
+                new_data.push(json_cp[idx[i]]);
+            }
+            if (max === 0) {
+                d3.select('#svg_lines').selectAll('path').attr('visibility', null);
+            } else {
+                var selection =  d3.select('#svg_lines').selectAll('path').data(new_data, key_func);
+                selection.exit().attr('visibility', 'hidden');
+                selection.attr('visibility', 'visible');
+            }
+
         }, this);
         this.listenTo(this.model, 'change:color', function(){
             var color = this.model.get('color');
@@ -988,7 +1002,10 @@ var LeafletGridLayerModel = LeafletRasterLayerModel.extend({
         filter_property: '',
         // tile_size : 256,
         // opacity : 1.0,
-        detect_retina: false
+        detect_retina: false,
+        radius:false,
+        point:false,
+
     }),
     initialize(attributes, options) {
         widgets.WidgetModel.prototype.initialize(this, attributes, options);
@@ -1007,7 +1024,8 @@ var LeafletMstLayerModel = LeafletLayerModel.extend({
         max_len: 0.0,
         svg_zoom: 5,
         color: '#0459e2',
-        shape: 'path'
+        shape: 'path',
+        __cut_count:0
     })
 });
 

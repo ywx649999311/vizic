@@ -99,6 +99,10 @@ class GridLayer(RasterLayer):
     custom_c = Bool(False).tag(sync=True)
     c_min_max = List().tag(sync=True)
     c_field = Unicode().tag(sync=True)
+    radius = Bool(False).tag(sync=True, o=True)
+    point = Bool(False).tag(sync=True, o=True)
+    df_rad = Int(2).tag(sync=True, o=True)
+
     # filter by property range
     filter_obj = Bool(False, help="Fileter object by property value range").tag(sync=True)
     filter_property = Unicode(help="The proerty field used to sort objects").tag(sync=True)
@@ -162,6 +166,8 @@ class GridLayer(RasterLayer):
             self.x_range = meta['xRange']
             self.y_range = meta['yRange']
             self.__minMax = meta['minmax']
+            (self.radius,self.point) = (meta['radius'], meta['point'])
+            print(type(self.radius))
             self.db_maxZoom = int(meta['maxZoom'])
             if self.max_zoom > int(meta['maxZoom']):
                 self.max_zoom = int(meta['maxZoom'])
@@ -172,7 +178,14 @@ class GridLayer(RasterLayer):
             if not set(['RA', 'DEC']).issubset(set(clms)):
                 raise Exception("RA, DEC is required for visualization!")
             if not set(['A_IMAGE', 'B_IMAGE', 'THETA_IMAGE']).issubset(set(clms)):
-                print('Without data for the object shape, every object will appear as a point')
+                print('No shape information provided')
+                if 'RADIUS' in clms:
+                    print('Will use radius for filtering!')
+                    self.radius = True
+                else:
+                    print('Object as point, slow performance!')
+                    self.point = True
+
             if self.coll_name is not None and self.coll_name in exist_colls:
                 raise Exception('Collectoin name already exists, try to use a different name or remove the df argument.')
             df_r, self._des_crs = self._data_prep(self.max_zoom, self.df)
@@ -199,8 +212,17 @@ class GridLayer(RasterLayer):
 
         dff['tile_x'] = ((dff.RA-xMin)*scaleMax/x_range).apply(np.floor).astype(int)
         dff['tile_y'] = ((yMax-dff.DEC)*scaleMax/y_range).apply(np.floor).astype(int)
-        dff.loc[:, 'a'] = dff.loc[:, 'A_IMAGE'].apply(lambda x: x*0.267/3600)
-        dff.loc[:, 'b'] = dff.loc[:, 'B_IMAGE'].apply(lambda x: x*0.267/3600)
+
+        if self.radius:
+            dff.loc[:, 'b'] = dff.loc[:, 'RADIUS'].apply(lambda x: x*0.267/3600)
+            dff['THETA_IMAGE'] = 0
+        elif self.point:
+            dff['b'] = 360
+            dff['THETA_IMAGE'] = 0
+        else:
+            dff.loc[:, 'a'] = dff.loc[:, 'A_IMAGE'].apply(lambda x: x*0.267/3600)
+            dff.loc[:, 'b'] = dff.loc[:, 'B_IMAGE'].apply(lambda x: x*0.267/3600)
+
         dff['ra'] = dff['RA']
         dff['dec'] = dff['DEC']
         # dff['zoom'] = int(zoom)
@@ -219,7 +241,7 @@ class GridLayer(RasterLayer):
         data_d = df.to_dict(orient='records')
         coll = self.db[self.collection]
         coll.insert_many(data_d, ordered=False)
-        coll.insert_one({'_id': 'meta', 'adjust': self._des_crs, 'xRange': self.x_range, 'yRange': self.y_range, 'minmax': self.__minMax, 'maxZoom':self.max_zoom})
+        coll.insert_one({'_id': 'meta', 'adjust': self._des_crs, 'xRange': self.x_range, 'yRange': self.y_range, 'minmax': self.__minMax, 'maxZoom':self.max_zoom,'radius':self.radius,'point':self.point})
         bulk = coll.initialize_unordered_bulk_op()
         bulk.find({'_id':{'$ne':'meta'}}).update({'$rename':{'ra':'loc.lng'}})
         bulk.find({'_id':{'$ne':'meta'}}).update({'$rename':{'dec':'loc.lat'}})
@@ -396,6 +418,8 @@ class MstLayer(Layer):
     visible = Bool(False).tag(sync=True)
     color = Unicode('#0459e2').tag(sync=True, o=True)
     svg_zoom = Int(5).tag(sync=True, o=True)
+    line_idx = List().tag(sync=True)
+    _cut_count = Int(0).tag(sync=True)
 
     def __init__(self, gridLayer, neighbors=15, **kwargs):
         super().__init__(**kwargs)
@@ -424,15 +448,15 @@ class MstLayer(Layer):
 
     def get_index(self):
         coll = self.db['mst']
-        print(self.document_id)
         cur_ls = list(coll.find({'_id':self.document_id}))
         # lines_ls = cur_ls['tree']
         df_pos = pd.DataFrame(cur_ls[0]['tree'])
-        print(df_pos.shape)
         self.index = get_m_index(df_pos)
 
-    def cut(self, length):
+    def cut(self, length, members):
+        self.line_idx = cut_tree(self.index, length, members)
         self.max_len = float(length)
+        self._cut_count += 1
 
     def recover(self):
         self.max_len = 0.0

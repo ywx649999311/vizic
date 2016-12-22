@@ -22,6 +22,8 @@ L.SvgTile = L.GridLayer.extend({
                 filterRange: [],
                 filterProperty: '',
                 background: 'black',
+                dfRad:1,
+                radius:false,
             },
 
             initialize: function (options){
@@ -291,19 +293,41 @@ L.SvgTile = L.GridLayer.extend({
                     //.attr('width', 256);
 
                 var svg_g = svg_pane.append('g').attr('class', 'leaflet-zoom-hide');
+                console.log(this.options.radius);
+                if (this.options.radius||this.options.point){
+                    var radius = this.options.dfRad*Math.pow(2,zoom)/4;
+                    if (this.options.radius){
+                        var bigRange = this.options.xRange>this.options.yRange? this.options.xRange:this.options.yRange;
+                        var multi = (256*Math.pow(2,zoom))/bigRange;
+                        radius = function(d){
+                            return d.b*multi;
+                        };
 
-                var ellipses = svg_g.selectAll('ellipse')
-                                .data(data)
-                                .enter()
-                                .append('ellipse')
-                                .attr('cx', function (d){ return d.cx;})
-                                .attr('cy', function (d){ return d.cy;})
-                                .attr('rx', function (d) {return d.a*multi_X;})
-                                .attr('ry', function (d){ return d.b*multi_Y;})
-                                .attr('transform', function (d){return d.rotate;})
-                                .attr('fill', color)
-                                .style('visibility', visibility);
-                return ellipses;
+                    }
+                    return svg_g.selectAll('circle')
+                                    .data(data)
+                                    .enter()
+                                    .append('circle')
+                                    .attr('cx', function (d){ return d.cx;})
+                                    .attr('cy', function (d){ return d.cy;})
+                                    .attr('r', radius)
+                                    .attr('fill', color)
+                                    .style('visibility', visibility);
+                }
+                else{
+                    return svg_g.selectAll('ellipse')
+                                    .data(data)
+                                    .enter()
+                                    .append('ellipse')
+                                    .attr('cx', function (d){ return d.cx;})
+                                    .attr('cy', function (d){ return d.cy;})
+                                    .attr('rx', function (d) {return d.a*multi_X;})
+                                    .attr('ry', function (d){ return d.b*multi_Y;})
+                                    .attr('transform', function (d){return d.rotate;})
+                                    .attr('fill', color)
+                                    .style('visibility', visibility);
+
+                }
             },
 
             // _displayObject: function(e){

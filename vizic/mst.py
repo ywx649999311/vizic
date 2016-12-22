@@ -29,7 +29,7 @@ def get_mst(df, neighbors):
 def get_m_index(df):
     node_num = df.shape[0]+1
     index_mtx = csr_matrix((df['edges'].values,(df['index1'].values, df['index2'].values)), shape=(node_num, node_num))
-    return index_mtx
+    return find(index_mtx)
 
 
 def cut_tree(mst_index, length, member):
@@ -47,14 +47,14 @@ def cut_tree(mst_index, length, member):
     df_s = s.reset_index(name='group')  # make label groups, make integer index one column and refer to node id
     gb = df_s.groupby('group')  # group by groups(labels)
     df_rt = gb.count()  # ordered by group labels, value is the counts, this is actually a dataframe
-    cls = df_rt['index']  # index is the column name
-    cls = cls[cls < member+1]  # find groups with less than n+1 node,
+    label_cnts = df_rt['index']  # index is the column name
+    label_cnts = label_cnts[label_cnts < member+1]  # find groups with less than n+1 node,
     # member is the provided min branch count
 
-    rm_gps = cls.index.values.tolist()  # groups with labels discarded
+    rm_gps = label_cnts.index.values.tolist()  # groups with labels discarded
     node_ls = df_s[df_s.group.isin(rm_gps)]['index'].tolist()  # the list of nodes that will be discarded
     lines_rt = lines[(~lines.col.isin(node_ls))]  # remove line pairs that include node in node_ls
     saved_index = lines_rt.index.values.tolist()
 
     # return the wanted lines in the form of index
-    return saved_index, cls
+    return saved_index
