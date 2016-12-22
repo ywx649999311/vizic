@@ -10,6 +10,7 @@ from notebook.utils import url_path_join
 import requests
 import json
 from .healpix import get_vert_bbox
+from .mst import *
 
 
 class AstroMap(Map):
@@ -281,32 +282,6 @@ class GridLayer(RasterLayer):
             print('bounds for selection is empty')
 
 
-class MstLayer(Layer):
-    _view_name = Unicode('LeafletMstLayerView').tag(sync=True)
-    _model_name = Unicode('LeafletMstLayerModel').tag(sync=True)
-    mst_url = Unicode().tag(sync=True)
-    # cut_tree = Bool(False).tag(sync=True)
-    max_len = Float(0.0).tag(sync=True)
-    visible = Bool(False).tag(sync=True)
-    color = Unicode('#0459e2').tag(sync=True, o=True)
-    svg_zoom = Int(5).tag(sync=True, o=True)
-
-    def __init__(self, connection, collection, **kwargs):
-        super().__init__(**kwargs)
-        try:
-            self.db = connection.db
-        except:
-            raise Exception('Mongodb connection error! Check connection object!')
-        self._server_url = connection._url
-        self.mst_url = url_path_join(self._server_url, '/mst/{}.json'.format(collection))
-
-    def cut(self, length):
-        self.max_len = float(length)
-
-    def recover(self):
-        self.max_len = 0.0
-
-
 class VoronoiLayer(Layer):
     _view_name = Unicode('LeafletVoronoiLayerView').tag(sync=True)
     _model_name = Unicode('LeafletVoronoiLayerModel').tag(sync=True)
@@ -410,3 +385,54 @@ class CirclesOverLay(Layer):
 
         coll = self.db['circles']
         coll.insert_one({'_id':document_id, 'data':data})
+
+
+class MstLayer(Layer):
+    _view_name = Unicode('LeafletMstLayerView').tag(sync=True)
+    _model_name = Unicode('LeafletMstLayerModel').tag(sync=True)
+    mst_url = Unicode().tag(sync=True)
+    # cut_tree = Bool(False).tag(sync=True)
+    max_len = Float(0.0).tag(sync=True)
+    visible = Bool(False).tag(sync=True)
+    color = Unicode('#0459e2').tag(sync=True, o=True)
+    svg_zoom = Int(5).tag(sync=True, o=True)
+
+    def __init__(self, gridLayer, neighbors=15, **kwargs):
+        super().__init__(**kwargs)
+        try:
+            self.db = gridLayer.db
+        except:
+            raise Exception('Mongodb connection error! Check connection object!')
+        self.document_id = gridLayer.collection
+
+        if self.db['mst'].find({'_id':self.document_id}).count() < 1:
+            self.inject_data(neighbors)
+        else:
+            self.get_index()
+
+        self._server_url = gridLayer._server_url
+        self.mst_url = url_path_join(self._server_url, '/mst/{}.json'.format(self.document_id))
+
+    def inject_data(self, neighbors):
+        coll = self.db[self.document_id]
+        cur_ls = list(coll.find({'_id':{'$ne':'meta'}},{'_id':0,'RA':1,'DEC':1}))
+        df_pos = pd.DataFrame(cur_ls)
+        m, index = get_mst(df_pos, neighbors)
+        self.index = index
+        mst_lines = m.to_dict(orient='records')
+        self.db['mst'].insert_one({'_id':self.document_id, 'tree':mst_lines})
+
+    def get_index(self):
+        coll = self.db['mst']
+        print(self.document_id)
+        cur_ls = list(coll.find({'_id':self.document_id}))
+        # lines_ls = cur_ls['tree']
+        df_pos = pd.DataFrame(cur_ls[0]['tree'])
+        print(df_pos.shape)
+        self.index = get_m_index(df_pos)
+
+    def cut(self, length):
+        self.max_len = float(length)
+
+    def recover(self):
+        self.max_len = 0.0
