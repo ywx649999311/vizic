@@ -102,6 +102,7 @@ class GridLayer(RasterLayer):
     radius = Bool(False).tag(sync=True, o=True)
     point = Bool(False).tag(sync=True, o=True)
     df_rad = Int(2).tag(sync=True, o=True)
+    scale_r = Float(1.0).tag(sync=True, o=True)
 
     # filter by property range
     filter_obj = Bool(False, help="Fileter object by property value range").tag(sync=True)
@@ -216,13 +217,14 @@ class GridLayer(RasterLayer):
 
         if self.radius:
             dff.loc[:, 'b'] = dff.loc[:, 'RADIUS'].apply(lambda x: x*0.267/3600)
-            dff['THETA_IMAGE'] = 0
+            dff['theta'] = 0
         elif self.point:
             dff['b'] = 360
-            dff['THETA_IMAGE'] = 0
+            dff['theta'] = 0
         else:
             dff.loc[:, 'a'] = dff.loc[:, 'A_IMAGE'].apply(lambda x: x*0.267/3600)
             dff.loc[:, 'b'] = dff.loc[:, 'B_IMAGE'].apply(lambda x: x*0.267/3600)
+            dff.loc[:, 'theta'] = dff.loc[:, 'THETA_IMAGE']
 
         dff['ra'] = dff['RA']
         dff['dec'] = dff['DEC']

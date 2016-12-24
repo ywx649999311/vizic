@@ -119,7 +119,7 @@ class MongoConnect(object):
             },
             {'b': {'$gte': minR*0.3}}
         ]},
-            {'_id':0, 'tile_x': 0, 'tile_y': 0, 'a': 0, 'b': 0, 'loc':0}
+            {'_id':0, 'tile_x': 0, 'tile_y': 0, 'a': 0, 'b': 0, 'loc':0, 'theta':0}
         )
 
         return list(cursor)

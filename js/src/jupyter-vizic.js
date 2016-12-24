@@ -1006,6 +1006,7 @@ var LeafletGridLayerModel = LeafletRasterLayerModel.extend({
         detect_retina: false,
         radius: false,
         point: false,
+        scale_r: 1,
 
     }),
     initialize(attributes, options) {

@@ -24,6 +24,7 @@ L.SvgTile = L.GridLayer.extend({
                 background: 'black',
                 dfRad:1,
                 radius:false,
+                scaleR: 1
             },
 
             initialize: function (options){
@@ -54,7 +55,7 @@ L.SvgTile = L.GridLayer.extend({
 
                         d.cx=map_point.x-coords.x*256;
                         d.cy=map_point.y-coords.y*256;
-                        d.rotate=['rotate(', d.THETA_IMAGE+90, d.cx, d.cy, ')'].join(' ');
+                        d.rotate=['rotate(', d.theta+90, d.cx, d.cy, ')'].join(' ');
 
                     });
                     that._drawShapes(json, tile, coords);
@@ -283,14 +284,12 @@ L.SvgTile = L.GridLayer.extend({
                 }
 
                 var zoom = coords.z;
-                var multi_X = (256*Math.pow(2,zoom))/this.options.xRange,
-                    multi_Y = (256*Math.pow(2,zoom))/this.options.yRange;
+                var multi_X = this.options.scaleR*(256*Math.pow(2,zoom))/this.options.xRange,
+                    multi_Y = this.options.scaleR*(256*Math.pow(2,zoom))/this.options.yRange;
 
                 var svg_pane=d3.select(tile).append('svg')
                     .attr('viewBox', '0 0 256 256')
                     .style('overflow', 'visible');
-                    //.attr('height', 256)
-                    //.attr('width', 256);
 
                 var svg_g = svg_pane.append('g').attr('class', 'leaflet-zoom-hide');
 
@@ -304,10 +303,10 @@ L.SvgTile = L.GridLayer.extend({
                                 .style('visibility', visibility);
 
                 if (this.options.radius||this.options.point){
-                    var radius = this.options.dfRad*Math.pow(2,zoom)/4;
+                    var radius = this.options.scaleR*this.options.dfRad*Math.pow(2,zoom)/4;
                     if (this.options.radius){
                         var bigRange = this.options.xRange>this.options.yRange? this.options.yRange:this.options.xRange;
-                        var multi = (256*Math.pow(2,zoom))/bigRange;
+                        var multi = this.options.scaleR*(256*Math.pow(2,zoom))/bigRange;
                         radius = function(d){
                             return d.b*multi;
                         };
@@ -326,34 +325,6 @@ L.SvgTile = L.GridLayer.extend({
 
                 }
             },
-
-            // _displayObject: function(e){
-            //     console.log(e);
-            //     var object_url = L.Util.template('/object/{coll}/{ra}/{dec}.json', {
-            //         coll: this.options.collection,
-            //         ra: e.RA,
-            //         dec: e.DEC
-            //     })
-            //     console.log(object_url);
-            //     var html='';
-            //
-            //    d3.json(object_url, function(error,json){
-            //
-            //         if (error) {return console.log(error);}
-            //         console.log(json);
-            //         json = json[0];
-            //
-            //         for (var key in json){
-            //             if (key!=='_id'){
-            //                 html+=key+':'+json[key]+'<br>';
-            //             }
-            //
-            //         }
-            //         console.log(html);
-            //         // document.getElementById('object_display').innerHTML=html;
-            //
-            //    });
-            // },
 
             _removeOldLevel: function(zoom){
 
