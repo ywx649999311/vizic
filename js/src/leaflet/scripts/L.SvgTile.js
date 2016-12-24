@@ -293,39 +293,36 @@ L.SvgTile = L.GridLayer.extend({
                     //.attr('width', 256);
 
                 var svg_g = svg_pane.append('g').attr('class', 'leaflet-zoom-hide');
-                console.log(this.options.radius);
+
+                svg_g.selectAll('ellipse')
+                                .data(data)
+                                .enter()
+                                .append('ellipse')
+                                .attr('cx', function (d){ return d.cx;})
+                                .attr('cy', function (d){ return d.cy;})
+                                .attr('fill', color)
+                                .style('visibility', visibility);
+
                 if (this.options.radius||this.options.point){
                     var radius = this.options.dfRad*Math.pow(2,zoom)/4;
                     if (this.options.radius){
-                        var bigRange = this.options.xRange>this.options.yRange? this.options.xRange:this.options.yRange;
+                        var bigRange = this.options.xRange>this.options.yRange? this.options.yRange:this.options.xRange;
                         var multi = (256*Math.pow(2,zoom))/bigRange;
                         radius = function(d){
                             return d.b*multi;
                         };
 
                     }
-                    return svg_g.selectAll('circle')
-                                    .data(data)
-                                    .enter()
-                                    .append('circle')
-                                    .attr('cx', function (d){ return d.cx;})
-                                    .attr('cy', function (d){ return d.cy;})
-                                    .attr('r', radius)
-                                    .attr('fill', color)
-                                    .style('visibility', visibility);
+                    return     svg_g.selectAll('ellipse')
+                                    .attr('rx', radius)
+                                    .attr('ry', radius);
+
                 }
                 else{
-                    return svg_g.selectAll('ellipse')
-                                    .data(data)
-                                    .enter()
-                                    .append('ellipse')
-                                    .attr('cx', function (d){ return d.cx;})
-                                    .attr('cy', function (d){ return d.cy;})
+                    return     svg_g.selectAll('ellipse')
                                     .attr('rx', function (d) {return d.a*multi_X;})
                                     .attr('ry', function (d){ return d.b*multi_Y;})
-                                    .attr('transform', function (d){return d.rotate;})
-                                    .attr('fill', color)
-                                    .style('visibility', visibility);
+                                    .attr('transform', function (d){return d.rotate;});
 
                 }
             },

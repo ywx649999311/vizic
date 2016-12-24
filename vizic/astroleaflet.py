@@ -123,8 +123,10 @@ class GridLayer(RasterLayer):
     def _update_c_min_max(self, change):
         if self.custom_c is True and self.c_field in self.get_fields():
             self.c_min_max = self.__minMax[change['new']]
+        elif self.custom_c is False:
+            pass
         else:
-            raise Exception('Color Field not valid!')
+            raise Exception('Color Field ({}) not valid!'.format(self.c_field))
             self.c_field = change['old']
         # return proposal['value']
 
@@ -167,7 +169,6 @@ class GridLayer(RasterLayer):
             self.y_range = meta['yRange']
             self.__minMax = meta['minmax']
             (self.radius,self.point) = (meta['radius'], meta['point'])
-            print(type(self.radius))
             self.db_maxZoom = int(meta['maxZoom'])
             if self.max_zoom > int(meta['maxZoom']):
                 self.max_zoom = int(meta['maxZoom'])
@@ -206,9 +207,9 @@ class GridLayer(RasterLayer):
         y_range = yMax - yMin
 
         # find field min and max
-        for col in self.df.columns:
-            if df[col].dtype.kind == 'f':
-                self.__minMax[col] = [df[col].min(), df[col].max()]
+        for col in dff.columns:
+            if dff[col].dtype.kind == 'f':
+                self.__minMax[col] = [dff[col].min(), dff[col].max()]
 
         dff['tile_x'] = ((dff.RA-xMin)*scaleMax/x_range).apply(np.floor).astype(int)
         dff['tile_y'] = ((yMax-dff.DEC)*scaleMax/y_range).apply(np.floor).astype(int)
@@ -284,7 +285,7 @@ class GridLayer(RasterLayer):
         if field in list(self.get_fields()):
             return self.__minMax[field]
         else:
-            raise Exception('Error: column name provided not in database!')
+            raise Exception('Error: {} not in database!'.format(field))
 
     def _query_selection(self):
         selection_url = url_path_join(self._server_url, '/selection/')
@@ -460,3 +461,8 @@ class MstLayer(Layer):
 
     def recover(self):
         self.max_len = 0.0
+
+    def get_data(self):
+        coll = self.db['mst']
+        cur_ls = list(coll.find({'_id':self.document_id}))
+        return cur_ls[0]['tree']

@@ -150,37 +150,39 @@ var LeafletMstLayerView = LeafletLayerView.extend({
             var max = this.model.get('max_len');
             var idx = this.model.get('line_idx');
             var json_cp = this.obj._json;
-            function comp(a,b) {
-                return a.line_index-b.line_index;
+
+            function comp(a, b) {
+                return a.line_index - b.line_index;
             }
-            function key_func(d){
+
+            function key_func(d) {
                 return d.line_index;
             }
             json_cp.sort(comp);
-            var new_data=[];
-            for (var i=0; i<idx.length; i++){
+            var new_data = [];
+            for (var i = 0; i < idx.length; i++) {
                 new_data.push(json_cp[idx[i]]);
             }
             if (max === 0) {
-                d3.select('#svg_lines').selectAll('path').attr('visibility', null);
+                d3.select(this.obj._el).selectAll('path').attr('visibility', null);
             } else {
-                var selection =  d3.select('#svg_lines').selectAll('path').data(new_data, key_func);
+                var selection = d3.select(this.obj._el).selectAll('path').data(new_data, key_func);
                 selection.exit().attr('visibility', 'hidden');
                 selection.attr('visibility', 'visible');
             }
 
         }, this);
-        this.listenTo(this.model, 'change:color', function(){
+        this.listenTo(this.model, 'change:color', function() {
             var color = this.model.get('color');
             var shape = this.model.get('shape');
-            d3.select('#svg_lines').selectAll(shape).attr('stroke', color);
+            d3.select(this.obj._el).selectAll(shape).attr('stroke', color);
         }, this);
     }
 });
 
 var LeafletOverlayView = LeafletLayerView.extend({
-    model_events:function(){
-        this.listenTo(this.model, 'change:color', function(){
+    model_events: function() {
+        this.listenTo(this.model, 'change:color', function() {
             var color = this.model.get('color');
             var shape = this.model.get('shape');
             d3.select(this.obj._el).selectAll(shape).attr('stroke', color);
@@ -296,7 +298,6 @@ var LeafletGridLayerView = LeafletRasterLayerView.extend({
             }
         }, this);
         this.listenTo(this.model, 'change:filter_range', function() {
-            // console.log(this.model.get('filter_property'));
             var that = this;
             var key;
             var range = this.model.get('filter_range');
@@ -789,7 +790,7 @@ var LeafletMapView = widgets.DOMWidgetView.extend({
         }, this);
         this.listenTo(this.model, 'change:pan_loc', function() {
             var loc = this.model.get('pan_loc');
-            if (loc.length != 0) {
+            if (loc.length !== 0) {
                 console.log(loc.length);
                 this.obj.setView([loc[0], loc[1]], loc[2]);
                 this.update_bounds();
@@ -1003,8 +1004,8 @@ var LeafletGridLayerModel = LeafletRasterLayerModel.extend({
         // tile_size : 256,
         // opacity : 1.0,
         detect_retina: false,
-        radius:false,
-        point:false,
+        radius: false,
+        point: false,
 
     }),
     initialize(attributes, options) {
@@ -1025,7 +1026,7 @@ var LeafletMstLayerModel = LeafletLayerModel.extend({
         svg_zoom: 5,
         color: '#0459e2',
         shape: 'path',
-        __cut_count:0
+        __cut_count: 0
     })
 });
 
