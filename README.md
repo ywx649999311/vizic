@@ -1,19 +1,24 @@
-Vizic
-==========
+# Vizic
 
 A Jupyter widget for visualizing astronomical catalog data
 
-Note
-----
+## Note
 
 Part of the project was orginally forked from [ipyleaflet](https://github.com/ellisonbg/ipyleaflet), which is a Jupyter / Leaflet bridge enabling interactive maps in the Jupyter notebook. As a major component of Vizic, ipyleaflet has been modified and improved in a way to better suite the needs of Vizic.
 
 Dependencies:
 
-    MongoDB
+```
+MongoDB
+```
 
-Installation
-------------
+## Installation
+
+```
+$ pip3 install vizic
+$ jupyter nbextension enable --py --sys-prefix vizic
+```
+
 For a development installation (requires npm):
 
 ```
@@ -25,9 +30,9 @@ $ jupyter nbextension enable --py --sys-prefix vizic
 ```
 
 To run the Jupyter Notebook with:
+
 ```
 $ jupyter notebook --NotebookApp.server_extensions="['vizic.mongo_ext.extension']"
 ```
-Note for developers: the `--symlink` argument on Linux or OS X allows one to
-modify the JavaScript code in-place. This feature is not available
-with Windows.
+
+Note for developers: the `--symlink` argument on Linux or OS X allows one to modify the JavaScript code in-place. This feature is not available with Windows.
