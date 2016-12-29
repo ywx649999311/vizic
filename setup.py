@@ -137,7 +137,7 @@ setup_args = {
     ],
     'install_requires': [
         'ipywidgets>=5.1.5',
-        'motor==0.7b0',
+        'motor==1.0',
         'pandas',
         'numpy',
         'uuid',

@@ -95,7 +95,7 @@ class MongoConnect(object):
         dec = float(dec)
         pop_cursor = self.stat_db[coll].find({
             '$and':[{'RA':ra},{'DEC':dec}]},
-            {'_id': 0, 'tile_x': 0, 'tile_y': 0, 'a': 0, 'b': 0, 'loc':0}
+            {'_id': 0, 'tile_x': 0, 'tile_y': 0, 'a': 0, 'b': 0, 'loc':0, 'theta':0}
         )
         return dumps(pop_cursor)
 
