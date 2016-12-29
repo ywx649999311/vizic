@@ -124,7 +124,7 @@ with open(os.path.join(here, 'vizic', '_version.py')) as f:
 setup_args = {
     'name': 'vizic',
     'version': version_ns['__version__'],
-    'description': 'A Jupyter widget for dynamic Leaflet maps',
+    'description': 'A Jupyter widget for visualizing astronomical catalogs',
     'long_description': LONG_DESCRIPTION,
     'License': 'MIT License',
     'include_package_data': True,
@@ -154,7 +154,7 @@ setup_args = {
     'author': 'Weixiang Yu',
     'author_email': 'wyu16@illinois.edu',
     'url': 'https://github.com/ywx649999311/vizic.git',
-    'keywords': ['ipython', 'jupyter', 'widgets', 'graphics', '3d'],
+    'keywords': ['ipython', 'jupyter', 'widgets', 'graphics'],
     'classifiers': [
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Developers',
