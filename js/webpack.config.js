@@ -42,7 +42,7 @@ module.exports = [
             libraryTarget: 'amd'
         }
     },
-    {// jupyter-leaflet bundle for the notebook
+    {// vizic bundle for the notebook
         entry: './src/index.js',
         output: {
             filename: 'index.js',

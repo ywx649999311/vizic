@@ -16,6 +16,7 @@ MongoDB
 
 ```
 $ pip3 install vizic
+$ jupyter nbextension enable --py --sys-prefix widgetsnbextension
 $ jupyter nbextension enable --py --sys-prefix vizic
 ```
 
@@ -26,6 +27,7 @@ $ git clone https://github.com/ywx649999311/vizic.git
 $ cd vizic
 $ pip install -e .
 $ jupyter nbextension install --py --symlink --sys-prefix vizic
+$ jupyter nbextension enable --py --sys-prefix widgetsnbextension
 $ jupyter nbextension enable --py --sys-prefix vizic
 ```
 

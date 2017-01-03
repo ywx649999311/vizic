@@ -141,7 +141,7 @@ setup_args = {
         'pandas',
         'numpy',
         'uuid',
-        'requests'
+        'requests', 'scipy', 'astropy==1.2.1', 'sklearn', 'healpy', 'notebook<4.3'
     ],
     'packages': find_packages(),
     'zip_safe': False,
