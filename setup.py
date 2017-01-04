@@ -126,7 +126,7 @@ setup_args = {
     'version': version_ns['__version__'],
     'description': 'A Jupyter widget for visualizing astronomical catalogs',
     'long_description': LONG_DESCRIPTION,
-    'License': 'MIT License',
+    'License': 'MIT',
     'include_package_data': True,
     'data_files': [
         ('share/jupyter/nbextensions/jupyter-vizic', [
