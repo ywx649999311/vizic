@@ -20,6 +20,33 @@ function camel_case(input) {
         return group1.toUpperCase();
     });
 }
+var colorMaps={
+    1: d3SC.interpolateSpectral,
+    2: d3SC.interpolateBrBG,
+    3: d3SC.interpolatePRGn,
+    4: d3SC.interpolatePiYG,
+    5: d3SC.interpolatePuOr,
+    6: d3SC.interpolateRdBu,
+    7: d3SC.interpolateRdYlBu,
+    8: d3SC.interpolateRdYlGn,
+    9: d3SC.interpolateBlues,
+    10: d3SC.interpolateGreens,
+    11: d3SC.interpolateOranges,
+    12: d3SC.interpolatePurples,
+    13: d3SC.interpolateReds,
+    14: d3SC.interpolateBuGn,
+    15: d3SC.interpolateBuPu,
+    16: d3SC.interpolateGnBu,
+    17: d3SC.interpolateOrRd,
+    18: d3SC.interpolatePuBuGn,
+    19: d3SC.interpolatePuBu,
+    20: d3SC.interpolatePuRd,
+    21: d3SC.interpolateRdPu,
+    22: d3SC.interpolateYlGnBu,
+    23: d3SC.interpolateYlGn,
+    24: d3SC.interpolateYlOrBr,
+    25: d3SC.interpolateYlOrRd
+};
 
 var NotebookUrlView = widgets.WidgetView.extend({
 
@@ -224,7 +251,6 @@ var LeafletGridLayerView = LeafletRasterLayerView.extend({
     },
     model_events: function() {
         var that = this;
-
         function single_cTile(key, color, callback) {
             d3.select(that.obj._cTiles[key].el).selectAll('ellipse').attr('fill', color);
             callback(null);
@@ -236,11 +262,11 @@ var LeafletGridLayerView = LeafletRasterLayerView.extend({
             that.obj.options.filterProperty = that.model.get('filter_property');
             callback(null);
         }
-
         function change_c_options(callback) {
             that.obj.options.customC = that.model.get('custom_c');
             that.obj.options.cMinMax = that.model.get('c_min_max');
             that.obj.options.cField = that.model.get('c_field');
+            that.obj.options.cMap = that.model.get('c_map');
             callback(null);
         }
         this.listenTo(this.model, 'change:color', function() {
@@ -257,10 +283,39 @@ var LeafletGridLayerView = LeafletRasterLayerView.extend({
                 console.log('single color change done');
             });
         }, this);
+        this.listenTo(this.model, 'change:c_map', function(){
+            var custom_c = this.model.get('custom_c');
+            var c_min_max = this.model.get('c_min_max');
+            var c_map = this.model.get('c_map');
+            var interpolate = d3.scaleSequential(colorMaps[c_map]).domain(c_min_max);
+            function update_cTile(key, c_field, callback) {
+                d3.select(that.obj._cTiles[key].el).selectAll('ellipse').attr('fill', function(d) {
+                    return interpolate(d[c_field]);
+                });
+                callback(null);
+            }
+            var key;
+            var q = d3.queue();
+            if (custom_c === true) {
+                var c_field = this.model.get('c_field');
+                d3.selectAll('.leaflet-tile').selectAll('ellipse').attr('fill', function(d) {
+                    return interpolate(d[c_field]);
+                });
+                q.defer(change_c_options);
+                for (key in that.obj._cTiles) {
+                    q.defer(update_cTile, key, c_field);
+                }
+                q.awaitAll(function(error) {
+                    if (error) throw error;
+                    console.log('update cTiles for customC');
+                });
+            }
+        }, this);
         this.listenTo(this.model, 'change:c_min_max', function() {
             var custom_c = this.model.get('custom_c');
             var c_min_max = this.model.get('c_min_max');
-            var interpolate = d3.scaleSequential(d3SC.interpolateSpectral).domain(c_min_max);
+            var c_map = this.model.get('c_map');
+            var interpolate = d3.scaleSequential(colorMaps[c_map]).domain(c_min_max);
 
             function update_cTile(key, c_field, callback) {
                 d3.select(that.obj._cTiles[key].el).selectAll('ellipse').attr('fill', function(d) {
@@ -998,6 +1053,7 @@ var LeafletGridLayerModel = LeafletRasterLayerModel.extend({
         c_min_max: [],
         custom_c: false,
         c_field: '',
+        c_map: 1,
         filter_obj: false,
         filter_range: [],
         filter_property: '',

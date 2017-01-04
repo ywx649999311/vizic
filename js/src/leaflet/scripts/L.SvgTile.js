@@ -18,6 +18,7 @@ L.SvgTile = L.GridLayer.extend({
                 cMinMax: [],
                 customC: false,
                 cField: undefined,
+                cMap: 1,
                 filterObj:false,
                 filterRange: [],
                 filterProperty: '',
@@ -25,6 +26,34 @@ L.SvgTile = L.GridLayer.extend({
                 dfRad:1,
                 radius:false,
                 scaleR: 1
+            },
+
+            colorMaps: {
+                1: d3SC.interpolateSpectral,
+                2: d3SC.interpolateBrBG,
+                3: d3SC.interpolatePRGn,
+                4: d3SC.interpolatePiYG,
+                5: d3SC.interpolatePuOr,
+                6: d3SC.interpolateRdBu,
+                7: d3SC.interpolateRdYlBu,
+                8: d3SC.interpolateRdYlGn,
+                9: d3SC.interpolateBlues,
+                10: d3SC.interpolateGreens,
+                11: d3SC.interpolateOranges,
+                12: d3SC.interpolatePurples,
+                13: d3SC.interpolateReds,
+                14: d3SC.interpolateBuGn,
+                15: d3SC.interpolateBuPu,
+                16: d3SC.interpolateGnBu,
+                17: d3SC.interpolateOrRd,
+                18: d3SC.interpolatePuBuGn,
+                19: d3SC.interpolatePuBu,
+                20: d3SC.interpolatePuRd,
+                21: d3SC.interpolateRdPu,
+                22: d3SC.interpolateYlGnBu,
+                23: d3SC.interpolateYlGn,
+                24: d3SC.interpolateYlOrBr,
+                25: d3SC.interpolateYlOrRd
             },
 
             initialize: function (options){
@@ -261,7 +290,7 @@ L.SvgTile = L.GridLayer.extend({
                 var visibility = 'visible';
                 var color = this.options.color;
                 var range = this.options.filterRange;
-                var interpolate = d3.scaleSequential(d3SC.interpolateSpectral);
+                var interpolate = d3.scaleSequential(this.colorMaps[that.options.cMap]);
 
                 if (this.options.customC){
                     var cMinMax = that.options.cMinMax;

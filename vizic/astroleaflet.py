@@ -99,6 +99,7 @@ class GridLayer(RasterLayer):
     custom_c = Bool(False).tag(sync=True)
     c_min_max = List().tag(sync=True)
     c_field = Unicode().tag(sync=True)
+    c_map = Int(1).tag(sync=True)
     radius = Bool(False).tag(sync=True, o=True)
     point = Bool(False).tag(sync=True, o=True)
     df_rad = Int(2).tag(sync=True, o=True)
