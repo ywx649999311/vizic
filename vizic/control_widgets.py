@@ -96,6 +96,46 @@ class CFDropdown(Dropdown):
             self.link()
 
 
+class ColorMap(Dropdown):
+    _layer = Instance(GridLayer)
+    colorSpaces = {
+        'Spectral':1,
+        'BrBG': 2,
+        'PRGn': 3,
+        'PiYG': 4,
+        'PuOr': 5,
+        'RdBu': 6,
+        'RdYlBu':7,
+        'RdYlGn':8,
+        'Blues':9,
+        'Greens':10,
+        'Oranges':11,
+        'Purples':12,
+        'Reds':13,
+        'BuGn':14,
+        'BuPu':15,
+        'GnBu':16,
+        'OrRd':17,
+        'PuBuGn':18,
+        'PuBu':19,
+        'PuRd':20,
+        'RdPu':21,
+        'YlGnBu':22,
+        'YlGn':23,
+        'YlOrBr':24,
+        'YlOrRd':25
+    }
+
+    def __init__(self, gridlayer, **kwargs):
+        super().__init__(**kwargs)
+        self._layer = gridlayer
+        self.description = 'ColorMap: '
+        self.layout.width = '100%'
+        self.options = self.colorSpaces
+        self.value = self._layer.c_map
+        dlink((self,'value'), (self._layer, 'c_map'))
+
+
 class FilterSlider(FloatRangeSlider):
     readout_format = Unicode('.3f').tag(sync=True)
 
