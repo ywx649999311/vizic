@@ -42,3 +42,7 @@ Note for developers: the `--symlink` argument on Linux or OS X allows one to mod
 ## Documentation
 
 A more detail documentation is on the way. Before it is ready, please look at the notebooks provided in the examples folder to get started, which are well documented with instructions.
+
+## Reference
+
+A paper about Vizic can be accessed on [AriXiv](https://arxiv.org/abs/1701.01222)

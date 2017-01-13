@@ -25,7 +25,7 @@ log.set_verbosity(log.DEBUG)
 log.info('setup.py entered')
 log.info('$PATH=%s' % os.environ['PATH'])
 
-LONG_DESCRIPTION = 'A Jupyter widget for dynamic Leaflet maps'
+LONG_DESCRIPTION = 'A Jupyter widget library for visualizing astronomical catalogs'
 
 
 def js_prerelease(command, strict=False):
