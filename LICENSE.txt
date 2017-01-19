@@ -1,10 +1,11 @@
-The MIT License (MIT)
+MIT License
 
-Copyright (c) for portions of project Vizic are held by
+Copyright (c) for portions (before commit #ba739b) of project Vizic are held by
 Brian E. Granger, 2014 as part of project ipyleaflet. All other copyright
-for project Vizic are held by Weixiang Yu, 2016.
+for project Vizic are held by Weixiang Yu, Matias Carrasco Kind and Robert J. Brunner 2016.
 
 Copyright (c) 2014 Brian E. Granger
+Copyright (c) 2016 Weixiang Yu, Matias Carrasco Kind and Robert J. Brunner
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
