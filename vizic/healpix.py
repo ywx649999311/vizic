@@ -1,5 +1,4 @@
 import healpy as hp
-# import matplotlib.pyplot as plt
 import numpy as np
 # NEST = True  # Keep it true
 # NSIDE = 1024  # must be a power of 2

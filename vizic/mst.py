@@ -1,10 +1,10 @@
 import numpy as np
+import pandas as pd
 from scipy.sparse.csgraph import minimum_spanning_tree as mst
 from sklearn.neighbors import kneighbors_graph as kng
 from scipy.sparse import find
 from scipy.sparse.csgraph import connected_components as cp
 from scipy.sparse import csr_matrix
-import pandas as pd
 
 
 def get_mst(df, neighbors):

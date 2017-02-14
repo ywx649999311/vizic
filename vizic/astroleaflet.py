@@ -1,14 +1,13 @@
-from .leaflet import *
+from traitlets import *
 from ipywidgets import *
-from traitlets import Unicode, dlink, link, Dict, Undefined
+from .leaflet import Map, RasterLayer, Layer
 import pymongo as pmg
 import pandas as pd
 import numpy as np
-from pandas import DataFrame, Series
 import uuid
-from notebook.utils import url_path_join
-import requests
 import json
+import requests
+from notebook.utils import url_path_join
 from .healpix import get_vert_bbox
 from .mst import *
 
@@ -86,7 +85,7 @@ class GridLayer(RasterLayer):
 
     bottom = Bool(False).tag(sync=True)
     _des_crs = List().tag(Sync=True)
-    df = Instance(DataFrame, allow_none=True)
+    df = Instance(pd.DataFrame, allow_none=True)
     min_zoom = Int(0).tag(sync=True, o=True)
     max_zoom = Int(8).tag(sync=True, o=True)
     # tile_size = Int(256).tag(sync=True, o=True)
@@ -110,7 +109,7 @@ class GridLayer(RasterLayer):
     filter_property = Unicode(help="The proerty field used to sort objects").tag(sync=True)
     filter_range = List().tag(sync=True)
     center = List().tag(sync=True)
-    obj_catalog = Instance(Series, allow_none=True)
+    obj_catalog = Instance(pd.Series, allow_none=True)
     __minMax = {}
     _popup_callbacks = Instance(CallbackDispatcher, ())
 
@@ -278,7 +277,7 @@ class GridLayer(RasterLayer):
         popup_url = url_path_join(self._server_url, '/objectPop/')
         result = requests.get(popup_url, data=body)
         pop_dict = json.loads(result.text[1:-1])
-        self.obj_catalog = Series(pop_dict)
+        self.obj_catalog = pd.Series(pop_dict)
 
     def get_fields(self):
         return self.__minMax.keys()
@@ -303,7 +302,7 @@ class GridLayer(RasterLayer):
             }
             res = requests.get(selection_url, data=body)
             selection_dict = json.loads(res.text)
-            self.select_data = DataFrame(selection_dict)
+            self.select_data = pd.DataFrame(selection_dict)
         else:
             print('bounds for selection is empty')
 
@@ -383,7 +382,7 @@ class CirclesOverLay(Layer):
     visible = Bool(False).tag(sync=True)
     color = Unicode('purple').tag(sync=True, o=True)
     svg_zoom = Int(5).tag(sync=True, o=True)
-    df = Instance(DataFrame, allow_none=True)
+    df = Instance(pd.DataFrame, allow_none=True)
     radius = Int(50).tag(sync=True, o=True)
     cols = List(['RA', 'DEC'])
 

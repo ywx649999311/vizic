@@ -1,8 +1,6 @@
-from ._version import version_info, __version__
-
-from .astroleaflet import AstroMap, GridLayer
-from .control_widgets import *
+from .astroleaflet import *
 from .connection import Connection
+from .control_widgets import *
 
 
 def _jupyter_nbextension_paths():
