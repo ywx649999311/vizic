@@ -8,8 +8,7 @@ import uuid
 import json
 import requests
 from notebook.utils import url_path_join
-from .healpix import get_vert_bbox
-from .mst import *
+from .utils import cut_tree, get_mst, get_m_index, get_vert_bbox
 
 
 class AstroMap(Map):
