@@ -12,6 +12,18 @@ from .utils import cut_tree, get_mst, get_m_index, get_vert_bbox
 
 
 class AstroMap(Map):
+    """Map class for hosting tile layer and overlays.
+
+    AstroMap extends the Map class from ipyleaflet with added rich features to display and interact with visualized astronomical catalogs.
+
+    Note:
+        Class attribute ``center`` is always in the form of ``[lat, lng]``.
+
+    Attributes:
+        **kwargs: Arbitrary keyword arguments. These arguments are
+            optional and are mainly used to cutomize the Leaflet map settings at the frond-end.
+
+    """
 
     @default('layout')
     def _default_layout(self):
@@ -25,13 +37,14 @@ class AstroMap(Map):
     position_control = Bool(True).tag(sync=True, o=True)
     fullscreen_control = Bool(True).tag(sync=True, o=True)
     fade_animation = Bool(True).tag(sync=True, o=True)
-    _des_crs = List().tag(sync=True)
-    pan_loc = List().tag(sync=True)
-    selection = Bool(False).tag(sync=True)
+    _des_crs = List(help='Coordinate system specification').tag(sync=True)
+    pan_loc = List(help='Target coordinate for panning').tag(sync=True)
+    selection = Bool(False, help='Lasso-like selection status(on/off)').tag(sync=True)
     s_bounds = List(help='LatLngBounds for selection tool').tag(sync=True)
     # pan_ready = Bool(False).tag(sync=True)
 
     def __init__(self, **kwargs):
+        """Init an AstroMap object."""
         super().__init__(**kwargs)
         if self.default_tiles is not None:
             self.default_tiles._map = self
@@ -42,6 +55,11 @@ class AstroMap(Map):
             self.default_tiles.visible = True
 
     def add_layer(self, layer):
+        """Add layer to map.
+
+        Args:
+            layer: layer object to be added to the map.
+        """
         if layer.model_id in self.layer_ids:
             raise LayerException('layer already on map: %r' % layer)
         layer._map = self
@@ -53,6 +71,11 @@ class AstroMap(Map):
         layer.visible = True
 
     def remove_layer(self, layer):
+        """Remove layer from map.
+
+        Args:
+            layer: layer object to be removed from the map.
+        """
         if layer.model_id not in self.layer_ids:
             raise LayerException('layer not on map: %r' % layer)
         # if isinstance(layer, GridLayer):
@@ -61,18 +84,28 @@ class AstroMap(Map):
         layer.visible = False
 
     def clear_layers(self):
+        """Remove all added layers from map."""
         self.layers = ()
 
     def center_map(self):
+        """Reset the zooms and locations of all added layers."""
         center = []
         try:
-            center.append(self._des_crs[1]-128*self._des_crs[3])
             center.append(self._des_crs[0]+128*self._des_crs[2])
+            center.append(self._des_crs[1]-128*self._des_crs[3])
             self.fly_to(center, 1)
         except:
             print('No base tiles added!')
 
-    def fly_to(self, latlng, zoom):
+    def fly_to(self, lnglat, zoom):
+        """Set view of the map.
+
+        Args:
+            lnglat: A list containing the RA and DEC for target locations.
+            zoom: An integer representing the target zoom level.
+
+        """
+        latlng = [lnglat[1],lnglat[0]]
         latlng.append(zoom)
         self.pan_loc = latlng
         self.pan_loc = []
