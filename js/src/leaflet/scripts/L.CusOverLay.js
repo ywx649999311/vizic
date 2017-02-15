@@ -29,7 +29,7 @@ L.CusOverLay = L.Layer.extend({
         this.fadeAnimation = this._map.options.fadeAnimation;
         this._map.options.inertia = false;
         this._map.options.fadeAnimation = false;
-        this._el = L.DomUtil.create('div', 'leaflet-zoom-hide');
+        this._el = L.DomUtil.create('div', 'leaflet-zoom-hide vizic-overlay');
         this.getPane().appendChild(this._el);
         console.log('onAdd');
     },

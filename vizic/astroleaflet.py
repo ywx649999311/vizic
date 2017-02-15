@@ -1,19 +1,29 @@
-from .leaflet import *
+from traitlets import *
 from ipywidgets import *
-from traitlets import Unicode, dlink, link, Dict, Undefined
+from .leaflet import Map, RasterLayer, Layer
 import pymongo as pmg
 import pandas as pd
 import numpy as np
-from pandas import DataFrame, Series
 import uuid
-from notebook.utils import url_path_join
-import requests
 import json
-from .healpix import get_vert_bbox
-from .mst import *
+import requests
+from notebook.utils import url_path_join
+from .utils import cut_tree, get_mst, get_m_index, get_vert_bbox
 
 
 class AstroMap(Map):
+    """Map class for hosting tile layer and overlays.
+
+    AstroMap extends the Map class from ipyleaflet with added rich features to display and interact with visualized astronomical catalogs.
+
+    Note:
+        Class attribute ``center`` is always in the form of ``[lat, lng]``.
+
+    Attributes:
+        **kwargs: Arbitrary keyword arguments. These arguments are
+            optional and are mainly used to cutomize the Leaflet map settings at the frond-end.
+
+    """
 
     @default('layout')
     def _default_layout(self):
@@ -27,13 +37,14 @@ class AstroMap(Map):
     position_control = Bool(True).tag(sync=True, o=True)
     fullscreen_control = Bool(True).tag(sync=True, o=True)
     fade_animation = Bool(True).tag(sync=True, o=True)
-    _des_crs = List().tag(sync=True)
-    pan_loc = List().tag(sync=True)
-    selection = Bool(False).tag(sync=True)
+    _des_crs = List(help='Coordinate system specification').tag(sync=True)
+    pan_loc = List(help='Target coordinate for panning').tag(sync=True)
+    selection = Bool(False, help='Lasso-like selection status(on/off)').tag(sync=True)
     s_bounds = List(help='LatLngBounds for selection tool').tag(sync=True)
     # pan_ready = Bool(False).tag(sync=True)
 
     def __init__(self, **kwargs):
+        """Init an AstroMap object."""
         super().__init__(**kwargs)
         if self.default_tiles is not None:
             self.default_tiles._map = self
@@ -44,6 +55,11 @@ class AstroMap(Map):
             self.default_tiles.visible = True
 
     def add_layer(self, layer):
+        """Add layer to map.
+
+        Args:
+            layer: layer object to be added to the map.
+        """
         if layer.model_id in self.layer_ids:
             raise LayerException('layer already on map: %r' % layer)
         layer._map = self
@@ -55,6 +71,11 @@ class AstroMap(Map):
         layer.visible = True
 
     def remove_layer(self, layer):
+        """Remove layer from map.
+
+        Args:
+            layer: layer object to be removed from the map.
+        """
         if layer.model_id not in self.layer_ids:
             raise LayerException('layer not on map: %r' % layer)
         # if isinstance(layer, GridLayer):
@@ -63,18 +84,28 @@ class AstroMap(Map):
         layer.visible = False
 
     def clear_layers(self):
+        """Remove all added layers from map."""
         self.layers = ()
 
     def center_map(self):
+        """Reset the zooms and locations of all added layers."""
         center = []
         try:
-            center.append(self._des_crs[1]-128*self._des_crs[3])
             center.append(self._des_crs[0]+128*self._des_crs[2])
+            center.append(self._des_crs[1]-128*self._des_crs[3])
             self.fly_to(center, 1)
         except:
             print('No base tiles added!')
 
-    def fly_to(self, latlng, zoom):
+    def fly_to(self, lnglat, zoom):
+        """Set view of the map.
+
+        Args:
+            lnglat: A list containing the RA and DEC for target locations.
+            zoom: An integer representing the target zoom level.
+
+        """
+        latlng = [lnglat[1],lnglat[0]]
         latlng.append(zoom)
         self.pan_loc = latlng
         self.pan_loc = []
@@ -86,7 +117,7 @@ class GridLayer(RasterLayer):
 
     bottom = Bool(False).tag(sync=True)
     _des_crs = List().tag(Sync=True)
-    df = Instance(DataFrame, allow_none=True)
+    df = Instance(pd.DataFrame, allow_none=True)
     min_zoom = Int(0).tag(sync=True, o=True)
     max_zoom = Int(8).tag(sync=True, o=True)
     # tile_size = Int(256).tag(sync=True, o=True)
@@ -110,7 +141,7 @@ class GridLayer(RasterLayer):
     filter_property = Unicode(help="The proerty field used to sort objects").tag(sync=True)
     filter_range = List().tag(sync=True)
     center = List().tag(sync=True)
-    obj_catalog = Instance(Series, allow_none=True)
+    obj_catalog = Instance(pd.Series, allow_none=True)
     __minMax = {}
     _popup_callbacks = Instance(CallbackDispatcher, ())
 
@@ -278,7 +309,7 @@ class GridLayer(RasterLayer):
         popup_url = url_path_join(self._server_url, '/objectPop/')
         result = requests.get(popup_url, data=body)
         pop_dict = json.loads(result.text[1:-1])
-        self.obj_catalog = Series(pop_dict)
+        self.obj_catalog = pd.Series(pop_dict)
 
     def get_fields(self):
         return self.__minMax.keys()
@@ -303,7 +334,7 @@ class GridLayer(RasterLayer):
             }
             res = requests.get(selection_url, data=body)
             selection_dict = json.loads(res.text)
-            self.select_data = DataFrame(selection_dict)
+            self.select_data = pd.DataFrame(selection_dict)
         else:
             print('bounds for selection is empty')
 
@@ -383,7 +414,7 @@ class CirclesOverLay(Layer):
     visible = Bool(False).tag(sync=True)
     color = Unicode('purple').tag(sync=True, o=True)
     svg_zoom = Int(5).tag(sync=True, o=True)
-    df = Instance(DataFrame, allow_none=True)
+    df = Instance(pd.DataFrame, allow_none=True)
     radius = Int(50).tag(sync=True, o=True)
     cols = List(['RA', 'DEC'])
 

@@ -33,3 +33,6 @@ button.getData-button{
 .widget-dropdown ul.dropdown-menu{
 	width: calc(100% - 25px);
 }
+div.vizic-overlay {
+	pointer-events: none;
+}

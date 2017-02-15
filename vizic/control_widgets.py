@@ -1,5 +1,4 @@
 from .astroleaflet import *
-from ipywidgets import *
 
 
 class NotebookUrl(Widget):
@@ -32,7 +31,7 @@ class PopupDis(Widget):
     _view_module = Unicode('jupyter-vizic').tag(sync=True)
     _object_info = Dict().tag(sync=True)
     layer = Instance(GridLayer)
-    data = Instance(Series, allow_none=True)
+    data = Instance(pd.Series, allow_none=True)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
