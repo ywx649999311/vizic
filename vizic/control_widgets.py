@@ -2,12 +2,22 @@ from .astroleaflet import *
 
 
 class NotebookUrl(Widget):
+    """Widget for getting Jupyter server url.
+
+    The actural url of the Jupyter server is assigned to class variable nb_url after the widget being displayed.
+    """
     _view_name = Unicode('NotebookUrlView').tag(sync=True)
     _view_module = Unicode('jupyter-vizic').tag(sync=True)
     nb_url = Unicode().tag(sync=True)
 
 
 class LayerColorPicker(ColorPicker):
+    """Layer color picker widget.
+
+    Attributes:
+        layer: The layer of which the color is being controlled by the picker.
+
+    """
     layer = Instance(Layer)
 
     def __init__(self, **kwargs):

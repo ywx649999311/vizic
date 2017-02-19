@@ -20,9 +20,12 @@ class AstroMap(Map):
         Class attribute ``center`` is always in the form of ``[lat, lng]``.
 
     Attributes:
-        **kwargs: Arbitrary keyword arguments. These arguments are optional
-            and are mainly used to cutomize the Leaflet map settings at the frond-end.
-
+        zoom(int): Initial zoom for the map. Defaults to 1.
+        max_zoom(int): Allowd maximum zoom level for the map. Defaults to 12.
+        position_control(bool): Whether to show projected mouse position
+            on the left bottom corner of the map window. Defaults to True.
+        fullscreen_control(bool): Whether to allow full screen mode. Defaults
+            to True.
     """
 
     @default('layout')
@@ -115,8 +118,16 @@ class GridLayer(RasterLayer):
     """Base tilelayer object for catalogs.
 
     Attributes:
-        **kwargs: Optional keyword arguments for cutomizing Leaflet tileLayer
-            settings at the frond-end.
+        df: A pandas dataframe where the data to be visualized is stored.
+        min_zoom(int): Minimum zoom level for the tileLayer. Defaults to 0.
+        max_zoom(int): Maximum zoom level for the tileLayer. Defaults to 8.
+        collection(str): The name for the MongoDB documents collection
+            that stores pre-ingested data.
+        color(str): Preset color for visualized objects. Defaults to red.
+        df_rad(int): The raidus of the circles representing objects in the
+            catalogs when size information is provided. Defaults to 2.
+        scale_r(float): A float number indicating the scaling ratio for
+            visualized objects. Defaults to 1.0.
 
     """
     _view_name = Unicode('LeafletGridLayerView').tag(sync=True)
@@ -404,8 +415,9 @@ class VoronoiLayer(Layer):
     Using the catalog data displayed by the GridLayer to compute and display Voronoi Diagram.
 
     Attributes:
-        **kwargs: Optional keyword arguments to cutomized dislayed Voronoi
-            diagram.
+        color(str): Color for the overlayed diagram. Defaults to #88b21c.
+        svg_zoom(int): Initial zoom for projecting the Voronoi diagram onto the
+        screen. The higher the zoom the better the resolution and accuracy. Defaults to 5.
 
     """
     _view_name = Unicode('LeafletVoronoiLayerView').tag(sync=True)
@@ -439,8 +451,9 @@ class DelaunayLayer(Layer):
     Using the catalog data displayed by the GridLayer to compute and display Delaunay Triangulation.
 
     Attributes:
-        **kwargs: Optional keyword arguments to cutomized dislayed Delaunay
-            Triangulation.
+        color(str): Color for the overlayed Triangulation. Defaults to blue.
+        svg_zoom(int): Initial zoom for projecting the Delaunay triangulation
+            onto the screen. The higher the zoom the better the resolution and accuracy. Defaults to 5.
     """
     _view_name = Unicode('LeafletDelaunayLayerView').tag(sync=True)
     _model_name = Unicode('LeafletDelaunayLayerModel').tag(sync=True)
@@ -474,8 +487,9 @@ class HealpixLayer(Layer):
     Using the catalog data displayed by the GridLayer to compute and display Healpix pixelization grid.
 
     Attributes:
-        **kwargs: Optional keyword arguments to cutomized dislayed Healpix
-            pixelization.
+        color(str): Color for the overlayed Healpix grid. Defaults to white.
+        svg_zoom(int): Initial zoom for projecting Healpix grid onto the
+            screen. The higher the zoom the better the resolution and accuracy. Defaults to 5.
     """
     _view_name = Unicode('LeafletHealpixLayerView').tag(sync=True)
     _model_name = Unicode('LeafletHealpixLayerModel').tag(sync=True)
@@ -524,8 +538,15 @@ class CirclesOverLay(Layer):
     Overlay a group of circles using provided pandas datafram or a document ID for stored data.
 
     Attributes:
-        **kwargs: Optional keyword arguments to cutomized dislayed circles
-            overlay.
+        color(str): Color for the overlayed circles. Defaults to purple.
+        svg_zoom(int): Initial zoom for projecting circles onto the screen.
+            The higher the zoom the better the resolution and accuracy. Defaults to 5.
+        df: A pandas dataframe containing the positions for the circles to be
+            drawn. Raidus for these circles could also be specified here.
+        raidus(int): The raidus of the circles drawn measured in pixels.
+            Defaults to 50 pixels.
+        cols: A list indicating the position columns name. Defauts to
+            [``RA``, ``DEC``]. A third entry can be provided to indicate the radius column.
     """
     _view_name = Unicode('LeafletCirclesLayerView').tag(sync=True)
     _model_name = Unicode('LeafletCirclesLayerModel').tag(sync=True)
@@ -577,8 +598,9 @@ class MstLayer(Layer):
     Layer object for the computed MST using the displayed catalog in the base tileLayer with added features to cut the tree by maximum edge length and minimum branch size (the number edges in a branch).
 
     Attributes:
-        **kwargs: Optional keyword arguments to cutomized dislayed circles
-            overlay.
+        color(str): Color for the overlayed MST. Defaults to #0459e2.
+        svg_zoom(int): Initial zoom for projecting MST onto the screen. The
+        higher the zoom the better the resolution and accuracy. Defaults to 5.
     """
     _view_name = Unicode('LeafletMstLayerView').tag(sync=True)
     _model_name = Unicode('LeafletMstLayerModel').tag(sync=True)
