@@ -28,15 +28,24 @@ class LayerColorPicker(ColorPicker):
             self.width = '30px'
 
     def unlink(self):
+        """Unlink colorpicker and layer."""
         self.dlink.unlink()
 
     def link(self, layer):
+        """Link the colorpicker to the layer.
+
+        Used directional link from value attribute to the color attribute of the target layer object.
+        """
         self.layer = layer
         self.dlink = dlink((self, 'value'), (self.layer, 'color'))
 
 
 class PopupDis(Widget):
-    """Popup display Widget"""
+    """Popup display Widget
+
+    Attributes:
+        layer: The base tilelayer object that the widget is monitoring.
+    """
     _view_name = Unicode('PopupDisView').tag(sync=True)
     _view_module = Unicode('jupyter-vizic').tag(sync=True)
     _object_info = Dict().tag(sync=True)
@@ -44,12 +53,17 @@ class PopupDis(Widget):
     data = Instance(pd.Series, allow_none=True)
 
     def __init__(self, **kwargs):
+        """Initiate the widget object create a direction link
+
+        The link is from the obj_catalog attribute of the layer object to the data attribute in this widget.
+        """
         super().__init__(**kwargs)
         # self.layout.width = '100%'
         self.dlink = dlink((self.layer, 'obj_catalog'), (self, 'data'))
 
     @observe('data')
     def _update_data(self,change):
+        """Observe changes in ``data`` and update at front-end."""
         old = change['old']
         new = change['new']
 
@@ -61,26 +75,37 @@ class PopupDis(Widget):
 
 
 class HomeButton(Button):
-    '''Home button Widget'''
+    """Home button Widget
+
+    Reset the map to initial zoom level and center position
+    """
     _view_name = Unicode('HomeButtonView').tag(sync=True)
     _view_module = Unicode('jupyter-vizic').tag(sync=True)
     _map = Instance(AstroMap, allow_none=True)
 
     def __init__(self, map, **kwargs):
+        """Initiate the widget and assign click handle"""
         super().__init__(**kwargs)
         self._map = map
         self.layout = Layout(height='30px', width='30px')
         self.on_click(self.handle_click)
 
     def handle_click(self, b):
+        """Reset and center map"""
         if self._map is not None:
             self._map.center_map()
 
 
 class CFDropdown(Dropdown):
+    """Dropdown menu for selecting colormapping field."""
     _active = Bool(False)
 
     def __init__(self, layer, **kwargs):
+        """Initiate the widget and link it to provided tileLayer.
+
+        Args:
+            layer: The tileLayer that the menu is associated with.
+        """
         super().__init__(**kwargs)
         self._layer = layer
         self.description = 'Property: '
@@ -89,16 +114,19 @@ class CFDropdown(Dropdown):
         dlink((self._layer,'custom_c'), (self, '_active'))
 
     def link(self):
+        """Link ``value`` to ``c_field`` in tileLayer"""
         # either dlink or use @validate on python side instead
         self.link = dlink((self, 'value'), (self._layer, 'c_field'))
 
     def unlink(self):
+        """Unlink for provided tileLayer"""
         self.link.unlink()
         self._layer.c_field = ''
         del self.link
 
     @observe('_active')
     def update_active(self, change):
+        """Update the active status of the menu."""
         if change['new'] is False:
             self.unlink()
         elif change['new'] is True:
@@ -106,6 +134,7 @@ class CFDropdown(Dropdown):
 
 
 class ColorMap(Dropdown):
+    """Dropdown menu for selecting colormapping color space."""
     _layer = Instance(GridLayer)
     colorSpaces = {
         'Spectral':1,
@@ -136,6 +165,11 @@ class ColorMap(Dropdown):
     }
 
     def __init__(self, gridlayer, **kwargs):
+        """Initiate the widget and link it to provided tileLayer.
+
+        Args:
+            gridlayer: The base tileLayer the widget is associate with.
+        """
         super().__init__(**kwargs)
         self._layer = gridlayer
         self.description = 'ColorMap: '
@@ -146,6 +180,13 @@ class ColorMap(Dropdown):
 
 
 class FilterSlider(FloatRangeSlider):
+    """RangeSlider widget for filering displayed objects.
+
+    Ranges for selected field are automatically reflected on the slider. Move the bars to filter out unwanted objects.
+
+    Attributes:
+        readout_format(str): The format of the float numbers on the slider.
+    """"
     readout_format = Unicode('.3f').tag(sync=True)
 
     def __init__(self, layer, field, **kwargs):
@@ -166,16 +207,22 @@ class FilterSlider(FloatRangeSlider):
         self.value = [self.min, self.max]
 
     def link(self):
+        """Link slider values with the ``filter_range`` from tileLayer."""
         self._layer.filter_property = self.property
         self.link = dlink((self, 'value'), (self._layer, 'filter_range'))
 
     def unlink(self):
+        """Unlink from the provided tileLayer."""
         self.link.unlink()
         del self.link
         self._layer.filter_property = ''
 
 
 class FilterWidget(Box):
+    """A Dropdown menu and a rangeSlider wrapped in a box layout.
+
+    Select the field for filtering objects and perform the filter action in one widget. The map will reset when a new field is chosen.
+    """
     filter_field = Unicode()
     _active = Bool(False)
 
@@ -184,6 +231,10 @@ class FilterWidget(Box):
         return Layout(display='flex', flex_flow='column',align_items='stretch', width='100%')
 
     def __init__(self, layer, *pargs, **kwargs):
+        """Initiate the box layout and creat links.
+
+        Two links are created: 1) link the dropDown menu with the ``filter_field`` attribute from the tileLayer. 2) link the ``filter_obj`` attribute from the tileLayer to the ``_active`` status attribute in this widget.
+        """"
         super().__init__(*pargs, **kwargs)
         self._layer = layer
         self.dropDown = Dropdown(options=list(self._layer.get_fields()), width='100%')
@@ -193,25 +244,29 @@ class FilterWidget(Box):
         dlink((self._layer,'filter_obj'), (self, '_active'))
 
     def link(self):
+        """Link the slider with the provided tileLayer."""
         self.slider.link()
 
     def unlink(self):
+        """Unlink slider from the tileLayer."""
         self.slider.unlink()
 
     @observe('filter_field')
     def update_field(self, change):
+        """Observe changes in the dropDown menu make updates"""
         if change['new'] != '':
             self._layer.filter_property = change['new']
             self.slider._change_field(change['new'])
 
     @observe('_active')
     def update_active(self, change):
+        """Unlink this widget from layer if ``_active`` changes to False."""
         if change['new'] is False:
             self.unlink()
 
 
 class FilterBox(Box):
-
+    """A box layout wrapping a FilterSlider object."""
     @default('layout')
     def _default_layout(self):
         return Layout(display='flex', align_items='stretch', justify_content='space_between')
@@ -231,36 +286,54 @@ class FilterBox(Box):
 
 
 class SelectionTrig(ToggleButton):
+    """A control widget to trigger lasso selection"""
     _view_name = Unicode('SelectionButtonView').tag(sync=True)
     _view_module = Unicode('jupyter-vizic').tag(sync=True)
     _map = Instance(AstroMap, allow_none=True)
 
     def __init__(self, map, **kwargs):
+        """Instructor method.
+
+        Args:
+            map: An AstroMap map object that the trigger widget associated
+                with.
+        """
         super().__init__(**kwargs)
         self._map = map
         self.layout = Layout(height='30px', width='30px')
 
     def link(self):
+        """Link the trigger to target AstroMap object"""
         self.link = link((self, 'value'), (self._map, 'selection'))
 
     def unlink(self):
+        """Unlink from the provided AstroMap"""
         self.link.unlink()
         del self.link
 
 
 class GetDataButton(Button):
-    '''Home button Widget'''
+    """Getting selected data button.
+
+    Clicking this button to query the database for data selected using the lasso-like selection tool.
+    """
     _view_name = Unicode('GetDataButtonView').tag(sync=True)
     _view_module = Unicode('jupyter-vizic').tag(sync=True)
     _layer = Instance(GridLayer)
 
     def __init__(self, layer, **kwargs):
+        """Initiate button and assign action for ``click``.
+
+        Args:
+            layer: The tileLayer that the button is asccoiate with.
+        """
         super().__init__(**kwargs)
         self._layer = layer
         self.layout = Layout(height='30px', width='30px')
         self.on_click(self.handle_click)
 
     def handle_click(self, b):
+
         if self._layer._map is not None and self._layer._map.selection:
             self.disabled = True
             self._layer._query_selection()
