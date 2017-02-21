@@ -11,6 +11,20 @@ from scipy.sparse import csr_matrix
 
 
 def get_mst(df, neighbors):
+    """Compute the Minimum Spanning Tree (MST) from postions.
+
+    This function takes a pandas dataframe of poistions and compute the distances to k-neighbors for all poistions given, then find the MST using ``scipy.sparse.csgraph``. Finally finds the non-zero elements in a returned sparse matrix.
+
+    Args:
+        df: A pandas dataframe all positions with longitude as ``RA``
+            and latitute as ``DEC``.
+        neighbors(int): The number of neighbors used when computing tress.
+
+    Returns:
+        final: The final pandas dataframe for all edges in the MST.
+        index: A tuple of arrays storing the indexes and values of non-zero
+            elements in the MST sparse matrix.
+    """
     df = df[['RA', 'DEC']]
     numA = df.as_matrix(columns=['RA','DEC'])
     G = kng(numA,n_neighbors=neighbors,mode='distance')
@@ -30,12 +44,29 @@ def get_mst(df, neighbors):
 
 
 def get_m_index(df):
+    """Find the index from a given dataframe of MST edges."""
     node_num = df.shape[0]+1
     index_mtx = csr_matrix((df['edges'].values,(df['index1'].values, df['index2'].values)), shape=(node_num, node_num))
     return find(index_mtx)
 
 
 def cut_tree(mst_index, length, member):
+    """Find the index for saved edges after a cut.
+
+    Note:
+        At the frond-end all edges in a MST are stored in a JavaScript array and this function only returns the indexes for wanted edges.
+
+    Args:
+        mst_index: A tuple of arrays indicating the indexes and values for the
+            MST sparse matrix.
+        length(float): The maximum length for edges in a trimmed tree. All edges
+            above are cutted off.
+        member(int): Minimum number of edges required in a saved branch. All
+            branches having less members are removed in the final tree.
+
+    Returns:
+        saved_index: A list of integers representing the index for saved edges.
+    """
     index = mst_index
     node_num = index[0].shape[0]+1
     lines = pd.DataFrame({'row':index[0], 'col':index[1], 'val':index[2]})
@@ -63,6 +94,7 @@ def cut_tree(mst_index, length, member):
     return saved_index
 
 
+# Functions for Healpix
 def get_vert(pixel, nside, nest):
     vertices = np.array(hp.vec2ang(np.transpose(hp.boundaries(nside,pixel,nest=nest))))
     vertices = vertices*180./np.pi

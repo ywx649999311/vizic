@@ -1,4 +1,3 @@
-# database util library for des data
 import motor
 from tornado import gen
 import concurrent.futures as cfs
@@ -9,7 +8,7 @@ from bson.json_util import dumps
 
 
 class MongoConnect(object):
-
+    """An MongoDB utility wrapper."""
     range_dict = {}
     zoom_dict = {}
 

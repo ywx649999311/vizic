@@ -10,7 +10,7 @@ connection = None
 
 
 class tileHandler(IPythonHandler):
-
+    """Handling requests for tiled catalogs."""
     @gen.coroutine
     def get(self, coll, zoom, xc, yc):
         global connection
@@ -30,9 +30,7 @@ class dbHandler(IPythonHandler):
 
     @tornado.web.asynchronous
     def post(self):
-        '''REST API to change mongodb connection.
-
-        '''
+        """REST API to change mongodb connection."""
         arguments = {k.lower(): self.get_argument(k) for k in self.request.arguments}
         host = arguments['host']
         port = int(arguments['port'])
@@ -58,9 +56,7 @@ class dbHandler(IPythonHandler):
 class rangeHandler(IPythonHandler):
 
     def post(self):
-        '''API to push range data to adictionary
-
-        '''
+        """API for pushing range data to a dictionary"""
         arguments = {k.lower(): self.get_argument(k) for k in self.request.arguments}
         collection = arguments['collection']
         mRange = arguments['mrange']
@@ -70,11 +66,9 @@ class rangeHandler(IPythonHandler):
 
 
 class popupHandler(IPythonHandler):
-    '''API to query catalog data for individual object
-
-    '''
 
     def get(self):
+        """API for individual object query request"""
         arguments = {k.lower(): self.get_argument(k) for k in self.request.arguments}
         coll = arguments['coll']
         ra = arguments['ra']
@@ -86,11 +80,9 @@ class popupHandler(IPythonHandler):
 
 
 class selectionHandler(IPythonHandler):
-    '''API to query catalog data for a selection
-
-    '''
 
     def get(self):
+        """API for querying selected catalog data"""
         arguments = {k.lower(): self.get_argument(k) for k in self.request.arguments}
         coll = arguments['coll']
         swLng = arguments['swlng']
@@ -105,8 +97,7 @@ class selectionHandler(IPythonHandler):
 
 
 class mstHandler(IPythonHandler):
-    '''Listening to request for mst data
-    '''
+    """Listening to request for mst data"""
     @gen.coroutine
     def get(self, coll):
         global connection
@@ -126,8 +117,7 @@ class mstHandler(IPythonHandler):
 
 
 class voronoiHandler(IPythonHandler):
-    '''Listening to request for voronoi data
-    '''
+    """Listening to request for voronoi data"""
     @gen.coroutine
     def get(self, coll):
         global connection
@@ -147,8 +137,7 @@ class voronoiHandler(IPythonHandler):
 
 
 class healpixHandler(IPythonHandler):
-    '''Listening to request for healpix data
-    '''
+    """Listening to request for healpix data"""
     @gen.coroutine
     def get(self, coll):
         global connection
@@ -168,8 +157,7 @@ class healpixHandler(IPythonHandler):
 
 
 class circlesHandler(IPythonHandler):
-    '''Listening to request for circles data
-    '''
+    """Listening to request for circles data"""
     @gen.coroutine
     def get(self, coll):
         global connection
