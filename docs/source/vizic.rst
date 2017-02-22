@@ -1,23 +1,7 @@
-vizic package
-=============
+*********
+Vizic API
+*********
 
-Subpackages
------------
-
-.. toctree::
-
-    vizic.mongo_ext
-
-Submodules
-----------
-
-vizic.astroleaflet module
--------------------------
-
-.. automodule:: vizic.astroleaflet
-    :members:
-    :undoc-members:
-    :show-inheritance:
 
 vizic.connection module
 -----------------------
@@ -25,7 +9,13 @@ vizic.connection module
 .. automodule:: vizic.connection
     :members:
     :undoc-members:
-    :show-inheritance:
+    
+vizic.astroleaflet module
+-------------------------
+
+.. automodule:: vizic.astroleaflet
+    :members:
+    :undoc-members:
 
 vizic.control_widgets module
 ----------------------------
@@ -33,7 +23,7 @@ vizic.control_widgets module
 .. automodule:: vizic.control_widgets
     :members:
     :undoc-members:
-    :show-inheritance:
+
 
 vizic.utils module
 ------------------
@@ -41,4 +31,3 @@ vizic.utils module
 .. automodule:: vizic.utils
     :members:
     :undoc-members:
-    :show-inheritance:

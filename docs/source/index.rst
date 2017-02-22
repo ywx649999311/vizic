@@ -9,9 +9,13 @@ Welcome to Vizic's documentation!
 Contents:
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 3
 
+   overview
+   install
+   getting_started
    vizic
+   extensions
 
 
 
