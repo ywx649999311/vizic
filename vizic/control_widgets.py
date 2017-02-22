@@ -186,7 +186,7 @@ class FilterSlider(FloatRangeSlider):
 
     Attributes:
         readout_format(str): The format of the float numbers on the slider.
-    """"
+    """
     readout_format = Unicode('.3f').tag(sync=True)
 
     def __init__(self, layer, field, **kwargs):
@@ -234,7 +234,7 @@ class FilterWidget(Box):
         """Initiate the box layout and creat links.
 
         Two links are created: 1) link the dropDown menu with the ``filter_field`` attribute from the tileLayer. 2) link the ``filter_obj`` attribute from the tileLayer to the ``_active`` status attribute in this widget.
-        """"
+        """
         super().__init__(*pargs, **kwargs)
         self._layer = layer
         self.dropDown = Dropdown(options=list(self._layer.get_fields()), width='100%')

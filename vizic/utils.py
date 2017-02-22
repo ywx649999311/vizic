@@ -16,8 +16,8 @@ def get_mst(df, neighbors):
     This function takes a pandas dataframe of poistions and compute the distances to k-neighbors for all poistions given, then find the MST using ``scipy.sparse.csgraph``. Finally finds the non-zero elements in a returned sparse matrix.
 
     Args:
-        df: A pandas dataframe all positions with longitude as ``RA``
-            and latitute as ``DEC``.
+        df: A pandas dataframe all positions with longitude as ``RA`` and
+            latitute as ``DEC``.
         neighbors(int): The number of neighbors used when computing tress.
 
     Returns:
