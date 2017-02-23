@@ -2,9 +2,9 @@ from .astroleaflet import *
 
 
 class NotebookUrl(Widget):
-    """Widget for getting Jupyter server url.
+    """Widget to get Jupyter server url.
 
-    The actural url of the Jupyter server is assigned to class variable nb_url after the widget being displayed.
+    The actural url of the Jupyter server is assigned to class variable ``nb_url`` after the widget being rendered.
     """
     _view_name = Unicode('NotebookUrlView').tag(sync=True)
     _view_module = Unicode('jupyter-vizic').tag(sync=True)
@@ -12,7 +12,7 @@ class NotebookUrl(Widget):
 
 
 class LayerColorPicker(ColorPicker):
-    """Layer color picker widget.
+    """Layer colorpicker widget.
 
     Attributes:
         layer: The layer of which the color is being controlled by the picker.
@@ -44,7 +44,7 @@ class PopupDis(Widget):
     """Popup display Widget
 
     Attributes:
-        layer: The base tilelayer object that the widget is monitoring.
+        layer: The base tilelayer that the widget is monitoring.
     """
     _view_name = Unicode('PopupDisView').tag(sync=True)
     _view_module = Unicode('jupyter-vizic').tag(sync=True)
@@ -77,21 +77,25 @@ class PopupDis(Widget):
 class HomeButton(Button):
     """Home button Widget
 
-    Reset the map to initial zoom level and center position
+    Reset the map to initial zoom level and center.
     """
     _view_name = Unicode('HomeButtonView').tag(sync=True)
     _view_module = Unicode('jupyter-vizic').tag(sync=True)
     _map = Instance(AstroMap, allow_none=True)
 
     def __init__(self, map, **kwargs):
-        """Initiate the widget and assign click handle"""
+        """
+        Args:
+            map: An AstroMap object, which the widget is intended to control.
+            **kwargs: Arbitrary keyward arguments for ``Button``.
+        """
         super().__init__(**kwargs)
         self._map = map
         self.layout = Layout(height='30px', width='30px')
         self.on_click(self.handle_click)
 
     def handle_click(self, b):
-        """Reset and center map"""
+        """Reset the map"""
         if self._map is not None:
             self._map.center_map()
 
@@ -101,10 +105,11 @@ class CFDropdown(Dropdown):
     _active = Bool(False)
 
     def __init__(self, layer, **kwargs):
-        """Initiate the widget and link it to provided tileLayer.
+        """Extends ``Dropdown`` class from ``ipywidgets``.
 
         Args:
             layer: The tileLayer that the menu is associated with.
+            **kwargs: Arbitrary keyward arguments for ``Dropdown``.
         """
         super().__init__(**kwargs)
         self._layer = layer
@@ -114,7 +119,7 @@ class CFDropdown(Dropdown):
         dlink((self._layer,'custom_c'), (self, '_active'))
 
     def link(self):
-        """Link ``value`` to ``c_field`` in tileLayer"""
+        """Link the value of the dropdown to ``c_field`` in tileLayer"""
         # either dlink or use @validate on python side instead
         self.link = dlink((self, 'value'), (self._layer, 'c_field'))
 
@@ -165,10 +170,11 @@ class ColorMap(Dropdown):
     }
 
     def __init__(self, gridlayer, **kwargs):
-        """Initiate the widget and link it to provided tileLayer.
+        """Extends ``Dropdown`` class from ``ipywidgets``.
 
         Args:
             gridlayer: The base tileLayer the widget is associate with.
+            **kwargs: Arbitrary keyward arguments for ``Dropdown``.
         """
         super().__init__(**kwargs)
         self._layer = gridlayer
@@ -182,14 +188,23 @@ class ColorMap(Dropdown):
 class FilterSlider(FloatRangeSlider):
     """RangeSlider widget for filering displayed objects.
 
-    Ranges for selected field are automatically reflected on the slider. Move the bars to filter out unwanted objects.
+    Ranges for selected field are automatically displayed on the slider. Move the bars to filter out unwanted objects.
 
     Attributes:
-        readout_format(str): The format of the float numbers on the slider.
+        readout_format(str): The format of the float numbers, which show the
+            value range of a particular property, on the slider.
     """
     readout_format = Unicode('.3f').tag(sync=True)
 
     def __init__(self, layer, field, **kwargs):
+        """Extends ``FloatRangeSlider`` from ``ipywidgets``.
+
+        Args:
+            layer: A gridLayer instance.
+            field(str): The property field of the catalog that the slider will
+                use for filtering.
+            **kwargs: Arbitrary keyword arguments for ``FloatRangeSlider``.
+        """
         super().__init__(**kwargs)
         self._layer = layer
         self.property = field.upper()
@@ -231,9 +246,13 @@ class FilterWidget(Box):
         return Layout(display='flex', flex_flow='column',align_items='stretch', width='100%')
 
     def __init__(self, layer, *pargs, **kwargs):
-        """Initiate the box layout and creat links.
+        """Extends ``Box`` from ``ipywidgets``.
 
         Two links are created: 1) link the dropDown menu with the ``filter_field`` attribute from the tileLayer. 2) link the ``filter_obj`` attribute from the tileLayer to the ``_active`` status attribute in this widget.
+        Args:
+            layer: A gridLayer instance.
+            *args: Variable length argument list for ``Box``.
+            **kwargs: Arbitrary keyword arguments for ``Box``.
         """
         super().__init__(*pargs, **kwargs)
         self._layer = layer
@@ -253,7 +272,7 @@ class FilterWidget(Box):
 
     @observe('filter_field')
     def update_field(self, change):
-        """Observe changes in the dropDown menu make updates"""
+        """Observe changes in the dropDown menu and updates"""
         if change['new'] != '':
             self._layer.filter_property = change['new']
             self.slider._change_field(change['new'])
@@ -272,6 +291,15 @@ class FilterBox(Box):
         return Layout(display='flex', align_items='stretch', justify_content='space_between')
 
     def __init__(self, layer, field, *pargs, **kwargs):
+        """Extends ``Box`` from ``ipywidgets``.
+
+        Args:
+            layer: A gridLayer instance.
+            field(str): The property field of the catalog that the slider will
+                use for filtering.
+            *args: Variable length argument list for ``Box``.
+            **kwargs: Arbitrary keyword arguments for ``Box``.
+        """
         super().__init__(*pargs, **kwargs)
         self.label = Label(field.upper())
         self.label.padding = '7px 2px 2px 2px'
@@ -292,11 +320,12 @@ class SelectionTrig(ToggleButton):
     _map = Instance(AstroMap, allow_none=True)
 
     def __init__(self, map, **kwargs):
-        """Instructor method.
+        """Extends ``ToggleButton`` from ``ipywidgets``.
 
         Args:
-            map: An AstroMap map object that the trigger widget associated
+            map: An AstroMap map object that the trigger widget is associated
                 with.
+            **kwargs: Arbitray keyword arguments for ``ToggleButton``.
         """
         super().__init__(**kwargs)
         self._map = map
@@ -313,7 +342,7 @@ class SelectionTrig(ToggleButton):
 
 
 class GetDataButton(Button):
-    """Getting selected data button.
+    """Getting selected data.
 
     Clicking this button to query the database for data selected using the lasso-like selection tool.
     """
@@ -322,7 +351,7 @@ class GetDataButton(Button):
     _layer = Instance(GridLayer)
 
     def __init__(self, layer, **kwargs):
-        """Initiate button and assign action for ``click``.
+        """Extends ``Button`` from ``ipywidgets``.
 
         Args:
             layer: The tileLayer that the button is asccoiate with.

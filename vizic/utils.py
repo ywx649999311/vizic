@@ -21,9 +21,7 @@ def get_mst(df, neighbors):
         neighbors(int): The number of neighbors used when computing tress.
 
     Returns:
-        final: The final pandas dataframe for all edges in the MST.
-        index: A tuple of arrays storing the indexes and values of non-zero
-            elements in the MST sparse matrix.
+        A pandas dataframe for all edges in the MST and a tuple of arrays storing the indexes and values of non-zero elements in the MST sparse matrix.
     """
     df = df[['RA', 'DEC']]
     numA = df.as_matrix(columns=['RA','DEC'])
@@ -44,7 +42,14 @@ def get_mst(df, neighbors):
 
 
 def get_m_index(df):
-    """Find the index from a given dataframe of MST edges."""
+    """Find the index from a given dataframe of MST edges.
+
+    Args:
+        df: A pandas dataframe of MST edges.
+
+    Returns:
+        A tuple of arrays storing the indexes and values of non-zero elements in the MST sparse matrix.
+    """
     node_num = df.shape[0]+1
     index_mtx = csr_matrix((df['edges'].values,(df['index1'].values, df['index2'].values)), shape=(node_num, node_num))
     return find(index_mtx)
@@ -65,7 +70,7 @@ def cut_tree(mst_index, length, member):
             branches having less members are removed in the final tree.
 
     Returns:
-        saved_index: A list of integers representing the index for saved edges.
+        A list of integers representing the index for saved edges.
     """
     index = mst_index
     node_num = index[0].shape[0]+1

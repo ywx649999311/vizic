@@ -12,9 +12,9 @@ from .utils import cut_tree, get_mst, get_m_index, get_vert_bbox
 
 
 class AstroMap(Map):
-    """Map class for hosting tilelayer and overlays.
+    """The map class, in charge of the overall operations.
 
-    AstroMap extends the Map class from ipyleaflet with added rich features to display and interact with visualized astronomical catalogs.
+    AstroMap extends the ``Map`` class from ``ipyleaflet`` with added rich features to display and interact with visualized astronomical catalogs and custom overlays.
 
     Note:
         Class attribute ``center`` is always in the form of ``[lat, lng]``.
@@ -90,11 +90,11 @@ class AstroMap(Map):
         layer.visible = False
 
     def clear_layers(self):
-        """Remove all added layers from map."""
+        """Remove all existing layers from map."""
         self.layers = ()
 
     def center_map(self):
-        """Reset the zooms and locations of all added layers."""
+        """Reset the zoom and location of the map."""
         center = []
         try:
             center.append(self._des_crs[0]+128*self._des_crs[2])
@@ -104,7 +104,7 @@ class AstroMap(Map):
             print('No base tiles added!')
 
     def fly_to(self, lnglat, zoom):
-        """Set view of the map.
+        """Set view of the map to a specified zoom and location.
 
         Args:
             lnglat: A list containing the RA and DEC for target locations.
@@ -118,7 +118,7 @@ class AstroMap(Map):
 
 
 class GridLayer(RasterLayer):
-    """Base tilelayer object for catalogs.
+    """Base tilelayer class for hosting visualized catalogs.
 
     Keyword Args:
         df: A pandas dataframe where the data to be visualized is stored.
@@ -202,10 +202,10 @@ class GridLayer(RasterLayer):
     def __init__(self, connection, coll_name=None, **kwargs):
         """
         Args:
-            connection: An object encapsulating a MongoDB connection info.
-            coll_name: A string specifying the collection name for a new
-                catalog to be ingested into the database. Default is None.
-            **kwargs: Optional arguments for ``GridLayer`` settings.
+            connection: A wrapper for MongoDB connections.
+            coll_name(str): The collection name for a new catalog to be ingested
+                into the database. Default is None.
+            **kwargs: Arbitrary keyword arguments.
         """
         super().__init__(**kwargs)
         try:
@@ -225,7 +225,7 @@ class GridLayer(RasterLayer):
     def _checkInput(self):
         """Check data source.
 
-        If a string specifying the collection name for stored catalog is given in the instructor, the catalog metadata will be retrived from the database and assigned to the GridLayer object. If a pandas dataframe containing the catalog is provided in the instructor, the catalog will be formated and ingested into the database using provided ``coll_name`` or a randomly generated ``uuid``.
+        If a string specifying the collection name for stored catalog is given in the instructor, the catalog metadata will be retrived from the database and assigned to the GridLayer object. If a pandas dataframe containing the catalog is provided in the instructor, the catalog will be formated and ingested into the database using provided ``coll_name`` or a randomly generated string by ``uuid``.
         """
         if not self.collection == '':
             meta = self.db[self.collection].find_one({'_id': 'meta'})
@@ -339,12 +339,12 @@ class GridLayer(RasterLayer):
         coll.create_index([('tile_x', pmg.ASCENDING),('tile_y', pmg.ASCENDING)], name='tile_x_y')
 
     def push_data(self, url):
-        """Update the server extension.
+        """Update server extension with newly displayed catalog.
 
         Send basic information of this tileLayer using Rest API to the server for directing data request from the front-end.
 
         Args:
-            url: A string specifying the Jupyter server address.
+            url(str): The Jupyter server address.
         """
         # The center is required, don't remove
         self.center = [self._des_crs[1]-self.y_range/2, self._des_crs[0]+self.x_range/2]
@@ -371,18 +371,18 @@ class GridLayer(RasterLayer):
         self.obj_catalog = pd.Series(pop_dict)
 
     def get_fields(self):
-        """Return float fields in the catalog."""
+        """Return float properties in the catalog."""
         return self.__minMax.keys()
 
     def get_min_max(self, field):
-        """Return the min/max value in specified catalog field
+        """Return the min/max value in specified catalog property.
 
         Args:
-            field: The name of the specified field.
+            field: The name of the specified property.
 
         Raises:
-            Exception: If the provided field is not a float field or such
-                a field doesn't exist in the catalog.
+            Exception: If the provided property is not a float property or such
+                a property doesn't exist in the catalog.
         """
         field = field.upper()
         if field in list(self.get_fields()):
@@ -393,7 +393,7 @@ class GridLayer(RasterLayer):
     def _query_selection(self):
         """Query selected objects.
 
-        Query the databaes for enclosed objects by a selection bound at the frond-end using a lasso-like selection tool. The query result is parsed into a pandas dataframe and assigned to ``select_data`` attribute.
+        Query the databaes for enclosed objects by the selection bound at the frond-end. The query result is parsed into a pandas dataframe and assigned to ``select_data`` attribute.
         """
         selection_url = url_path_join(self._server_url, '/selection/')
         if self._map.s_bounds != []:
@@ -434,10 +434,11 @@ class VoronoiLayer(Layer):
         """
         Args:
             gridLayer: A gridLayer instance.
-            **kwargs: Optional arguments for ``VoronoiLayer`` settings.
+            **kwargs: Arbitrary keyword arguments.
 
         Raises:
-            Exception: If the gridLayer object doesn't have a connected database.
+            Exception: If the gridLayer object doesn't have a connected
+                database.
         """
         super().__init__(**kwargs)
         try:
@@ -469,7 +470,7 @@ class DelaunayLayer(Layer):
         """
         Args:
             gridLayer: A gridLayer instance.
-            **kwargs: Optional arguments for ``DelaunayLayer`` settings.
+            **kwargs: Arbitrary keyword arguments.
 
         Raises:
             Exception: If the gridLayer object doesn't have a
@@ -487,7 +488,7 @@ class DelaunayLayer(Layer):
 class HealpixLayer(Layer):
     """Healpix grid Layer.
 
-    Using the catalog data displayed by the GridLayer to compute and display Healpix pixelization grid.
+    Using the catalog data displayed by a given tileLayer to compute and display Healpix pixelization grid.
 
     Keyword Args:
         color(str): Color for the overlayed Healpix grid. Defaults to white.
@@ -507,7 +508,7 @@ class HealpixLayer(Layer):
         """
         Args:
             gridLayer: A gridLayer instance.
-            **kwargs: Optional arguments for ``HealpixLayer`` settings.
+            **kwargs: Arbitrary keyword arguments.
 
         Raises:
             Exception: If the gridLayer object doesn't have a
@@ -538,7 +539,7 @@ class HealpixLayer(Layer):
 class CirclesOverLay(Layer):
     """Circles overlay class.
 
-    Overlay a group of circles using provided pandas datafram or a document ID for stored data.
+    Overlay a group of circles using data provided in a pandas dataframe or a document ID for stored data in the database.
 
     Keyword Args:
         color(str): Color for the overlayed circles. Defaults to purple.
@@ -566,8 +567,8 @@ class CirclesOverLay(Layer):
         Args:
             gridLayer: A gridLayer instance.
             name: The document ID for data stored in the database or a new
-                customized ID for new data.
-            **kwargs: Optional arguments for ``CirclesOverLay`` settings.
+                user-defined ID for new data.
+            **kwargs: Arbitrary keyword arguments.
 
         """
         super().__init__(**kwargs)
@@ -599,10 +600,10 @@ class CirclesOverLay(Layer):
 class MstLayer(Layer):
     """Minimum spanning tree (MST) overlay class.
 
-    Layer object for the computed MST using the displayed catalog in the base tileLayer with added features to cut the tree by maximum edge length and minimum branch size (the number edges in a branch).
+    Layer class for MST computed using the catalog visualized by the base tileLayer with added features to cut the tree by maximum edge length and minimum branch size (the number edges in a branch).
 
     Keyword Args:
-        color(str): Color for the overlayed MST. Defaults to #0459e2.
+        color(str): Color for the overlayed MST. Defaults to ``#0459e2``.
         svg_zoom(int): Initial zoom for projecting MST onto the screen.
             The higher the zoom the better the resolution and accuracy. Defaults to 5.
     """
@@ -626,7 +627,7 @@ class MstLayer(Layer):
             gridLayer: A gridLayer instance.
             neighbors: Vizic uses ``kneighbors_graph`` from sklearn to compute
                 spanning trees for each set of points. The higher the number of neighbors used, the higher the precision.
-            **kwargs: Optional arguments for ``MstLayer`` settings.
+            **kwargs: Arbitrary keyword arguments.
 
         Raises:
             Exception: If the gridLayer object doesn't have a
@@ -669,8 +670,8 @@ class MstLayer(Layer):
         """Cut the MST.
 
         Args:
-            length: Maximum edge length.
-            members: The minimum number of edges in each saved branch.
+            length(float): Maximum edge length.
+            members(int): The minimum number of edges in each saved branch.
         """
         self.line_idx = cut_tree(self.index, length, members)
         self.max_len = float(length)
@@ -680,7 +681,7 @@ class MstLayer(Layer):
         self.max_len = 0.0
 
     def get_data(self):
-        """Retrive the MST lines data from the database."""
+        """Retrive the MST edges data from the database."""
         coll = self.db['mst']
         cur_ls = list(coll.find({'_id':self.document_id}))
         return cur_ls[0]['tree']
