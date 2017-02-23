@@ -349,3 +349,8 @@ texinfo_documents = [
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 #
 # texinfo_no_detailmenu = False
+
+# -- Options for autodoc ---------------------------------------------------
+autoclass_content = 'both'
+autodoc_memeber_order = 'bysource'
+napoleon_include_init_with_doc = True

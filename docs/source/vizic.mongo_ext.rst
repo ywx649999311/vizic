@@ -1,16 +1,16 @@
 vizic.mongo_ext package
 =======================
 
-vizic.mongo_ext.db_connect module
----------------------------------
+Database Utils
+--------------
 
 .. automodule:: vizic.mongo_ext.db_connect
-    :members:
-    :undoc-members:
-    :show-inheritance:
 
-vizic.mongo_ext.extension module
---------------------------------
+    .. autoclass:: MongoConnect
+        :members:
+
+Server Handlers
+---------------
 
 .. automodule:: vizic.mongo_ext.extension
     :members:

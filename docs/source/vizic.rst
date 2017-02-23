@@ -3,31 +3,43 @@ Vizic API
 *********
 
 
-vizic.connection module
------------------------
+Connection
+----------
 
 .. automodule:: vizic.connection
     :members:
-    :undoc-members:
-    
-vizic.astroleaflet module
--------------------------
+
+Map & Layers
+------------
 
 .. automodule:: vizic.astroleaflet
-    :members:
-    :undoc-members:
 
-vizic.control_widgets module
-----------------------------
+    .. autoclass:: AstroMap
+        :members:
+    .. autoclass:: GridLayer
+        :members:
+
+    Custom overlays
+    ^^^^^^^^^^^^^^^
+    .. autoclass:: VoronoiLayer
+        :members:
+    .. autoclass:: DelaunayLayer
+        :members:
+    .. autoclass:: HealpixLayer
+        :members:
+    .. autoclass:: CirclesOverLay
+        :members:
+    .. autoclass:: MstLayer
+        :members:
+
+Control Widgets
+---------------
 
 .. automodule:: vizic.control_widgets
     :members:
-    :undoc-members:
 
-
-vizic.utils module
-------------------
+Utils
+-----
 
 .. automodule:: vizic.utils
     :members:
-    :undoc-members:

@@ -19,7 +19,7 @@ class AstroMap(Map):
     Note:
         Class attribute ``center`` is always in the form of ``[lat, lng]``.
 
-    Attributes:
+    Keyword Args:
         zoom(int): Initial zoom for the map. Defaults to 1.
         max_zoom(int): Allowd maximum zoom level for the map. Defaults to 12.
         position_control(bool): Whether to show projected mouse position
@@ -47,7 +47,10 @@ class AstroMap(Map):
     # pan_ready = Bool(False).tag(sync=True)
 
     def __init__(self, **kwargs):
-        """Init an AstroMap object."""
+        """
+        Args:
+            **kwargs: Optional arguments for map settings.
+        """
         super().__init__(**kwargs)
         if self.default_tiles is not None:
             self.default_tiles._map = self
@@ -117,7 +120,7 @@ class AstroMap(Map):
 class GridLayer(RasterLayer):
     """Base tilelayer object for catalogs.
 
-    Attributes:
+    Keyword Args:
         df: A pandas dataframe where the data to be visualized is stored.
         min_zoom(int): Minimum zoom level for the tileLayer. Defaults to 0.
         max_zoom(int): Maximum zoom level for the tileLayer. Defaults to 8.
@@ -125,7 +128,7 @@ class GridLayer(RasterLayer):
             that stores pre-ingested data.
         color(str): Preset color for visualized objects. Defaults to red.
         df_rad(int): The raidus of the circles representing objects in the
-            catalogs when size information is provided. Defaults to 2.
+            catalog when size information is provided. Defaults to 2.
         scale_r(float): A float number indicating the scaling ratio for
             visualized objects. Defaults to 1.0.
 
@@ -197,12 +200,12 @@ class GridLayer(RasterLayer):
             self.filter_property = ''
 
     def __init__(self, connection, coll_name=None, **kwargs):
-        """Instructor for Gridlayer object.
-
+        """
         Args:
             connection: An object encapsulating a MongoDB connection info.
             coll_name: A string specifying the collection name for a new
-                catalogs to be ingested into the database. Default is None.
+                catalog to be ingested into the database. Default is None.
+            **kwargs: Optional arguments for ``GridLayer`` settings.
         """
         super().__init__(**kwargs)
         try:
@@ -222,7 +225,7 @@ class GridLayer(RasterLayer):
     def _checkInput(self):
         """Check data source.
 
-        If a string specifying the collection name for stored catalogs is given in the instructor, the catalogs metadata will be retrived from the database and assigned to the GridLayer object. If a pandas dataframe containing the catalogs is provided in the instructor, the catalogs will be formated and ingested into the database using provided ``coll_name`` or a randomly generated ``uuid``.
+        If a string specifying the collection name for stored catalog is given in the instructor, the catalog metadata will be retrived from the database and assigned to the GridLayer object. If a pandas dataframe containing the catalog is provided in the instructor, the catalog will be formated and ingested into the database using provided ``coll_name`` or a randomly generated ``uuid``.
         """
         if not self.collection == '':
             meta = self.db[self.collection].find_one({'_id': 'meta'})
@@ -260,9 +263,9 @@ class GridLayer(RasterLayer):
             raise Exception('Need to provide a collection name or a pandas dataframe!')
 
     def _data_prep(self, zoom, df):
-        """Private method for formatting catalogs.
+        """Private method for formatting catalog.
 
-        Metadata for catalogs provided in a pandas dataframe is extracted here. Corresponding tile ID for each object in the catalog is caculated and inserted into the dataframe, so as the mapped coordinates and shapes/sizes for the objects.
+        Metadata for catalog provided in a pandas dataframe is extracted here. Corresponding tile ID for each object in the catalog is caculated and inserted into the dataframe, so as the mapped coordinates and shapes/sizes for the objects.
 
         Args:
             zoom: An integer indicating the maximum zoom level for visualized
@@ -309,10 +312,10 @@ class GridLayer(RasterLayer):
         return dff, [xMin, yMax, xScale, yScale]
 
     def _insert_data(self, df):
-        """Private method to insert catalogs into database.
+        """Private method to insert a catalog into database.
 
         Args:
-            df: A pandas dataframe with correctly formatted catalogs.
+            df: A pandas dataframe with correctly formatted catalog.
         """
         if self.coll_name is not None:
             self.collection = self.coll_name
@@ -379,7 +382,7 @@ class GridLayer(RasterLayer):
 
         Raises:
             Exception: If the provided field is not a float field or such
-                a field doesn't exist in the catalogs.
+                a field doesn't exist in the catalog.
         """
         field = field.upper()
         if field in list(self.get_fields()):
@@ -414,10 +417,10 @@ class VoronoiLayer(Layer):
 
     Using the catalog data displayed by the GridLayer to compute and display Voronoi Diagram.
 
-    Attributes:
+    Keyword Args:
         color(str): Color for the overlayed diagram. Defaults to #88b21c.
         svg_zoom(int): Initial zoom for projecting the Voronoi diagram onto the
-        screen. The higher the zoom the better the resolution and accuracy. Defaults to 5.
+            screen. The higher the zoom the better the resolution and accuracy. Defaults to 5.
 
     """
     _view_name = Unicode('LeafletVoronoiLayerView').tag(sync=True)
@@ -428,10 +431,10 @@ class VoronoiLayer(Layer):
     svg_zoom = Int(5, help='initial zoom for projection').tag(sync=True, o=True)
 
     def __init__(self, gridLayer, **kwargs):
-        """Extends the instructor of Layer class.
-
+        """
         Args:
-            gridLayer: Base tileLayer visualizing the catalogs.
+            gridLayer: A gridLayer instance.
+            **kwargs: Optional arguments for ``VoronoiLayer`` settings.
 
         Raises:
             Exception: If the gridLayer object doesn't have a connected database.
@@ -450,7 +453,7 @@ class DelaunayLayer(Layer):
 
     Using the catalog data displayed by the GridLayer to compute and display Delaunay Triangulation.
 
-    Attributes:
+    Keyword Args:
         color(str): Color for the overlayed Triangulation. Defaults to blue.
         svg_zoom(int): Initial zoom for projecting the Delaunay triangulation
             onto the screen. The higher the zoom the better the resolution and accuracy. Defaults to 5.
@@ -463,10 +466,10 @@ class DelaunayLayer(Layer):
     svg_zoom = Int(5).tag(sync=True, o=True)
 
     def __init__(self, gridLayer, **kwargs):
-        """Extends the instructor of Layer class.
-
+        """
         Args:
-            gridLayer: Base tileLayer visualizing the catalogs.
+            gridLayer: A gridLayer instance.
+            **kwargs: Optional arguments for ``DelaunayLayer`` settings.
 
         Raises:
             Exception: If the gridLayer object doesn't have a
@@ -486,10 +489,10 @@ class HealpixLayer(Layer):
 
     Using the catalog data displayed by the GridLayer to compute and display Healpix pixelization grid.
 
-    Attributes:
+    Keyword Args:
         color(str): Color for the overlayed Healpix grid. Defaults to white.
-        svg_zoom(int): Initial zoom for projecting Healpix grid onto the
-            screen. The higher the zoom the better the resolution and accuracy. Defaults to 5.
+        svg_zoom(int): Initial zoom for projecting Healpix grid onto the screen.
+            The higher the zoom the better the resolution and accuracy. Defaults to 5.
     """
     _view_name = Unicode('LeafletHealpixLayerView').tag(sync=True)
     _model_name = Unicode('LeafletHealpixLayerModel').tag(sync=True)
@@ -501,10 +504,10 @@ class HealpixLayer(Layer):
     nest = Bool(True)
 
     def __init__(self, gridLayer, **kwargs):
-        """Extends the instructor of Layer class.
-
+        """
         Args:
-            gridLayer: Base tileLayer visualizing the catalogs.
+            gridLayer: A gridLayer instance.
+            **kwargs: Optional arguments for ``HealpixLayer`` settings.
 
         Raises:
             Exception: If the gridLayer object doesn't have a
@@ -537,7 +540,7 @@ class CirclesOverLay(Layer):
 
     Overlay a group of circles using provided pandas datafram or a document ID for stored data.
 
-    Attributes:
+    Keyword Args:
         color(str): Color for the overlayed circles. Defaults to purple.
         svg_zoom(int): Initial zoom for projecting circles onto the screen.
             The higher the zoom the better the resolution and accuracy. Defaults to 5.
@@ -559,12 +562,13 @@ class CirclesOverLay(Layer):
     cols = List(['RA', 'DEC'])
 
     def __init__(self, gridLayer, name, **kwargs):
-        """Extends the instructor of Layer class.
-
+        """
         Args:
-            gridLayer: The base tileLayer for circle overlays to be added upon.
+            gridLayer: A gridLayer instance.
             name: The document ID for data stored in the database or a new
                 customized ID for new data.
+            **kwargs: Optional arguments for ``CirclesOverLay`` settings.
+
         """
         super().__init__(**kwargs)
         try:
@@ -597,10 +601,10 @@ class MstLayer(Layer):
 
     Layer object for the computed MST using the displayed catalog in the base tileLayer with added features to cut the tree by maximum edge length and minimum branch size (the number edges in a branch).
 
-    Attributes:
+    Keyword Args:
         color(str): Color for the overlayed MST. Defaults to #0459e2.
-        svg_zoom(int): Initial zoom for projecting MST onto the screen. The
-        higher the zoom the better the resolution and accuracy. Defaults to 5.
+        svg_zoom(int): Initial zoom for projecting MST onto the screen.
+            The higher the zoom the better the resolution and accuracy. Defaults to 5.
     """
     _view_name = Unicode('LeafletMstLayerView').tag(sync=True)
     _model_name = Unicode('LeafletMstLayerModel').tag(sync=True)
@@ -614,14 +618,15 @@ class MstLayer(Layer):
     _cut_count = Int(0).tag(sync=True)
 
     def __init__(self, gridLayer, neighbors=15, **kwargs):
-        """Extends the instructor of Layer class.
+        """
         Note:
             To speed the calculation, Vizic retains the index of non-zero element in the MST sparse matrix.
 
         Args:
-            gridLayer: Base tileLayer visualizing the catalogs.
+            gridLayer: A gridLayer instance.
             neighbors: Vizic uses ``kneighbors_graph`` from sklearn to compute
-             spanning trees for each set of points. The higher the number of neighbors used, the higher the precision.
+                spanning trees for each set of points. The higher the number of neighbors used, the higher the precision.
+            **kwargs: Optional arguments for ``MstLayer`` settings.
 
         Raises:
             Exception: If the gridLayer object doesn't have a
