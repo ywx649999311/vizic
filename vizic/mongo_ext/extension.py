@@ -10,7 +10,7 @@ connection = None
 
 
 class tileHandler(IPythonHandler):
-    """Handling requests for tiled catalogs."""
+    """Handler for tiled catalogs requests."""
     @gen.coroutine
     def get(self, coll, zoom, xc, yc):
         global connection
@@ -27,10 +27,9 @@ class tileHandler(IPythonHandler):
 
 
 class dbHandler(IPythonHandler):
-
+    """Handler for request on database change."""
     @tornado.web.asynchronous
     def post(self):
-        """REST API to change mongodb connection."""
         arguments = {k.lower(): self.get_argument(k) for k in self.request.arguments}
         host = arguments['host']
         port = int(arguments['port'])
@@ -54,9 +53,9 @@ class dbHandler(IPythonHandler):
 
 
 class rangeHandler(IPythonHandler):
+    """Handler for updates on catalog metadata."""
 
     def post(self):
-        """API for pushing range data to a dictionary"""
         arguments = {k.lower(): self.get_argument(k) for k in self.request.arguments}
         collection = arguments['collection']
         mRange = arguments['mrange']
@@ -66,9 +65,9 @@ class rangeHandler(IPythonHandler):
 
 
 class popupHandler(IPythonHandler):
+    """Handler for data request on clicked object."""
 
     def get(self):
-        """API for individual object query request"""
         arguments = {k.lower(): self.get_argument(k) for k in self.request.arguments}
         coll = arguments['coll']
         ra = arguments['ra']
@@ -80,9 +79,9 @@ class popupHandler(IPythonHandler):
 
 
 class selectionHandler(IPythonHandler):
+    """Handler for data request on selected objects by selection tool."""
 
     def get(self):
-        """API for querying selected catalog data"""
         arguments = {k.lower(): self.get_argument(k) for k in self.request.arguments}
         coll = arguments['coll']
         swLng = arguments['swlng']
@@ -97,7 +96,7 @@ class selectionHandler(IPythonHandler):
 
 
 class mstHandler(IPythonHandler):
-    """Listening to request for mst data"""
+    """Handler for MST data request."""
     @gen.coroutine
     def get(self, coll):
         global connection
@@ -117,7 +116,7 @@ class mstHandler(IPythonHandler):
 
 
 class voronoiHandler(IPythonHandler):
-    """Listening to request for voronoi data"""
+    """Hanlder for request on voronoi diagram data."""
     @gen.coroutine
     def get(self, coll):
         global connection
@@ -137,7 +136,7 @@ class voronoiHandler(IPythonHandler):
 
 
 class healpixHandler(IPythonHandler):
-    """Listening to request for healpix data"""
+    """Handler for data request on healpix grid."""
     @gen.coroutine
     def get(self, coll):
         global connection
@@ -157,7 +156,7 @@ class healpixHandler(IPythonHandler):
 
 
 class circlesHandler(IPythonHandler):
-    """Listening to request for circles data"""
+    """Handler for data request on CirclesOverLays."""
     @gen.coroutine
     def get(self, coll):
         global connection
@@ -178,9 +177,8 @@ class circlesHandler(IPythonHandler):
 
 def load_jupyter_server_extension(nbapp):
     """
-    nbapp is istance of Jupyter.notebook.notebookapp.NotebookApp
-    nbapp.web_app is isntance of tornado.web.Application - can register new tornado.web.RequestHandlers
-    to extend API backend.
+    nbapp is instance of Jupyter.notebook.notebookapp.NotebookApp
+    nbapp.web_app is instance of tornado.web.Application - can register new tornado.web.RequestHandlers to extend API backend.
     """
     nbapp.log.info('My Extension Loaded')
     web_app = nbapp.web_app
