@@ -515,6 +515,11 @@ class HealpixLayer(Layer):
                 connected database.
         """
         super().__init__(**kwargs)
+        # Check for parameters regarding Healpix, i.e, nside and nest
+        if 'nside' in kwargs:
+            self.nside = Int(kwargs["nside"])
+        if 'nest' in kwargs:
+            self.nest = Bool(kwargs["nest"])
         try:
             self.db = gridLayer.db
         except:
