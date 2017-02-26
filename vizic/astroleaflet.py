@@ -517,9 +517,9 @@ class HealpixLayer(Layer):
         super().__init__(**kwargs)
         # Check for parameters regarding Healpix, i.e, nside and nest
         if 'nside' in kwargs:
-            self.nside = Int(kwargs["nside"])
+            self.nside = int(kwargs["nside"])
         if 'nest' in kwargs:
-            self.nest = Bool(kwargs["nest"])
+            self.nest = bool(kwargs["nest"])
         try:
             self.db = gridLayer.db
         except:
