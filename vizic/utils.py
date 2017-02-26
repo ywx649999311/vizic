@@ -1,8 +1,6 @@
 import healpy as hp
 import numpy as np
 import pandas as pd
-# NEST = True  # Keep it true
-# NSIDE = 1024  # must be a power of 2
 from scipy.sparse.csgraph import minimum_spanning_tree as mst
 from sklearn.neighbors import kneighbors_graph as kng
 from scipy.sparse import find

@@ -501,8 +501,8 @@ class HealpixLayer(Layer):
     visible = Bool(False).tag(sync=True)
     color = Unicode('white').tag(sync=True, o=True)
     svg_zoom = Int(5).tag(sync=True, o=True)
-    nside = Int(1024)
-    nest = Bool(True)
+    #nside = Int(1024)
+    #nest = Bool(True)
 
     def __init__(self, gridLayer, **kwargs):
         """
@@ -518,8 +518,12 @@ class HealpixLayer(Layer):
         # Check for parameters regarding Healpix, i.e, nside and nest
         if 'nside' in kwargs:
             self.nside = int(kwargs["nside"])
+        else:
+            self.nside = 1024
         if 'nest' in kwargs:
             self.nest = bool(kwargs["nest"])
+        else:
+            self.nest = True
         try:
             self.db = gridLayer.db
         except:
