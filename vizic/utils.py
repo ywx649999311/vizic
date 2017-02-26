@@ -101,7 +101,20 @@ def cut_tree(mst_index, length, member):
 
 # Functions for Healpix
 def get_vert(pixel, nside, nest):
+    """Get the coordinates for the vertices for a single Healpix index for a given
+    resolution (nside) and schema (nest)
+
+    Args:
+        * All arguments are required
+        pixel(int): Healpix index
+        nside(int) : Healpix resolution given by nside parameters for the input pixel
+        nest(bool): Pixelization schema, True: Nested Schema, False: Ring Schema
+    Returns:
+        Two lists with the RA and DEC positions for the vertices for the given pixel.
+    """
+    # Get vertices in radian coordinates for a given pixel
     vertices = np.array(hp.vec2ang(np.transpose(hp.boundaries(nside,pixel,nest=nest))))
+    # To degrees
     vertices = vertices*180./np.pi
     diff = vertices[1] - vertices[1][0]  # RA = 0
     diff[diff > 180] -= 360
@@ -114,11 +127,21 @@ def get_vert(pixel, nside, nest):
 
 
 def is_inside_bbox(ra,dec,llra,lldec,urra,urdec):
-    # for a simple box for now, ray tracing for any polygon TBD
-    # llra: lower left ra
-    # lldec: lower left dec
-    # urra: upper right ra
-    # urdec: upper right dec
+    """Find whether a point is inside a bounding box.
+
+    Args:
+        ra(float): Right ascension of the query point.
+        dec(float): Declination of the query point.
+        llra(float): Lower left RA for the bounding box.
+        lldec(float): Lower left DEC for the bounding box.
+        urra(float): Upper right RA for the bounding box.
+        urdec(float): Upper right DEC for the bounding box.
+
+    Returns:
+        A Bool whether the point is inside the bounding box.
+
+    TODO: Use ray tracing for any polygon shape
+    """
     if (ra <= urra) & (ra >= llra) & (dec <= urdec) & (dec >= lldec):
         return True
     else:
@@ -126,27 +149,48 @@ def is_inside_bbox(ra,dec,llra,lldec,urra,urdec):
 
 
 def get_vert_bbox(llra,lldec,urra,urdec,nside,nest):
-    # central point
+    """Get a list of the vertices for all Healpix pixels inside a given bounding
+    box, resolution and pixelization schema.
+
+    Args:
+        llra(float): Lower left RA for the bounding box.
+        lldec(float): Lower left DEC for the bounding box.
+        urra(float): Upper right RA for the bounding box.
+        urdec(float): Upper right DEC for the bounding box.
+        nside(int) : Healpix resolution given by nside.
+        nest(bool): Pixelization schema, True: Nested Schema, False: Ring Schema
+
+    Returns:
+        A list with the vertices for all pixels inside the bounding box.
+    """
+    # Find central point for the bbox
     mid_ra = (urra+llra)/2.
     mid_dec = (urdec + lldec)/2.
+    # Convert to radians
     phi = mid_ra/180.*np.pi
     th = (90.-mid_dec)/180.*np.pi
     pix = hp.ang2pix(nside,th,phi,nest)  # Pixel at center
-    neig = hp.get_all_neighbours(nside,pix,None,nest)  # first 8 neighbors
+    neig = hp.get_all_neighbours(nside,pix,None,nest)  # Get initial 8 neighbors
+    # Create a set
     allp = set(neig)
     checked_big = set()
     checked_all = set()
     k = 0
+    # Find all pixels inside bounding box by looking at all the neighbors'
+    # neighbors recursively using a set to speed up the process.
     while True:
         if k == 10000:
-            raise RuntimeError('Did not converge, increase k')
+            raise RuntimeError('Did not converge, increase k limit')
+        # Create a copy of the intial set of neighbors
         temp = allp.copy()
         for i in temp.copy().difference(checked_big):
             ntemp = set(hp.get_all_neighbours(nside,i,None,nest))
             for j in ntemp.difference(checked_all):
                 th2,phi2 = hp.pix2ang(nside,j,nest)
+                # Check if given neighbor is inside the bbox
                 if is_inside_bbox(phi2*180./np.pi,90-th2*180./np.pi,llra,lldec,urra,urdec):
                     temp.add(j)
+            # Update set to keep track of checked pixels
             checked_all.update(ntemp)
             checked_big.add(i)
         if temp == allp:
@@ -155,6 +199,8 @@ def get_vert_bbox(llra,lldec,urra,urdec,nside,nest):
             allp.update(temp)
             k += 1
     all_verts = []
+    # Get vertices for pixels inside bounding box
     for i in allp:
         all_verts.append(get_vert(i, nside,nest))
+    # Return complete list
     return all_verts
