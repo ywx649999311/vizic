@@ -1,3 +1,5 @@
+[![ascl:1701.002](https://img.shields.io/badge/ascl-1701.002-blue.svg?colorB=262255)](http://ascl.net/1701.002)
+
 # Vizic
 
 A Jupyter widget for visualizing astronomical catalog data
