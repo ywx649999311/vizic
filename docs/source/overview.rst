@@ -22,6 +22,6 @@ Beyond the basic browsing of visualized catalog data in a map like application, 
 Custom Overlays
 ===============
 
-The most unique feature of Vizic is its capability to graphically display the hidden pattern revealed by the geospatial distribution of astronomical objects in given catalogs, for example large-scale structure. Vizic offers several graphical tools to achieve this goal, namely Voronoi overlay, Delaunay overlay, minimum spanning tree overlay and Healpix grid overlay. For any given visualized catalog in a tiled layer, overlays mentioned above can be generated using the dataset being visualized and appended on top of the catalog layer. Such overlays can also zoom and shift to accommodate the movement of the base tiled layer.
+The most unique feature of Vizic is its capability to graphically display the hidden pattern revealed by the geospatial distribution of astronomical objects in given catalogs, for example large-scale structure. Vizic offers several graphical tools to achieve this goal, namely Voronoi overlay, Delaunay overlay, Minimum Spanning Tree overlay and Healpix Grid overlay. For any given visualized catalog in a tiled layer, overlays mentioned above can be generated using the dataset being visualized and appended on top of the catalog layer. Such overlays can also zoom and shift to accommodate the movement of the base tiled layer.
 
-To enable fast search of large scale structures, appended minimum spanning tree can be trimmed by maximum edge length and minimum branch size. 
+To enable fast search of large scale structures, appended minimum spanning tree can be trimmed by maximum edge length and minimum branch size.
