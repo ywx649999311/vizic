@@ -134,10 +134,11 @@ setup_args = {
             'vizic/static/index.js',
             'vizic/static/index.js.map',
         ] + glob('vizic/static/*.png')),
+        ('share/vizic/data', ['examples/demo.csv'])
     ],
     'install_requires': [
         'ipywidgets<=6.0.0', 'motor>=1.0', 'pandas', 'numpy', 'uuid',
-        'requests', 'scipy', 'astropy==1.2.1', 'sklearn', 'healpy', 
+        'requests', 'scipy', 'astropy==1.2.1', 'sklearn', 'healpy',
         'notebook<4.3', 'widgetsnbextension==1.2.6'
     ],
     'packages': find_packages(),
