@@ -136,12 +136,9 @@ setup_args = {
         ] + glob('vizic/static/*.png')),
     ],
     'install_requires': [
-        'ipywidgets>=5.1.5',
-        'motor==1.0',
-        'pandas',
-        'numpy',
-        'uuid',
-        'requests', 'scipy', 'astropy==1.2.1', 'sklearn', 'healpy', 'notebook<4.3'
+        'ipywidgets<=6.0.0', 'motor>=1.0', 'pandas', 'numpy', 'uuid',
+        'requests', 'scipy', 'astropy==1.2.1', 'sklearn', 'healpy', 
+        'notebook<4.3', 'widgetsnbextension==1.2.6'
     ],
     'packages': find_packages(),
     'zip_safe': False,
