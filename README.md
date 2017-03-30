@@ -36,7 +36,7 @@ $ jupyter nbextension enable --py --sys-prefix vizic
 To run the Jupyter Notebook with:
 
 ```
-$ jupyter notebook --NotebookApp.server_extensions="['vizic.mongo_ext.extension']"
+$ jupyter notebook --NotebookApp.nbserver_extensions="{'vizic.mongo_ext.extension':True}"
 ```
 
 Note for developers: the `--symlink` argument on Linux or OS X allows one to modify the JavaScript code in-place. This feature is not available with Windows.
