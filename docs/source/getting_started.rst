@@ -6,7 +6,7 @@ Vizic uses MongoDB for data storage, and an added Jupyter server extension to di
 
 To start the App use::
 
-	jupyter notebook --NotebookApp.server_extensions="['vizic.mongo_ext.extension']"
+	jupyter notebook --NotebookApp.nbserver_extensions="{'vizic.mongo_ext.extension':True}"
 
 In addition, a running MongoDB instance is required. To start a new instance on the local machine, enter the following in a new terminal window::
 

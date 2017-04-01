@@ -8,8 +8,6 @@
 Vizic
 =====
 
-Contents:
-
 .. toctree::
    :maxdepth: 2
 
