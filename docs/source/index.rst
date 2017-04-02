@@ -18,7 +18,6 @@ Vizic
    extensions
 
 
-
 Indices and tables
 ==================
 
