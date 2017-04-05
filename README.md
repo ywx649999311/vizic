@@ -43,7 +43,7 @@ Note for developers: the `--symlink` argument on Linux or OS X allows one to mod
 
 ## Documentation
 
-A more detail documentation is on the way. Before it is ready, please look at the notebooks provided in the examples folder to get started, which are well documented with instructions.
+For detailed description, please refer to the [Vizic documentation](http://pythonhosted.org/vizic).
 
 ## Reference
 
