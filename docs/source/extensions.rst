@@ -2,11 +2,14 @@
 Extensions
 **********
 
-The communication between the front-end Leaflet maps and the MongoDB database is empowered by custom server handlers. Leaflet maps at the front-end request data by URL. The associated server handlers query the database and returns data.
+At the front-end, all maps and layers are controlled by **Leaflet** JavaScript library. Initially, **Leaflet** is designed to work with tiled web maps stored as many PNG images. To make the visualization customizable, **Vizic** creates vector tiles on the fly from catalogs stored in MongoDB database.
 
-To further take advantages of the unique design provided by Vizic, users can add their own server handlers and enable additional features that require access to the database. Under **vizic.mongo_ext** subpackage, **extension** module hosts custom handlers and **db_connect** module has all the functions to query the database.
+The data pipeline is composed of two modules: **db_connect** and **extension**.
+The **db_connect** provides all of the functions that are used to access the catalogs stored in the database. The **extension** module contains custom server handlers, which listen to URL requests, call the functions in the **db_connect** module and return requested information.
 
-Regarding how to write custom server handler for Jupyter App, an in-depth explanation can be found here_.
+In the future, any added functionality that requires the access to the database by URL, can takes advantage of existing database utility function and custom server handlers found below. In addition, users can write their own database functions and server handlers. 
+
+Regarding how to write custom server handler for Jupyter Notebook App, an in-depth explanation can be found here_.
 
 	.. _here: http://jupyter-notebook.readthedocs.io/en/latest/extending/handlers.html
 
