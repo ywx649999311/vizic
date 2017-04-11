@@ -335,8 +335,9 @@ class GridLayer(RasterLayer):
         except:
             print(result)
         coll.create_index([('loc', pmg.GEO2D)], name='geo_loc_2d', min=-90, max=360)
-        coll.create_index([('RA', pmg.ASCENDING),('DEC', pmg.ASCENDING)], name='ra_dec')
+        # coll.create_index([('RA', pmg.ASCENDING),('DEC', pmg.ASCENDING)], name='ra_dec')
         coll.create_index([('tile_x', pmg.ASCENDING),('tile_y', pmg.ASCENDING)], name='tile_x_y')
+        coll.create_index([('b', pmg.ASCENDING)], name='semi_axis')
 
     def push_data(self, url):
         """Update server extension with newly displayed catalog.
