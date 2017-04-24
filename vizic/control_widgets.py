@@ -21,7 +21,7 @@ class LayerColorPicker(ColorPicker):
     layer = Instance(Layer)
 
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        super(LayerColorPicker, self).__init__(**kwargs)
         self.value = self.layer.color
         self.link(self.layer)
         if self.concise:
@@ -57,7 +57,7 @@ class PopupDis(Widget):
 
         The link is from the obj_catalog attribute of the layer object to the data attribute in this widget.
         """
-        super().__init__(**kwargs)
+        super(PopupDis, self).__init__(**kwargs)
         # self.layout.width = '100%'
         self.dlink = dlink((self.layer, 'obj_catalog'), (self, 'data'))
 
@@ -89,7 +89,7 @@ class HomeButton(Button):
             map: An AstroMap object, which the widget is intended to control.
             **kwargs: Arbitrary keyward arguments for ``Button``.
         """
-        super().__init__(**kwargs)
+        super(HomeButton, self).__init__(**kwargs)
         self._map = map
         self.layout = Layout(height='30px', width='30px')
         self.on_click(self.handle_click)
@@ -111,7 +111,7 @@ class CFDropdown(Dropdown):
             layer: The tileLayer that the menu is associated with.
             **kwargs: Arbitrary keyward arguments for ``Dropdown``.
         """
-        super().__init__(**kwargs)
+        super(CFDropdown, self).__init__(**kwargs)
         self._layer = layer
         self.description = 'Property: '
         self.layout.width = '100%'
@@ -176,7 +176,7 @@ class ColorMap(Dropdown):
             gridlayer: The base tileLayer the widget is associate with.
             **kwargs: Arbitrary keyward arguments for ``Dropdown``.
         """
-        super().__init__(**kwargs)
+        super(ColorMap, self).__init__(**kwargs)
         self._layer = gridlayer
         self.description = 'ColorMap: '
         self.layout.width = '100%'
@@ -205,7 +205,7 @@ class FilterSlider(FloatRangeSlider):
                 use for filtering.
             **kwargs: Arbitrary keyword arguments for ``FloatRangeSlider``.
         """
-        super().__init__(**kwargs)
+        super(FilterSlider, self).__init__(**kwargs)
         self._layer = layer
         self.property = field.upper()
         self.min, self.max = (-1e6, 1e6)
@@ -254,7 +254,7 @@ class FilterWidget(Box):
             *args: Variable length argument list for ``Box``.
             **kwargs: Arbitrary keyword arguments for ``Box``.
         """
-        super().__init__(*pargs, **kwargs)
+        super(FilterWidget, self).__init__(*pargs, **kwargs)
         self._layer = layer
         self.dropDown = Dropdown(options=list(self._layer.get_fields()), width='100%')
         self.slider = FilterSlider(layer, self.dropDown.value)
@@ -300,7 +300,7 @@ class FilterBox(Box):
             *args: Variable length argument list for ``Box``.
             **kwargs: Arbitrary keyword arguments for ``Box``.
         """
-        super().__init__(*pargs, **kwargs)
+        super(FilterBox, self).__init__(*pargs, **kwargs)
         self.label = Label(field.upper())
         self.label.padding = '7px 2px 2px 2px'
         self.slider = FilterSlider(layer, field)
@@ -327,7 +327,7 @@ class SelectionTrig(ToggleButton):
                 with.
             **kwargs: Arbitray keyword arguments for ``ToggleButton``.
         """
-        super().__init__(**kwargs)
+        super(SelectionTrig, self).__init__(**kwargs)
         self._map = map
         self.layout = Layout(height='30px', width='30px')
 
@@ -356,7 +356,7 @@ class GetDataButton(Button):
         Args:
             layer: The tileLayer that the button is asccoiate with.
         """
-        super().__init__(**kwargs)
+        super(GetDataButton, self).__init__(**kwargs)
         self._layer = layer
         self.layout = Layout(height='30px', width='30px')
         self.on_click(self.handle_click)

@@ -9,6 +9,7 @@ import json
 import requests
 from notebook.utils import url_path_join
 from .utils import cut_tree, get_mst, get_m_index, get_vert_bbox
+from __future__ import print_function
 
 
 class AstroMap(Map):
@@ -51,7 +52,7 @@ class AstroMap(Map):
         Args:
             **kwargs: Optional arguments for map settings.
         """
-        super().__init__(**kwargs)
+        super(AstroMap, self).__init__(**kwargs)
         if self.default_tiles is not None:
             self.default_tiles._map = self
             self._des_crs = self.default_tiles._des_crs
@@ -207,7 +208,7 @@ class GridLayer(RasterLayer):
                 into the database. Default is None.
             **kwargs: Arbitrary keyword arguments.
         """
-        super().__init__(**kwargs)
+        super(GridLayer, self).__init__(**kwargs)
         try:
             self.db = connection.db
         except:
@@ -441,7 +442,7 @@ class VoronoiLayer(Layer):
             Exception: If the gridLayer object doesn't have a connected
                 database.
         """
-        super().__init__(**kwargs)
+        super(VoronoiLayer, self).__init__(**kwargs)
         try:
             self.db = gridLayer.db
         except:
@@ -477,7 +478,7 @@ class DelaunayLayer(Layer):
             Exception: If the gridLayer object doesn't have a
                 connected database.
         """
-        super().__init__(**kwargs)
+        super(DelaunayLayer, self).__init__(**kwargs)
         try:
             self.db = gridLayer.db
         except:
@@ -502,8 +503,8 @@ class HealpixLayer(Layer):
     visible = Bool(False).tag(sync=True)
     color = Unicode('white').tag(sync=True, o=True)
     svg_zoom = Int(5).tag(sync=True, o=True)
-    #nside = Int(1024)
-    #nest = Bool(True)
+    # nside = Int(1024)
+    # nest = Bool(True)
 
     def __init__(self, gridLayer, **kwargs):
         """
@@ -515,7 +516,7 @@ class HealpixLayer(Layer):
             Exception: If the gridLayer object doesn't have a
                 connected database.
         """
-        super().__init__(**kwargs)
+        super(HealpixLayer, self).__init__(**kwargs)
         # Check for parameters regarding Healpix, i.e, nside and nest
         if 'nside' in kwargs:
             self.nside = int(kwargs["nside"])
@@ -581,7 +582,7 @@ class CirclesOverLay(Layer):
             **kwargs: Arbitrary keyword arguments.
 
         """
-        super().__init__(**kwargs)
+        super(CirclesOverLay, self).__init__(**kwargs)
         try:
             self.db = gridLayer.db
         except:
@@ -643,7 +644,7 @@ class MstLayer(Layer):
             Exception: If the gridLayer object doesn't have a
                 connected database.
         """
-        super().__init__(**kwargs)
+        super(MstLayer, self).__init__(**kwargs)
         try:
             self.db = gridLayer.db
         except:
