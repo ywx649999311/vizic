@@ -1,3 +1,4 @@
+from __future__ import print_function
 from traitlets import *
 from ipywidgets import *
 from .leaflet import Map, RasterLayer, Layer
@@ -9,7 +10,6 @@ import json
 import requests
 from notebook.utils import url_path_join
 from .utils import cut_tree, get_mst, get_m_index, get_vert_bbox
-from __future__ import print_function
 
 
 class AstroMap(Map):

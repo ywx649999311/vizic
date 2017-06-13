@@ -1,3 +1,4 @@
+from __future__ import print_function
 from ipywidgets import (
     Widget, DOMWidget, Box, Color, CallbackDispatcher, widget_serialization,
     Layout
@@ -10,7 +11,6 @@ from traitlets import (
 
 # TODO: don't use private APIs
 from ipywidgets.widgets.interaction import _widget_from_abbrev
-from __future__ import print_function
 def_loc = [0.0, 0.0]
 
 

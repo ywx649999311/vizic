@@ -1,8 +1,8 @@
+from __future__ import print_function
 import pymongo as pg
 import requests
 from pymongo.errors import AutoReconnect, ConnectionFailure
 from notebook.utils import url_path_join
-from __future__ import print_function
 
 
 class Connection(object):
