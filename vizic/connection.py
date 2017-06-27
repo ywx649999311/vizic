@@ -11,25 +11,28 @@ class Connection(object):
     This object establish connections to the given database. Error will be thrown if fails, otherwise push the database information to the server through REST API.
     """
 
-    def __init__(self, host="localhost", port=27017, db="vis", url='http://localhost:8888/'):
+    def __init__(self, dbHost="localhost", dbPort=27017, db="vis", sevrPort=None):
         """
         Args:
-            host(str): The host name or address. Defaults to ``localhost``.
-            port(int): The port that the specified database is listening to.
+            dbHost(str): The host name or address. Defaults to ``localhost``.
+            dbPort(int): The port that the specified database is listening to.
                 Defaults to 27017.
             db: A MongoDB database to store or retrive data. Defaults to
                 ``vis``.
-            url(str): The address for the Jupyter server. This can be determined
-                using ``NotebookUrl`` widget is not known. Defaults to ``http://localhost:8888/``
+            sevrPort(int): The port that Jupyter server listens on. Defaults to
+                8888. By default the server is running on the localhost.
 
         Raises:
             Exception: If initiating connection to specified database fails.
         """
-        self.host = host
-        self.port = port
-        self._url = url
+        self.host = dbHost
+        self.port = dbPort
+        self.sevrPort = 8888
+        if sevrPort is not None and isinstance(sevrPort, int):
+            self.sevrPort = sevrPort
+        self._url = "http://localhost:{}/".format(self.sevrPort)
         try:
-            self.client = pg.MongoClient(host, port)
+            self.client = pg.MongoClient(dbHost, dbPort)
             self.db = self.client[db]
             self.change_db(db)
         except ConnectionFailure as err:

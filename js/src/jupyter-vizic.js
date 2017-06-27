@@ -48,23 +48,23 @@ var colorMaps={
     25: d3SC.interpolateYlOrRd
 };
 
-var NotebookUrlView = widgets.WidgetView.extend({
-
-    render: function() {
-        this.host = document.location.origin;
-        this.base_url = document.querySelector('body').getAttribute('data-base-url');
-        this.nb_url = this.host + this.base_url;
-        this.el.textContent = this.nb_url;
-        this.update();
-
-    },
-    update: function() {
-        var that = this;
-        this.model.set('nb_url', that.nb_url);
-        this.touch();
-    },
-
-});
+// var NotebookUrlView = widgets.WidgetView.extend({
+//
+//     render: function() {
+//         this.host = document.location.origin;
+//         this.base_url = document.querySelector('body').getAttribute('data-base-url');
+//         this.nb_url = this.host + this.base_url;
+//         this.el.textContent = this.nb_url;
+//         this.update();
+//
+//     },
+//     update: function() {
+//         var that = this;
+//         this.model.set('nb_url', that.nb_url);
+//         this.touch();
+//     },
+//
+// });
 
 var HomeButtonView = widgets.ButtonView.extend({
     render: function() {
@@ -1064,11 +1064,7 @@ var LeafletGridLayerModel = LeafletRasterLayerModel.extend({
         point: false,
         scale_r: 1,
 
-    }),
-    initialize(attributes, options) {
-        widgets.WidgetModel.prototype.initialize(this, attributes, options);
-        // console.log(this.attributes);
-    }
+    })
 
 });
 
@@ -1409,7 +1405,7 @@ module.exports = {
     LeafletControlView: LeafletControlView,
     LeafletDrawControlView: LeafletDrawControlView,
     LeafletMapView: LeafletMapView,
-    NotebookUrlView: NotebookUrlView,
+    // NotebookUrlView: NotebookUrlView,
     PopupDisView: PopupDisView,
     HomeButtonView: HomeButtonView,
     SelectionButtonView: SelectionButtonView,

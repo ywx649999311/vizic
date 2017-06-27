@@ -28,9 +28,9 @@
     "d3": "^4.2.3",
     "d3-scale-chromatic": "^1.0.2",
     "jquery": "^2.1.4",
-    "jupyter-js-widgets": "^1.0.0",
+    "jupyter-js-widgets": "^2.1.4",
     "leaflet-draw": "^0.3.0",
-    "leaflet-fullscreen": "1.0.1",
+    "leaflet-fullscreen": "^1.0.1",
     "underscore": "^1.8.3"
   }
 }
