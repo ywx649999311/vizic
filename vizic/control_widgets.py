@@ -18,6 +18,8 @@ class LayerColorPicker(ColorPicker):
         layer: The layer of which the color is being controlled by the picker.
 
     """
+    _view_name = Unicode('LayerColorPickerView').tag(sync=True)
+    _view_module = Unicode('jupyter-vizic').tag(sync=True)
     layer = Instance(Layer)
 
     def __init__(self, **kwargs):
@@ -34,7 +36,8 @@ class LayerColorPicker(ColorPicker):
     def link(self, layer):
         """Link the colorpicker to the layer.
 
-        Used directional link from value attribute to the color attribute of the target layer object.
+        Used directional link from value attribute to the color attribute of
+        the target layer object.
         """
         self.layer = layer
         self.dlink = dlink((self, 'value'), (self.layer, 'color'))
@@ -55,14 +58,15 @@ class PopupDis(DOMWidget):
     def __init__(self, **kwargs):
         """Initiate the widget object create a direction link
 
-        The link is from the obj_catalog attribute of the layer object to the data attribute in this widget.
+        The link is from the obj_catalog attribute of the layer object to the
+        data attribute in this widget.
         """
         super(PopupDis, self).__init__(**kwargs)
         # self.layout.width = '100%'
         self.dlink = dlink((self.layer, 'obj_catalog'), (self, 'data'))
 
     @observe('data')
-    def _update_data(self,change):
+    def _update_data(self, change):
         """Observe changes in ``data`` and update at front-end."""
         old = change['old']
         new = change['new']
@@ -115,7 +119,7 @@ class CFDropdown(Dropdown):
         self.description = 'Property: '
         self.layout.width = '100%'
         self.options = list(self._layer.get_fields())
-        dlink((self._layer,'custom_c'), (self, '_active'))
+        dlink((self._layer, 'custom_c'), (self, '_active'))
 
     def link(self):
         """Link the value of the dropdown to ``c_field`` in tileLayer"""
@@ -141,13 +145,13 @@ class ColorMap(Dropdown):
     """Dropdown menu for selecting colormapping color space."""
     _layer = Instance(GridLayer)
     colorSpaces = {
-        'Spectral':1,
+        'Spectral': 1,
         'BrBG': 2,
         'PRGn': 3,
         'PiYG': 4,
         'PuOr': 5,
         'RdBu': 6,
-        'RdYlBu':7,
+        'RdYlBu': 7,
         'RdYlGn':8,
         'Blues':9,
         'Greens':10,

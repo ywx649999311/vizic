@@ -65,6 +65,12 @@ var colorMaps={
 //     },
 //
 // });
+var LayerColorPickerView = widgets.ColorPickerView.extend({
+    render:function(){
+        LayerColorPickerView.__super__.render.call(this);
+        this.el.classList.add('vizic');
+    }
+});
 
 var HomeButtonView = widgets.ButtonView.extend({
     render: function() {
@@ -107,7 +113,6 @@ var PopupDisView = widgets.DOMWidgetView.extend({
         }
         var table = document.createElement('TABLE');
         var jObj = this.model.get('_object_info');
-        console.log(jObj);
         var keys = Object.keys(jObj);
         keys.forEach(function(d) {
             var row = table.insertRow();
@@ -1383,6 +1388,7 @@ var LeafletMapModel = widgets.DOMWidgetModel.extend({
 
 module.exports = {
     // views
+    LayerColorPickerView: LayerColorPickerView,
     LeafletLayerView: LeafletLayerView,
     LeafletUILayerView: LeafletUILayerView,
     LeafletMarkerView: LeafletMarkerView,
