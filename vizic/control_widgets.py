@@ -25,7 +25,7 @@ class LayerColorPicker(ColorPicker):
         self.value = self.layer.color
         self.link(self.layer)
         if self.concise:
-            self.width = '30px'
+            self.layout.width = '30px'
 
     def unlink(self):
         """Unlink colorpicker and layer."""
@@ -40,7 +40,7 @@ class LayerColorPicker(ColorPicker):
         self.dlink = dlink((self, 'value'), (self.layer, 'color'))
 
 
-class PopupDis(Widget):
+class PopupDis(DOMWidget):
     """Popup display Widget
 
     Attributes:
@@ -66,7 +66,6 @@ class PopupDis(Widget):
         """Observe changes in ``data`` and update at front-end."""
         old = change['old']
         new = change['new']
-
         if old is Undefined:
             return
 

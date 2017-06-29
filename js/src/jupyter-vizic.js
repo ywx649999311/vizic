@@ -87,7 +87,7 @@ var SelectionButtonView = widgets.ToggleButtonView.extend({
     }
 });
 
-var PopupDisView = widgets.WidgetView.extend({
+var PopupDisView = widgets.DOMWidgetView.extend({
 
     render: function() {
         this.create_obj();
@@ -107,6 +107,7 @@ var PopupDisView = widgets.WidgetView.extend({
         }
         var table = document.createElement('TABLE');
         var jObj = this.model.get('_object_info');
+        console.log(jObj);
         var keys = Object.keys(jObj);
         keys.forEach(function(d) {
             var row = table.insertRow();
