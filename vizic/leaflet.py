@@ -1,7 +1,7 @@
 from __future__ import print_function
 from ipywidgets import (
-    Widget, DOMWidget, Box, Color, CallbackDispatcher, widget_serialization,
-    Layout
+    Layout, Widget, DOMWidget, Box, Color, CallbackDispatcher,
+    widget_serialization, interactive
 )
 
 from traitlets import (
@@ -9,8 +9,8 @@ from traitlets import (
     default, validate, TraitError
 )
 
-# TODO: don't use private APIs
-from ipywidgets.widgets.interaction import _widget_from_abbrev
+# # TODO: don't use private APIs
+# from ipywidgets.widgets.interaction import _widget_from_abbrev
 def_loc = [0.0, 0.0]
 
 
@@ -24,7 +24,7 @@ class InteractMixin(object):
         c = []
         for name, abbrev in kwargs.items():
             default = getattr(self, name)
-            widget = _widget_from_abbrev(abbrev, default)
+            widget = interactive.widget_from_abbrev(abbrev, default)
             if not widget.description:
                 widget.description = name
             widget.link = link((widget, 'value'), (self, name))
@@ -445,8 +445,6 @@ class Map(DOMWidget, InteractMixin):
         layers list.
         """
         self.layer_ids = [l.model_id for l in proposal['value']]
-        # print (proposal['value'])
-        # print (self.layer_ids)
         if len(set(self.layer_ids)) != len(self.layer_ids):
             raise LayerException('duplicate layer detected, only use each layer once')
         return proposal['value']

@@ -28,6 +28,10 @@ class tileHandler(IPythonHandler):
 
 class dbHandler(IPythonHandler):
     """Handler for request on database change."""
+
+    def check_xsrf_cookie(self):
+        pass
+
     @tornado.web.asynchronous
     def post(self):
         arguments = {k.lower(): self.get_argument(k) for k in self.request.arguments}
@@ -54,6 +58,9 @@ class dbHandler(IPythonHandler):
 
 class rangeHandler(IPythonHandler):
     """Handler for updates on catalog metadata."""
+
+    def check_xsrf_cookie(self):
+        pass
 
     def post(self):
         arguments = {k.lower(): self.get_argument(k) for k in self.request.arguments}

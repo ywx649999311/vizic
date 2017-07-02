@@ -15,6 +15,6 @@ require('leaflet/images/marker-icon-2x.png');
 require('leaflet-fullscreen/dist/fullscreen.png');
 require('leaflet-fullscreen/dist/fullscreen@2x.png');
 
-// Export everything from jupyter-leaflet and the npm package version number.
+// Export everything from jupyter-vizic and the npm package version number.
 module.exports = require('./jupyter-vizic.js');
-module.exports['version'] = require('../package.json').version;
+module.exports.version = require('../package.json').version;

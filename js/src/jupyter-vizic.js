@@ -48,22 +48,28 @@ var colorMaps={
     25: d3SC.interpolateYlOrRd
 };
 
-var NotebookUrlView = widgets.WidgetView.extend({
-
-    render: function() {
-        this.host = document.location.origin;
-        this.base_url = document.querySelector('body').getAttribute('data-base-url');
-        this.nb_url = this.host + this.base_url;
-        this.el.textContent = this.nb_url;
-        this.update();
-
-    },
-    update: function() {
-        var that = this;
-        this.model.set('nb_url', that.nb_url);
-        this.touch();
-    },
-
+// var NotebookUrlView = widgets.WidgetView.extend({
+//
+//     render: function() {
+//         this.host = document.location.origin;
+//         this.base_url = document.querySelector('body').getAttribute('data-base-url');
+//         this.nb_url = this.host + this.base_url;
+//         this.el.textContent = this.nb_url;
+//         this.update();
+//
+//     },
+//     update: function() {
+//         var that = this;
+//         this.model.set('nb_url', that.nb_url);
+//         this.touch();
+//     },
+//
+// });
+var LayerColorPickerView = widgets.ColorPickerView.extend({
+    render:function(){
+        LayerColorPickerView.__super__.render.call(this);
+        this.el.classList.add('vizic');
+    }
 });
 
 var HomeButtonView = widgets.ButtonView.extend({
@@ -87,7 +93,7 @@ var SelectionButtonView = widgets.ToggleButtonView.extend({
     }
 });
 
-var PopupDisView = widgets.WidgetView.extend({
+var PopupDisView = widgets.DOMWidgetView.extend({
 
     render: function() {
         this.create_obj();
@@ -1064,11 +1070,7 @@ var LeafletGridLayerModel = LeafletRasterLayerModel.extend({
         point: false,
         scale_r: 1,
 
-    }),
-    initialize(attributes, options) {
-        widgets.WidgetModel.prototype.initialize(this, attributes, options);
-        // console.log(this.attributes);
-    }
+    })
 
 });
 
@@ -1386,6 +1388,7 @@ var LeafletMapModel = widgets.DOMWidgetModel.extend({
 
 module.exports = {
     // views
+    LayerColorPickerView: LayerColorPickerView,
     LeafletLayerView: LeafletLayerView,
     LeafletUILayerView: LeafletUILayerView,
     LeafletMarkerView: LeafletMarkerView,
@@ -1409,7 +1412,7 @@ module.exports = {
     LeafletControlView: LeafletControlView,
     LeafletDrawControlView: LeafletDrawControlView,
     LeafletMapView: LeafletMapView,
-    NotebookUrlView: NotebookUrlView,
+    // NotebookUrlView: NotebookUrlView,
     PopupDisView: PopupDisView,
     HomeButtonView: HomeButtonView,
     SelectionButtonView: SelectionButtonView,
