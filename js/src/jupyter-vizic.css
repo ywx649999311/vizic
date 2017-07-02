@@ -1,4 +1,4 @@
-button.jupyter-button.home-button {
+button.home-button {
 	background:#fbf8f8 url('widget-images/home_black.png') no-repeat 0 0;
 	background-size:24px 24px;
 	background-position: center center;
@@ -17,21 +17,25 @@ button.jupyter-button.home-button {
     flex-shrink: 1;
 	min-width: 0px;
 }
-.widget-colorpicker.concise.vizic input[type='color']:hover{
+.widget-colorpicker.concise.vizic:hover,
+.btn-default.selection-button:hover{
+	background-color: #e6e6e6;
 	box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14),
                 0 3px 1px -2px rgba(0, 0, 0, 0.2),
                 0 1px 5px 0 rgba(0, 0, 0, 0.12);
 }
-button.jupyter-button.selection-button{
+.jupyter-button.selection-button, .btn-default.selection-button{
 	background:#fbf8f8 url('widget-images/noun_482440_cc.png') no-repeat 0 0;
 	background-size:24px 18px;
 	background-position: center center;
 	border: 1px solid #9E9E9E;
 }
-.jupyter-button.selection-button:active, .jupyter-button.selection-button.mod-active{
-	background-color: #c3c3c3;
+.jupyter-button.selection-button:active,
+.jupyter-button.selection-button.mod-active,
+.btn-default.selection-button.active{
+	background-color:#c3c3c3;
 }
-button.jupyter-button.getData-button{
+.getData-button{
 	background:#fbf8f8 url('widget-images/download.png') no-repeat 0 0;
 	background-size:24px 24px;
 	background-position: center center;
