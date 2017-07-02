@@ -137,9 +137,8 @@ setup_args = {
         ('share/vizic/data', ['examples/demo.csv'])
     ],
     'install_requires': [
-        'ipywidgets<=6.0.0', 'motor>=1.0', 'pandas', 'numpy', 'uuid',
-        'requests', 'scipy', 'astropy==1.2.1', 'sklearn', 'healpy',
-        'notebook<4.3', 'widgetsnbextension==1.2.6'
+        'motor>=1.0', 'pandas', 'numpy', 'uuid', 'ipywidgets>=6.0.0',
+        'requests', 'scipy', 'astropy==1.2.1', 'sklearn', 'healpy'
     ],
     'packages': find_packages(),
     'zip_safe': False,
