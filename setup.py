@@ -134,7 +134,7 @@ setup_args = {
             'vizic/static/index.js',
             'vizic/static/index.js.map',
         ] + glob('vizic/static/*.png')),
-        ('share/vizic/data', ['examples/demo.csv'])
+        ('share/vizic/data', ['examples/data & figs/demo.csv'])
     ],
     'install_requires': [
         'motor>=1.0', 'pandas', 'numpy', 'uuid', 'ipywidgets>=6.0.0',
