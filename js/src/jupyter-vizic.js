@@ -7,7 +7,7 @@ require('leaflet-draw');
 require('leaflet/scripts/L.DesCRS');
 require('leaflet/scripts/L.SvgTile');
 require('leaflet/scripts/L.CusOverLay');
-require('leaflet/scripts/L.OverLayShape');
+require('leaflet/scripts/L.SciOveLay');
 require('leaflet/scripts/L.Control.MousePosition');
 require('leaflet-fullscreen');
 
@@ -164,18 +164,18 @@ var LeafletLayerView = widgets.WidgetView.extend({
 
 var LeafletMstLayerView = LeafletLayerView.extend({
     create_obj: function() {
-        this.obj = L.overLayLines(this.model.get('mst_url'), this.get_options());
+        this.obj = new MST(this.model.get('mst_url'), this.get_options());
     },
     model_events: function() {
         var that = this;
 
-        function validate(edges, max) {
-            if (edges >= max) {
-                return 'hidden';
-            } else {
-                return 'visible';
-            }
-        }
+        // function validate(edges, max) {
+        //     if (edges >= max) {
+        //         return 'hidden';
+        //     } else {
+        //         return 'visible';
+        //     }
+        // }
         this.listenTo(this.model, 'change:_cut_count', function() {
             // var visible = that.model.get('visible');
             var count = this.model.get('_cut_count');
@@ -188,18 +188,20 @@ var LeafletMstLayerView = LeafletLayerView.extend({
                 return a.line_index - b.line_index;
             }
 
+            // key_func() is used to get the position of a line in the whole tree
             function key_func(d) {
                 return d.line_index;
             }
             json_cp.sort(comp);
             var new_data = [];
+            // After the tree cut, pick wanted lines from ordered tree lines
             for (var i = 0; i < idx.length; i++) {
                 new_data.push(json_cp[idx[i]]);
             }
             if (max === 0) {
                 d3.select(this.obj._el).selectAll('path').attr('visibility', null);
             } else {
-                var selection = d3.select(this.obj._el).selectAll('path').data(new_data, key_func);
+                var selection = d3.select(this.obj._el).selectAll('path').data(new_data, key_func); /*key_func tells d3 to order grabbed paths*/
                 selection.exit().attr('visibility', 'hidden');
                 selection.attr('visibility', 'visible');
             }
@@ -243,7 +245,7 @@ var LeafletHealpixLayerView = LeafletOverlayView.extend({
 
 var LeafletCirclesLayerView = LeafletOverlayView.extend({
     create_obj: function() {
-        this.obj = new L.overLayCircles(this.model.get('circles_url'), this.get_options());
+        this.obj = CirclesOverLay(this.model.get('circles_url'), this.get_options());
     },
 });
 
