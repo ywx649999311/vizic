@@ -12,7 +12,6 @@ L.CusOverLay = L.Layer.extend({
         this._json = [];
         this._dataR = {};
         this._getData();
-        // this._fms = {};
     },
 
 	add: function() {
@@ -41,7 +40,6 @@ L.CusOverLay = L.Layer.extend({
             if (error) {
                 return console.log(error);
             }
-            // console.log(json.length);
             that._json = json;
             var draw = L.bind(that.add, that);
             draw();
@@ -50,24 +48,12 @@ L.CusOverLay = L.Layer.extend({
     },
 
     sortJson: function(data){
-        var canvasData = data;
-        var frameCount = 4,
-            oneDimCount = Math.sqrt(frameCount);
-        var sortDataDEC = canvasData.sort(this.comp_func_y),
-            chunk = Math.ceil(canvasData.length / frameCount),
-            // frameData = {},
+        var chunk = 60,
+            numGroups = Math.ceil(data.length / chunk);
 
-            sortDataRA;
-        for (var i = 0, l = 0; i < oneDimCount; l += chunk * oneDimCount, i++) {
-            var ra_cut = sortDataDEC.slice(l, l + chunk * oneDimCount).sort(this.comp_func_x);
-            for (var j = 0, z = 0; j < oneDimCount; z += chunk, j++) {
-                this._dataR[this.getFrameKey(i, j)] = ra_cut.slice(z, z + chunk);
-            }
+        for (var i = 0, z = 0; i < numGroups; z += chunk, i++){
+            this._dataR[i] = data.slice(z, z+chunk);
         }
-    },
-
-    getFrameKey: function(i, j) {
-        return i + ':' + j;
     },
 
     drawSvg: function(svg_id) {
