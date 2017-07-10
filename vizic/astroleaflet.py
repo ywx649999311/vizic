@@ -517,7 +517,7 @@ class HealpixLayer(Layer):
             The higher the zoom the better the resolution and accuracy.
             Defaults to 5.
         nside(int) : Healpix resolution given by nside parameters for the
-        input pixel, dafaults to 1024.
+        input pixel, dafaults to 1024. It must be a power of 2, less than 2**30.
         nest(bool): Pixelization schema, True: Nested Schema, False: Ring
             Schema. Defaults to True.
     """

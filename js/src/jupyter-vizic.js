@@ -179,13 +179,6 @@ var LeafletMstLayerView = LeafletOverlayView.extend({
     model_events: function() {
         var that = this;
 
-        // function validate(edges, max) {
-        //     if (edges >= max) {
-        //         return 'hidden';
-        //     } else {
-        //         return 'visible';
-        //     }
-        // }
         this.listenTo(this.model, 'change:_cut_count', function() {
             // var visible = that.model.get('visible');
             var count = this.model.get('_cut_count');
