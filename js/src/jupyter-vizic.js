@@ -239,7 +239,7 @@ var LeafletDelaunayLayerView = LeafletOverlayView.extend({
 
 var LeafletHealpixLayerView = LeafletOverlayView.extend({
     create_obj: function() {
-        this.obj = new Healpix(this.model.get('healpix_url'), this.get_options());
+        this.obj = new Healpix(this.model.get('_healpix_url'), this.get_options());
     },
 });
 
@@ -1121,8 +1121,8 @@ var LeafletHealpixLayerModel = LeafletLayerModel.extend({
     defaults: _.extend({}, LeafletLayerModel.prototype.defaults, {
         _view_name: 'LeafletHealpixLayerView',
         _model_name: 'LeafletHealpixLayerModel',
+        _healpix_url: '',
 
-        healpix_url: '',
         visible: false,
         svg_zoom: 5,
         color: 'white',
