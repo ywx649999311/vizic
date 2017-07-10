@@ -162,7 +162,17 @@ var LeafletLayerView = widgets.WidgetView.extend({
     },
 });
 
-var LeafletMstLayerView = LeafletLayerView.extend({
+var LeafletOverlayView = LeafletLayerView.extend({
+    model_events: function() {
+        this.listenTo(this.model, 'change:color', function() {
+            var color = this.model.get('color');
+            var shape = this.model.get('shape');
+            d3.select(this.obj._el).selectAll(shape).attr('stroke', color);
+        }, this);
+    }
+});
+
+var LeafletMstLayerView = LeafletOverlayView.extend({
     create_obj: function() {
         this.obj = new MST(this.model.get('mst_url'), this.get_options());
     },
@@ -199,28 +209,13 @@ var LeafletMstLayerView = LeafletLayerView.extend({
                 new_data.push(json_cp[idx[i]]);
             }
             if (max === 0) {
-                d3.select(this.obj._el).selectAll('path').attr('visibility', null);
+                d3.select(this.obj._el).selectAll('path').attr('display', none);
             } else {
                 var selection = d3.select(this.obj._el).selectAll('path').data(new_data, key_func); /*key_func tells d3 to order grabbed paths*/
-                selection.exit().attr('visibility', 'hidden');
-                selection.attr('visibility', 'visible');
+                selection.exit().attr('display', 'none');
+                selection.attr('display', 'initial');
             }
 
-        }, this);
-        this.listenTo(this.model, 'change:color', function() {
-            var color = this.model.get('color');
-            var shape = this.model.get('shape');
-            d3.select(this.obj._el).selectAll(shape).attr('stroke', color);
-        }, this);
-    }
-});
-
-var LeafletOverlayView = LeafletLayerView.extend({
-    model_events: function() {
-        this.listenTo(this.model, 'change:color', function() {
-            var color = this.model.get('color');
-            var shape = this.model.get('shape');
-            d3.select(this.obj._el).selectAll(shape).attr('stroke', color);
         }, this);
     }
 });
