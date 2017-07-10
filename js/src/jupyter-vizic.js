@@ -7,7 +7,7 @@ require('leaflet-draw');
 require('leaflet/scripts/L.DesCRS');
 require('leaflet/scripts/L.SvgTile');
 require('leaflet/scripts/L.CusOverLay');
-require('leaflet/scripts/L.OverLayShape');
+require('leaflet/scripts/L.SciOveLay');
 require('leaflet/scripts/L.Control.MousePosition');
 require('leaflet-fullscreen');
 
@@ -162,20 +162,23 @@ var LeafletLayerView = widgets.WidgetView.extend({
     },
 });
 
-var LeafletMstLayerView = LeafletLayerView.extend({
+var LeafletOverlayView = LeafletLayerView.extend({
+    model_events: function() {
+        this.listenTo(this.model, 'change:color', function() {
+            var color = this.model.get('color');
+            var shape = this.model.get('shape');
+            d3.select(this.obj._el).selectAll(shape).attr('stroke', color);
+        }, this);
+    }
+});
+
+var LeafletMstLayerView = LeafletOverlayView.extend({
     create_obj: function() {
-        this.obj = L.overLayLines(this.model.get('mst_url'), this.get_options());
+        this.obj = new MST(this.model.get('mst_url'), this.get_options());
     },
     model_events: function() {
         var that = this;
 
-        function validate(edges, max) {
-            if (edges >= max) {
-                return 'hidden';
-            } else {
-                return 'visible';
-            }
-        }
         this.listenTo(this.model, 'change:_cut_count', function() {
             // var visible = that.model.get('visible');
             var count = this.model.get('_cut_count');
@@ -188,37 +191,24 @@ var LeafletMstLayerView = LeafletLayerView.extend({
                 return a.line_index - b.line_index;
             }
 
+            // key_func() is used to get the position of a line in the whole tree
             function key_func(d) {
                 return d.line_index;
             }
             json_cp.sort(comp);
             var new_data = [];
+            // After the tree cut, pick wanted lines from ordered tree lines
             for (var i = 0; i < idx.length; i++) {
                 new_data.push(json_cp[idx[i]]);
             }
             if (max === 0) {
-                d3.select(this.obj._el).selectAll('path').attr('visibility', null);
+                d3.select(this.obj._el).selectAll('path').attr('display', none);
             } else {
-                var selection = d3.select(this.obj._el).selectAll('path').data(new_data, key_func);
-                selection.exit().attr('visibility', 'hidden');
-                selection.attr('visibility', 'visible');
+                var selection = d3.select(this.obj._el).selectAll('path').data(new_data, key_func); /*key_func tells d3 to order grabbed paths*/
+                selection.exit().attr('display', 'none');
+                selection.attr('display', 'initial');
             }
 
-        }, this);
-        this.listenTo(this.model, 'change:color', function() {
-            var color = this.model.get('color');
-            var shape = this.model.get('shape');
-            d3.select(this.obj._el).selectAll(shape).attr('stroke', color);
-        }, this);
-    }
-});
-
-var LeafletOverlayView = LeafletLayerView.extend({
-    model_events: function() {
-        this.listenTo(this.model, 'change:color', function() {
-            var color = this.model.get('color');
-            var shape = this.model.get('shape');
-            d3.select(this.obj._el).selectAll(shape).attr('stroke', color);
         }, this);
     }
 });
@@ -237,13 +227,13 @@ var LeafletDelaunayLayerView = LeafletOverlayView.extend({
 
 var LeafletHealpixLayerView = LeafletOverlayView.extend({
     create_obj: function() {
-        this.obj = new Healpix(this.model.get('healpix_url'), this.get_options());
+        this.obj = new Healpix(this.model.get('_healpix_url'), this.get_options());
     },
 });
 
 var LeafletCirclesLayerView = LeafletOverlayView.extend({
     create_obj: function() {
-        this.obj = new L.overLayCircles(this.model.get('circles_url'), this.get_options());
+        this.obj = CirclesOverLay(this.model.get('circles_url'), this.get_options());
     },
 });
 
@@ -1119,8 +1109,8 @@ var LeafletHealpixLayerModel = LeafletLayerModel.extend({
     defaults: _.extend({}, LeafletLayerModel.prototype.defaults, {
         _view_name: 'LeafletHealpixLayerView',
         _model_name: 'LeafletHealpixLayerModel',
+        _healpix_url: '',
 
-        healpix_url: '',
         visible: false,
         svg_zoom: 5,
         color: 'white',
