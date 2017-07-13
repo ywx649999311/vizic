@@ -49,26 +49,24 @@ class MongoConnect(object):
             zoom(int): Zoom level for the required tile.
 
         """
-        # multiThread is not stable
-        result = self.getCoordRange(xc, yc, zoom, self.zoom_dict[coll])
+        result = self.getCoordRange(int(xc), int(yc), int(zoom), coll)
         minR = self.getMinRadius(zoom, self.range_dict[coll])
-        cursor = self.db[coll].find({
 
-            '$and': [
-                {'tile_x': {"$lt":result[0]}},
-                {'tile_x': {"$gt":result[1]}},
-                {'tile_y': {"$lt":result[2]}},
-                {'tile_y': {"$gt":result[3]}},
-                {'b': {'$gte': minR*0.3}}  # a good number to use, objects smaller than this size is hard to display
-
-            ]
-        },
-
+        cursor = self.db[coll].find({'$and':[
             {
-            '_id':0,
-            'loc':0
-        })
-
+                'loc': {
+                    '$geoWithin':{
+                        '$box': [
+                            [result[0],result[1]],
+                            [result[2],result[3]]
+                        ]
+                    }
+                }
+            },
+            {'b': {'$gte': minR*0.3}}
+        ]},
+            {'_id':0, 'loc': 0}
+        )
         return cursor
 
     # remeber to exclude the meta document
@@ -92,28 +90,34 @@ class MongoConnect(object):
         })
         return cursor
 
-    def getCoordRange(self, xc, yc, zoom, maxZoom):
+    def getCoordRange(self, xc, yc, zoom, collection):
         """Determine the projection of a tile on the maximum zoom level.
 
-        For tiles at lower (smaller) zoom levels, this function returns tile coordinates for the set of tiles that cover the same area as the provided one at the maximum zoom level.
+        For tiles at lower (smaller) zoom levels, this function returns tile
+        coordinates for the set of tiles that cover the same area as the
+        provided one at the maximum zoom level.
 
         Args:
             xc(int): x-coordinate of the required tile.
             yc(int): y-coordinate of the required tile.
             zoom(int): Zoom level of the required tile.
-            maxZoom(int): Maximum allowed zoom for the particular catalog
-                collection.
+            collection(str): The name of collection storing the requested catalog.
         Returns:
-            A tuple representing the smallest and largest coordinate in both x and y direction.
+            A tuple representing the smallest and largest coordinate in both
+            x and y direction.
 
         """
-        multi = 2**(int(maxZoom)-int(zoom))
-        xMin = int(xc)*multi - 1
-        xMax = (int(xc)+1)*multi
-        yMin = int(yc)*multi - 1
-        yMax = (int(yc)+1)*multi
+        # read map range info from collection
+        meta = self.stat_db[collection].find_one({'_id':'meta'})
+        x_range = meta['xRange']
+        y_range = meta['yRange']
 
-        return (xMax, xMin, yMax, yMin)
+        total = 2**(zoom)
+        xMin = x_range*xc/total+meta['adjust'][0]
+        xMax = x_range*(xc+1)/total+meta['adjust'][0]
+        yMin = meta['adjust'][1]-y_range*yc/total
+        yMax = meta['adjust'][1]-y_range*(yc+1)/total
+        return (xMin, yMin, xMax, yMax)
 
     def getMinRadius(self, zoom, mapSizeV):
         """Returns the length scale of a one pixel.
@@ -186,7 +190,7 @@ class MongoConnect(object):
         dec = float(dec)
         pop_cursor = self.stat_db[coll].find({
             '$and':[{'RA':ra},{'DEC':dec}]},
-            {'_id': 0, 'tile_x': 0, 'tile_y': 0, 'a': 0, 'b': 0, 'loc':0, 'theta':0}
+            {'_id': 0, 'a': 0, 'b': 0, 'loc':0, 'theta':0}
         )
         return dumps(pop_cursor)
 
@@ -225,7 +229,7 @@ class MongoConnect(object):
             },
             {'b': {'$gte': minR*0.3}}
         ]},
-            {'_id':0, 'tile_x': 0, 'tile_y': 0, 'a': 0, 'b': 0, 'loc':0, 'theta':0}
+            {'_id':0, 'a': 0, 'b': 0, 'loc':0, 'theta':0}
         )
 
         return list(cursor)

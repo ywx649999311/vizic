@@ -117,20 +117,20 @@ class Connection(object):
 
         return circles
 
-    def import_new(self, df, coll_name, map_dict=None, max_zoom=8):
+    def import_new(self, df, coll_name, map_dict=None):
 
         exist_colls = self.show_catalogs()
         if coll_name in exist_colls:
             raise Exception('Provided collection name already exists, use a different name or use function import_exists().')
 
         coll = Collection()
-        coll.db_maxZoom = max_zoom
         coll.name = coll_name
 
         if map_dict is not None:
-            df = df.rename(columns=map_dict)
-        clms = [x.upper() for x in list(df.columns)]
+            for k in map_dict.keys():
+                df[k] = df[map_dict[k]]
 
+        clms = [x.upper() for x in list(df.columns)]
         if not set(['RA', 'DEC']).issubset(set(clms)):
             raise Exception("RA, DEC is required for visualization!")
         if not set(['A_IMAGE', 'B_IMAGE', 'THETA_IMAGE']).issubset(set(clms)):
@@ -144,6 +144,15 @@ class Connection(object):
         df_r, coll._des_crs = self._data_prep(df, coll)
         coll.x_range = coll._des_crs[2]*256
         coll.y_range = coll._des_crs[3]*256
+
+        # drop created mapped columns before ingecting data
+        if map_dict is not None:
+            col_keys = [x.upper() for x in map_dict.keys()
+                        if x.upper() not in ['RA', 'DEC']]
+            df_r.drop(col_keys,axis=1, inplace=True)
+            for k in col_keys:
+                coll._minMax.pop(k, None)
+
         self._insert_data(df_r, coll)
 
     def add_to_old(self, df, coll_name, map_dict=None):
@@ -155,15 +164,20 @@ class Connection(object):
             raise Exception('Provided collection name does not exist, please use function import_new()')
 
         coll = Collection()
-        coll.db_maxZoom = db_meta.db_maxZoom
+        coll.name = coll_name
         if map_dict is not None:
-            df = df.rename(columns=map_dict)
+            for k in map_dict.keys():
+                df[k] = df[map_dict[k]]
+
         clms = [x.upper() for x in list(df.columns)]
         if not set(['RA', 'DEC']).issubset(set(clms)):
             raise Exception("RA, DEC is required for visualization!")
-        if set(['A_IMAGE', 'B_IMAGE', 'THETA_IMAGE']).issubset(set(clms)) and (not db_meta.radius and not db_meta.point):
+        if set(['A_IMAGE', 'B_IMAGE', 'THETA_IMAGE']).issubset(set(clms)) and \
+                (not db_meta.radius and not db_meta.point):
             print('Will use shape information for filtering')
-        elif 'RADIUS' not in clms and not set(['A_IMAGE', 'B_IMAGE', 'THETA_IMAGE']).issubset(set(clms)) and db_meta.point:
+        elif ('RADIUS' not in clms and
+                not set(['A_IMAGE', 'B_IMAGE', 'THETA_IMAGE']).issubset(set(clms))) or  \
+                db_meta.point:
             coll.point = True
             print('Objects as points, slow performance')
         else:
@@ -172,8 +186,20 @@ class Connection(object):
         df_r, coll._des_crs = self._data_prep(df, coll)
         coll.x_range = coll._des_crs[2]*256
         coll.y_range = coll._des_crs[3]*256
+        self.update_coll(coll, db_meta)
+
+        # drop created mapped columns before ingecting data
+        if map_dict is not None:
+            col_keys = [x.upper() for x in map_dict.keys()
+                        if x.upper() not in ['RA', 'DEC']]
+            df_r.drop(col_keys, axis=1, inplace=True)
+            for k in col_keys:
+                coll._minMax.pop(k, None)
+
+        self._insert_data(df_r, coll)
 
     def update_coll(self, new, old):
+
         xMin = new._des_crs[0] if new._des_crs[0] < old._des_crs[0] \
             else old._des_crs[0]
         xMax = new._des_crs[0]+new.x_range if new._des_crs[0]+new.x_range > \
@@ -183,8 +209,21 @@ class Connection(object):
         yMax = new._des_crs[1] if new._des_crs[1] > old._des_crs[1] \
             else old._des_crs[1]
 
-        x_range = xMax - xMin
-        y_range = yMax - yMin
+        new.x_range = xMax - xMin
+        new.y_range = yMax - yMin
+        new._des_crs = [xMin, yMax, new.x_range/256, new.y_range/256]
+
+        com_keys = list(set(new._minMax.keys()) & set(old._minMax.keys()))
+        for key in com_keys:
+            nMin = new._minMax[key][0] if new._minMax[key][0] < \
+                old._minMax[key][0] else old._minMax[key][0]
+            nMax = new._minMax[key][1] if new._minMax[key][1] > \
+                old._minMax[key][1] else old._minMax[key][1]
+            new._minMax[key] = [nMin, nMax]
+
+        for k in old._minMax.keys():
+            if k not in com_keys:
+                new._minMax[k] = old._minMax[k]
 
     def read_meta(self, coll_name):
 
@@ -194,9 +233,8 @@ class Connection(object):
         coll._des_crs = meta['adjust']
         coll.x_range = meta['xRange']
         coll.y_range = meta['yRange']
-        coll.__minMax = meta['minmax']
+        coll._minMax = meta['minmax']
         (coll.radius, coll.point) = (meta['radius'], meta['point'])
-        coll.db_maxZoom = int(meta['maxZoom'])
 
         return coll
 
@@ -222,7 +260,6 @@ class Connection(object):
         dff.columns = [x.upper() for x in dff.columns]
         (xMax, xMin) = (dff['RA'].max(), dff['RA'].min())
         (yMax, yMin) = (dff['DEC'].max(), dff['DEC'].min())
-        scaleMax = 2**int(coll.db_maxZoom)
         x_range = xMax - xMin
         y_range = yMax - yMin
 
@@ -230,9 +267,6 @@ class Connection(object):
         for col in dff.columns:
             if dff[col].dtype.kind == 'f':
                 coll._minMax[col] = [dff[col].min(), dff[col].max()]
-
-        dff['tile_x'] = ((dff.RA-xMin)*scaleMax/x_range).apply(np.floor).astype(int)
-        dff['tile_y'] = ((yMax-dff.DEC)*scaleMax/y_range).apply(np.floor).astype(int)
 
         if coll.radius:
             dff.loc[:, 'b'] = dff.loc[:, 'RADIUS'].apply(lambda x: x*0.267/3600)
@@ -247,7 +281,6 @@ class Connection(object):
 
         dff['ra'] = dff['RA']
         dff['dec'] = dff['DEC']
-        # dff['zoom'] = int(zoom)
 
         xScale = x_range/256
         yScale = y_range/256
@@ -264,14 +297,13 @@ class Connection(object):
         data_d = df.to_dict(orient='records')
         collection = self.db[coll.name]
         collection.insert_many(data_d, ordered=False)
-        collection.insert_one({'_id': 'meta', 'adjust': coll._des_crs, 'xRange': coll.x_range, 'yRange': coll.y_range, 'minmax': coll._minMax, 'maxZoom':coll.db_maxZoom,'radius':coll.radius,'point':coll.point})
+        collection.update_one({'_id': 'meta'}, {'$set':{'adjust': coll._des_crs, 'xRange': coll.x_range, 'yRange': coll.y_range, 'minmax': coll._minMax, 'radius':coll.radius,'point':coll.point}}, upsert=True)
         bulk = collection.initialize_unordered_bulk_op()
-        bulk.find({'_id':{'$ne':'meta'}}).update({'$rename':{'ra':'loc.lng'}})
-        bulk.find({'_id':{'$ne':'meta'}}).update({'$rename':{'dec':'loc.lat'}})
+        bulk.find({'ra':{'$exists':True}}).update(
+            {'$rename':{'ra':'loc.lng', 'dec':'loc.lat'}})
         try:
-            result = bulk.execute()
-        except:
-            print(result)
+            bulk.execute()
+        except pmg.errors.BulkWriteError as bwe:
+            print(bwe.details)
         collection.create_index([('loc', pmg.GEO2D)], name='geo_loc_2d', min=-90, max=360)
-        collection.create_index([('tile_x', pmg.ASCENDING),('tile_y', pmg.ASCENDING)], name='tile_x_y')
         collection.create_index([('b', pmg.ASCENDING)], name='semi_axis')

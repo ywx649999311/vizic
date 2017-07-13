@@ -202,7 +202,7 @@ class GridLayer(RasterLayer):
         elif self.filter_property not in self.get_fields():
             self.filter_property = ''
 
-    def __init__(self, connection, coll_name=None, **kwargs):
+    def __init__(self, connection, coll_name=None, map_dict=None, **kwargs):
         """
         Args:
             connection: A wrapper for MongoDB connections.
@@ -215,6 +215,11 @@ class GridLayer(RasterLayer):
             self.db = connection.db
         except:
             raise Exception('Mongodb connection error! Check connection object!')
+
+        if map_dict is not None:
+            self.map_dict = map_dict
+            for k in map_dict.keys():
+                self.df[k] = self.df[map_dict[k]]
 
         self.connection = connection
         self._server_url = connection._url
@@ -245,9 +250,6 @@ class GridLayer(RasterLayer):
             self.y_range = meta['yRange']
             self.__minMax = meta['minmax']
             (self.radius, self.point) = (meta['radius'], meta['point'])
-            self.db_maxZoom = int(meta['maxZoom'])
-            if self.max_zoom > int(meta['maxZoom']):
-                self.max_zoom = int(meta['maxZoom'])
         elif self.df is not None:
             clms = [x.upper() for x in list(self.df.columns)]
             exist_colls = self.db.collection_names()
@@ -268,7 +270,11 @@ class GridLayer(RasterLayer):
             df_r, self._des_crs = self._data_prep(self.max_zoom, self.df)
             self.x_range = self._des_crs[2]*256
             self.y_range = self._des_crs[3]*256
-            self.db_maxZoom = self.max_zoom
+
+            # drop created mapped columns before ingecting data
+            col_keys = [x.upper() for x in self.map_dict.keys()
+                        if x.upper() not in ['RA', 'DEC']]
+            df_r.drop(col_keys,axis=1, inplace=True)
             self._insert_data(df_r, coll_name)
         else:
             raise Exception('Need to provide a collection name or a pandas dataframe!')
@@ -295,7 +301,6 @@ class GridLayer(RasterLayer):
         dff.columns = [x.upper() for x in dff.columns]
         (xMax, xMin) = (dff['RA'].max(), dff['RA'].min())
         (yMax, yMin) = (dff['DEC'].max(), dff['DEC'].min())
-        scaleMax = 2**int(zoom)
         x_range = xMax - xMin
         y_range = yMax - yMin
 
@@ -303,9 +308,6 @@ class GridLayer(RasterLayer):
         for col in dff.columns:
             if dff[col].dtype.kind == 'f':
                 self.__minMax[col] = [dff[col].min(), dff[col].max()]
-
-        dff['tile_x'] = ((dff.RA-xMin)*scaleMax/x_range).apply(np.floor).astype(int)
-        dff['tile_y'] = ((yMax-dff.DEC)*scaleMax/y_range).apply(np.floor).astype(int)
 
         if self.radius:
             dff.loc[:, 'b'] = dff.loc[:, 'RADIUS'].apply(lambda x: x*0.267/3600)
@@ -320,7 +322,6 @@ class GridLayer(RasterLayer):
 
         dff['ra'] = dff['RA']
         dff['dec'] = dff['DEC']
-        # dff['zoom'] = int(zoom)
 
         xScale = x_range/256
         yScale = y_range/256
@@ -342,16 +343,15 @@ class GridLayer(RasterLayer):
         data_d = df.to_dict(orient='records')
         coll = self.db[self.collection]
         coll.insert_many(data_d, ordered=False)
-        coll.insert_one({'_id': 'meta', 'adjust': self._des_crs, 'xRange': self.x_range, 'yRange': self.y_range, 'minmax': self.__minMax, 'maxZoom':self.max_zoom,'radius':self.radius,'point':self.point})
+        coll.insert_one({'_id': 'meta', 'adjust': self._des_crs, 'xRange': self.x_range, 'yRange': self.y_range, 'minmax': self.__minMax, 'radius':self.radius,'point':self.point})
         bulk = coll.initialize_unordered_bulk_op()
-        bulk.find({'_id':{'$ne':'meta'}}).update({'$rename':{'ra':'loc.lng'}})
-        bulk.find({'_id':{'$ne':'meta'}}).update({'$rename':{'dec':'loc.lat'}})
+        bulk.find({'ra':{'$exists':True}}).update(
+            {'$rename':{'ra':'loc.lng', 'dec':'loc.lat'}})
         try:
-            result = bulk.execute()
-        except:
-            print(result)
+            bulk.execute()
+        except pmg.errors.BulkWriteError as bwe:
+            print(bwe.details)
         coll.create_index([('loc', pmg.GEO2D)], name='geo_loc_2d', min=-90, max=360)
-        coll.create_index([('tile_x', pmg.ASCENDING),('tile_y', pmg.ASCENDING)], name='tile_x_y')
         coll.create_index([('b', pmg.ASCENDING)], name='semi_axis')
 
     def push_data(self, url):
@@ -369,7 +369,7 @@ class GridLayer(RasterLayer):
         body = {
             'collection': self.collection,
             'mrange': mRange,
-            'maxzoom': self.db_maxZoom
+            'maxzoom': self.max_zoom
         }
         push_url = url_path_join(url, '/rangeinfo/')
         req = requests.post(push_url, data=body)
