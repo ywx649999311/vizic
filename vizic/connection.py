@@ -3,6 +3,22 @@ import pymongo as pg
 import requests
 from pymongo.errors import AutoReconnect, ConnectionFailure
 from notebook.utils import url_path_join
+import numpy as np
+import pandas as pd
+import pymongo as pmg
+
+
+class Collection(object):
+
+    def __init__(self):
+        self.point = False
+        self.radius = False
+        self.name = ''
+        self._des_crs = []
+        self.x_range = 0
+        self.y_range = 0
+        self.db_maxZoom = 8
+        self._minMax = {}
 
 
 class Connection(object):
@@ -100,3 +116,162 @@ class Connection(object):
         circles = [x['_id'] for x in circles]
 
         return circles
+
+    def import_new(self, df, coll_name, map_dict=None, max_zoom=8):
+
+        exist_colls = self.show_catalogs()
+        if coll_name in exist_colls:
+            raise Exception('Provided collection name already exists, use a different name or use function import_exists().')
+
+        coll = Collection()
+        coll.db_maxZoom = max_zoom
+        coll.name = coll_name
+
+        if map_dict is not None:
+            df = df.rename(columns=map_dict)
+        clms = [x.upper() for x in list(df.columns)]
+
+        if not set(['RA', 'DEC']).issubset(set(clms)):
+            raise Exception("RA, DEC is required for visualization!")
+        if not set(['A_IMAGE', 'B_IMAGE', 'THETA_IMAGE']).issubset(set(clms)):
+            print('No shape information provided')
+            if 'RADIUS' in clms:
+                print('Will use radius for filtering!')
+                coll.radius = True
+            else:
+                print('Object as point, slow performance!')
+                coll.point = True
+        df_r, coll._des_crs = self._data_prep(df, coll)
+        coll.x_range = coll._des_crs[2]*256
+        coll.y_range = coll._des_crs[3]*256
+        self._insert_data(df_r, coll)
+
+    def add_to_old(self, df, coll_name, map_dict=None):
+
+        exist_colls = self.show_catalogs()
+        if coll_name in exist_colls:
+            db_meta = self.read_meta(coll_name)
+        else:
+            raise Exception('Provided collection name does not exist, please use function import_new()')
+
+        coll = Collection()
+        coll.db_maxZoom = db_meta.db_maxZoom
+        if map_dict is not None:
+            df = df.rename(columns=map_dict)
+        clms = [x.upper() for x in list(df.columns)]
+        if not set(['RA', 'DEC']).issubset(set(clms)):
+            raise Exception("RA, DEC is required for visualization!")
+        if set(['A_IMAGE', 'B_IMAGE', 'THETA_IMAGE']).issubset(set(clms)) and (not db_meta.radius and not db_meta.point):
+            print('Will use shape information for filtering')
+        elif 'RADIUS' not in clms and not set(['A_IMAGE', 'B_IMAGE', 'THETA_IMAGE']).issubset(set(clms)) and db_meta.point:
+            coll.point = True
+            print('Objects as points, slow performance')
+        else:
+            coll.radius = True
+            print('Use raidus to filter objects')
+        df_r, coll._des_crs = self._data_prep(df, coll)
+        coll.x_range = coll._des_crs[2]*256
+        coll.y_range = coll._des_crs[3]*256
+
+    def update_coll(self, new, old):
+        xMin = new._des_crs[0] if new._des_crs[0] < old._des_crs[0] \
+            else old._des_crs[0]
+        xMax = new._des_crs[0]+new.x_range if new._des_crs[0]+new.x_range > \
+            old._des_crs[0]+old.x_range else old._des_crs[0]+old.x_range
+        yMin = new._des_crs[1]-new.y_range if new._des_crs[1]-new.y_range < \
+            old._des_crs[1]-old.y_range else old._des_crs[1]-old.y_range
+        yMax = new._des_crs[1] if new._des_crs[1] > old._des_crs[1] \
+            else old._des_crs[1]
+
+        x_range = xMax - xMin
+        y_range = yMax - yMin
+
+    def read_meta(self, coll_name):
+
+        coll = Collection()
+        meta = self.db[coll_name].find_one({'_id': 'meta'})
+        coll.name = coll_name
+        coll._des_crs = meta['adjust']
+        coll.x_range = meta['xRange']
+        coll.y_range = meta['yRange']
+        coll.__minMax = meta['minmax']
+        (coll.radius, coll.point) = (meta['radius'], meta['point'])
+        coll.db_maxZoom = int(meta['maxZoom'])
+
+        return coll
+
+    def _data_prep(self, df, coll):
+        """Private method for formatting catalog.
+
+        Metadata for catalog provided in a pandas dataframe is extracted here.
+        Corresponding tile ID for each object in the catalog is caculated and
+        inserted into the dataframe, so as the mapped coordinates and
+        shapes/sizes for the objects.
+
+        Args:
+            df: A pandas dataframe containning the catalog.
+            coll: The Collection object containing meta information for the new
+                catalog.
+
+        Returns:
+            A new pandas dataframe with added columns and a list specifying
+            the coordinate scale.
+
+        """
+        dff = df.copy()
+        dff.columns = [x.upper() for x in dff.columns]
+        (xMax, xMin) = (dff['RA'].max(), dff['RA'].min())
+        (yMax, yMin) = (dff['DEC'].max(), dff['DEC'].min())
+        scaleMax = 2**int(coll.db_maxZoom)
+        x_range = xMax - xMin
+        y_range = yMax - yMin
+
+        # find field min and max
+        for col in dff.columns:
+            if dff[col].dtype.kind == 'f':
+                coll._minMax[col] = [dff[col].min(), dff[col].max()]
+
+        dff['tile_x'] = ((dff.RA-xMin)*scaleMax/x_range).apply(np.floor).astype(int)
+        dff['tile_y'] = ((yMax-dff.DEC)*scaleMax/y_range).apply(np.floor).astype(int)
+
+        if coll.radius:
+            dff.loc[:, 'b'] = dff.loc[:, 'RADIUS'].apply(lambda x: x*0.267/3600)
+            dff['theta'] = 0
+        elif coll.point:
+            dff['b'] = 360
+            dff['theta'] = 0
+        else:
+            dff.loc[:, 'a'] = dff.loc[:, 'A_IMAGE'].apply(lambda x: x*0.267/3600)
+            dff.loc[:, 'b'] = dff.loc[:, 'B_IMAGE'].apply(lambda x: x*0.267/3600)
+            dff.loc[:, 'theta'] = dff.loc[:, 'THETA_IMAGE']
+
+        dff['ra'] = dff['RA']
+        dff['dec'] = dff['DEC']
+        # dff['zoom'] = int(zoom)
+
+        xScale = x_range/256
+        yScale = y_range/256
+        return dff, [xMin, yMax, xScale, yScale]
+
+    def _insert_data(self, df, coll):
+        """Private method to insert a catalog into database.
+
+        Args:
+            df: A pandas dataframe with correctly formatted catalog.
+            coll_name: MongoDB collection name for the new catalog.
+        """
+
+        data_d = df.to_dict(orient='records')
+        collection = self.db[coll.name]
+        collection.insert_many(data_d, ordered=False)
+        collection.insert_one({'_id': 'meta', 'adjust': coll._des_crs, 'xRange': coll.x_range, 'yRange': coll.y_range, 'minmax': coll._minMax, 'maxZoom':coll.db_maxZoom,'radius':coll.radius,'point':coll.point})
+        bulk = collection.initialize_unordered_bulk_op()
+        bulk.find({'_id':{'$ne':'meta'}}).update({'$rename':{'ra':'loc.lng'}})
+        bulk.find({'_id':{'$ne':'meta'}}).update({'$rename':{'dec':'loc.lat'}})
+        try:
+            result = bulk.execute()
+        except:
+            print(result)
+        collection.create_index([('loc', pmg.GEO2D)], name='geo_loc_2d', min=-90, max=360)
+        collection.create_index([('tile_x', pmg.ASCENDING),('tile_y', pmg.ASCENDING)], name='tile_x_y')
+        collection.create_index([('b', pmg.ASCENDING)], name='semi_axis')

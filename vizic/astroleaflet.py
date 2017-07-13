@@ -216,16 +216,16 @@ class GridLayer(RasterLayer):
         except:
             raise Exception('Mongodb connection error! Check connection object!')
 
-        self.coll_name = coll_name
+        self.connection = connection
         self._server_url = connection._url
-        self._checkInput()
+        self._checkInput(coll_name)
         self.push_data(self._server_url)
         self._popup_callbacks.register_callback(self._query_obj, remove=False)
         self.on_msg(self._handle_leaflet_event)
 
         print('Mongodb collection name is {}'.format(self.collection))
 
-    def _checkInput(self):
+    def _checkInput(self, coll_name):
         """Check data source.
 
         If a string specifying the collection name for stored catalog is given
@@ -234,6 +234,9 @@ class GridLayer(RasterLayer):
         containing the catalog is provided in the instructor, the catalog will
         be formated and ingested into the database using provided ``coll_name``
         or a randomly generated string by ``uuid``.
+
+        Args:
+            coll_name: MongoDB collection name for the new catalog.
         """
         if not self.collection == '':
             meta = self.db[self.collection].find_one({'_id': 'meta'})
@@ -241,7 +244,7 @@ class GridLayer(RasterLayer):
             self.x_range = meta['xRange']
             self.y_range = meta['yRange']
             self.__minMax = meta['minmax']
-            (self.radius,self.point) = (meta['radius'], meta['point'])
+            (self.radius, self.point) = (meta['radius'], meta['point'])
             self.db_maxZoom = int(meta['maxZoom'])
             if self.max_zoom > int(meta['maxZoom']):
                 self.max_zoom = int(meta['maxZoom'])
@@ -260,13 +263,13 @@ class GridLayer(RasterLayer):
                     print('Object as point, slow performance!')
                     self.point = True
 
-            if self.coll_name is not None and self.coll_name in exist_colls:
-                raise Exception('Collectoin name already exists, try to use a different name or remove the df argument.')
+            if coll_name is not None and coll_name in exist_colls:
+                raise Exception('Collectoin name already exists, try to use a different name or use existing collection.')
             df_r, self._des_crs = self._data_prep(self.max_zoom, self.df)
             self.x_range = self._des_crs[2]*256
             self.y_range = self._des_crs[3]*256
             self.db_maxZoom = self.max_zoom
-            self._insert_data(df_r)
+            self._insert_data(df_r, coll_name)
         else:
             raise Exception('Need to provide a collection name or a pandas dataframe!')
 
@@ -323,14 +326,15 @@ class GridLayer(RasterLayer):
         yScale = y_range/256
         return dff, [xMin, yMax, xScale, yScale]
 
-    def _insert_data(self, df):
+    def _insert_data(self, df, coll_name):
         """Private method to insert a catalog into database.
 
         Args:
             df: A pandas dataframe with correctly formatted catalog.
+            coll_name: MongoDB collection name for the new catalog.
         """
-        if self.coll_name is not None:
-            self.collection = self.coll_name
+        if coll_name is not None:
+            self.collection = coll_name
         if self.collection == '':
             coll_id = str(uuid.uuid4())
             self.collection = coll_id
@@ -347,7 +351,6 @@ class GridLayer(RasterLayer):
         except:
             print(result)
         coll.create_index([('loc', pmg.GEO2D)], name='geo_loc_2d', min=-90, max=360)
-        # coll.create_index([('RA', pmg.ASCENDING),('DEC', pmg.ASCENDING)], name='ra_dec')
         coll.create_index([('tile_x', pmg.ASCENDING),('tile_y', pmg.ASCENDING)], name='tile_x_y')
         coll.create_index([('b', pmg.ASCENDING)], name='semi_axis')
 
