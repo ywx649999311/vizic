@@ -48,8 +48,8 @@ L.CusOverLay = L.Layer.extend({
     },
 
     sortJson: function(data){
-        var chunk = 60,
-            numGroups = Math.ceil(data.length / chunk);
+        var numGroups = 8,
+            chunk = Math.ceil(data.length / numGroups);
 
         for (var i = 0, z = 0; i < numGroups; z += chunk, i++){
             this._dataR[i] = data.slice(z, z+chunk);
