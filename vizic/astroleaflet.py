@@ -159,7 +159,10 @@ class GridLayer(RasterLayer):
     point = Bool(False).tag(sync=True, o=True)
     df_rad = Int(2).tag(sync=True, o=True)
     scale_r = Float(1.0).tag(sync=True, o=True)
+    c_lock = Bool(False, help='Lock on objects coloring method.').tag(sync=True)
 
+    # color by catalogs
+    c_by_c = Bool(False, help='Color the map by different catalogs').tag(sync=True, o=True)
     # filter by property range
     filter_obj = Bool(False, help="Fileter object by property value range").tag(sync=True)
     filter_property = Unicode(help="The proerty field used to sort objects").tag(sync=True)
@@ -169,23 +172,40 @@ class GridLayer(RasterLayer):
     __minMax = {}
     _popup_callbacks = Instance(CallbackDispatcher, ())
 
+    @observe('c_by_c')
+    def _update_cat_color(self, change):
+        if change['new'] is True:
+            self.custom_c = False
+            self.c_lock = True
+        else:
+            self.c_lock = False
+
     @observe('custom_c')
     def _update_color_src(self, change):
-        if change['new'] is True and self.c_field in self.get_fields():
-            self.c_min_max = self.__minMax[self.c_field]
+        if change['new'] is True:
+            self.c_min_max = []
+            self.c_by_c = False
+            self.c_lock = True
         else:
             self.c_min_max = []
+            self.c_lock = False
+
+    @validate('c_field')
+    def _valid_field(self, proposal):
+        if self.custom_c is False and not proposal['value'] == '':
+            raise TraitError('Activate color by properties before ' +
+                             'assigning a field to use')
+        return proposal['value']
 
     @observe('c_field')
     def _update_c_min_max(self, change):
         if self.custom_c is True and self.c_field in self.get_fields():
             self.c_min_max = self.__minMax[change['new']]
-        elif self.custom_c is False:
+        elif self.custom_c is False and change['new'] == '':
             pass
         else:
             raise Exception('Color Field ({}) not valid!'.format(self.c_field))
             self.c_field = change['old']
-        # return proposal['value']
 
     @observe('filter_obj')
     def _update_filter(self, change):
@@ -217,20 +237,19 @@ class GridLayer(RasterLayer):
             raise Exception('Mongodb connection error! Check connection object!')
 
         if map_dict is not None:
-            self.map_dict = map_dict
             for k in map_dict.keys():
                 self.df[k] = self.df[map_dict[k]]
 
         self.connection = connection
         self._server_url = connection._url
-        self._checkInput(coll_name)
+        self._checkInput(coll_name, map_dict)
         self.push_data(self._server_url)
         self._popup_callbacks.register_callback(self._query_obj, remove=False)
         self.on_msg(self._handle_leaflet_event)
 
         print('Mongodb collection name is {}'.format(self.collection))
 
-    def _checkInput(self, coll_name):
+    def _checkInput(self, coll_name, map_dict):
         """Check data source.
 
         If a string specifying the collection name for stored catalog is given
@@ -242,6 +261,7 @@ class GridLayer(RasterLayer):
 
         Args:
             coll_name: MongoDB collection name for the new catalog.
+            map_dict(dict): Dataframe columns mapping dictionary.
         """
         if not self.collection == '':
             meta = self.db[self.collection].find_one({'_id': 'meta'})
@@ -250,6 +270,7 @@ class GridLayer(RasterLayer):
             self.y_range = meta['yRange']
             self.__minMax = meta['minmax']
             (self.radius, self.point) = (meta['radius'], meta['point'])
+            self.cat_ct = meta['catCt']
         elif self.df is not None:
             clms = [x.upper() for x in list(self.df.columns)]
             exist_colls = self.db.collection_names()
@@ -272,9 +293,13 @@ class GridLayer(RasterLayer):
             self.y_range = self._des_crs[3]*256
 
             # drop created mapped columns before ingecting data
-            col_keys = [x.upper() for x in self.map_dict.keys()
-                        if x.upper() not in ['RA', 'DEC']]
-            df_r.drop(col_keys,axis=1, inplace=True)
+            if map_dict is not None:
+                col_keys = [x.upper() for x in map_dict.keys()
+                            if x.upper() not in ['RA', 'DEC']]
+                df_r.drop(col_keys,axis=1, inplace=True)
+                for k in col_keys:
+                    coll._minMax.pop(k, None)
+
             self._insert_data(df_r, coll_name)
         else:
             raise Exception('Need to provide a collection name or a pandas dataframe!')
@@ -340,10 +365,11 @@ class GridLayer(RasterLayer):
             coll_id = str(uuid.uuid4())
             self.collection = coll_id
 
+        df['cat_rank'] = 1
         data_d = df.to_dict(orient='records')
         coll = self.db[self.collection]
         coll.insert_many(data_d, ordered=False)
-        coll.insert_one({'_id': 'meta', 'adjust': self._des_crs, 'xRange': self.x_range, 'yRange': self.y_range, 'minmax': self.__minMax, 'radius':self.radius,'point':self.point})
+        coll.insert_one({'_id': 'meta', 'adjust': self._des_crs, 'xRange': self.x_range, 'yRange': self.y_range, 'minmax': self.__minMax, 'radius':self.radius,'point':self.point, 'cat_ct':1})
         bulk = coll.initialize_unordered_bulk_op()
         bulk.find({'ra':{'$exists':True}}).update(
             {'$rename':{'ra':'loc.lng', 'dec':'loc.lat'}})

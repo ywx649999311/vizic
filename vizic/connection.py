@@ -19,6 +19,7 @@ class Collection(object):
         self.y_range = 0
         self.db_maxZoom = 8
         self._minMax = {}
+        self.cat_ct = 1
 
 
 class Connection(object):
@@ -224,6 +225,7 @@ class Connection(object):
         for k in old._minMax.keys():
             if k not in com_keys:
                 new._minMax[k] = old._minMax[k]
+        new.cat_ct = old.cat_ct + 1
 
     def read_meta(self, coll_name):
 
@@ -234,6 +236,7 @@ class Connection(object):
         coll.x_range = meta['xRange']
         coll.y_range = meta['yRange']
         coll._minMax = meta['minmax']
+        coll.cat_ct = meta['catCt']
         (coll.radius, coll.point) = (meta['radius'], meta['point'])
 
         return coll
@@ -294,10 +297,11 @@ class Connection(object):
             coll_name: MongoDB collection name for the new catalog.
         """
 
+        df['cat_rank'] = coll.cat_ct
         data_d = df.to_dict(orient='records')
         collection = self.db[coll.name]
         collection.insert_many(data_d, ordered=False)
-        collection.update_one({'_id': 'meta'}, {'$set':{'adjust': coll._des_crs, 'xRange': coll.x_range, 'yRange': coll.y_range, 'minmax': coll._minMax, 'radius':coll.radius,'point':coll.point}}, upsert=True)
+        collection.update_one({'_id': 'meta'}, {'$set':{'adjust': coll._des_crs, 'xRange': coll.x_range, 'yRange': coll.y_range, 'minmax': coll._minMax, 'radius':coll.radius,'point':coll.point, 'catCt':coll.cat_ct}}, upsert=True)
         bulk = collection.initialize_unordered_bulk_op()
         bulk.find({'ra':{'$exists':True}}).update(
             {'$rename':{'ra':'loc.lng', 'dec':'loc.lat'}})

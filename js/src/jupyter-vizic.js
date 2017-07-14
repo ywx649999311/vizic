@@ -263,26 +263,34 @@ var LeafletGridLayerView = LeafletRasterLayerView.extend({
             that.obj.options.cMinMax = that.model.get('c_min_max');
             that.obj.options.cField = that.model.get('c_field');
             that.obj.options.cMap = that.model.get('c_map');
+            that.obj.options.cByC = that.model.get('c_by_c');
+            that.obj.options.catCt = that.model.get('cat_ct');
             callback(null);
         }
         this.listenTo(this.model, 'change:color', function() {
             var key;
             var q = d3.queue();
             var c = this.model.get('color');
-            d3.selectAll('.leaflet-tile').selectAll('ellipse').attr('fill', c);
-            this.obj.options.color = c;
-            for (key in that.obj._cTiles) {
-                q.defer(single_cTile, key, c);
+            var lock = this.model.get('c_lock');
+            console.log(lock);
+            if (lock === false){
+                d3.selectAll('.leaflet-tile').selectAll('ellipse').attr('fill', c);
+                this.obj.options.color = c;
+                for (key in that.obj._cTiles) {
+                    q.defer(single_cTile, key, c);
+                }
+                q.awaitAll(function(error) {
+                    if (error) throw error;
+                    console.log('single color change done');
+                });
             }
-            q.awaitAll(function(error) {
-                if (error) throw error;
-                console.log('single color change done');
-            });
         }, this);
         this.listenTo(this.model, 'change:c_map', function(){
             var custom_c = this.model.get('custom_c');
             var c_min_max = this.model.get('c_min_max');
             var c_map = this.model.get('c_map');
+            var c_by_c = this.model.get('c_by_c');
+            var cat_ct = this.model.get('cat_ct');
             var interpolate = d3.scaleSequential(colorMaps[c_map]).domain(c_min_max);
             function update_cTile(key, c_field, callback) {
                 d3.select(that.obj._cTiles[key].el).selectAll('ellipse').attr('fill', function(d) {
@@ -306,9 +314,66 @@ var LeafletGridLayerView = LeafletRasterLayerView.extend({
                     console.log('update cTiles for customC');
                 });
             }
+            else if (c_by_c === true){
+                interpolate = d3.scaleSequential(colorMaps[c_map]).domain([1,cat_ct+1]);
+                d3.selectAll('.leaflet-tile').selectAll('ellipse').attr('fill', function(d) {
+                    return interpolate(d.cat_rank);
+                });
+                q.defer(change_c_options);
+                for (key in that.obj._cTiles) {
+                    q.defer(update_cTile, key, 'cat_rank');
+                }
+                q.awaitAll(function(error) {
+                    if (error) throw error;
+                    console.log('update cTiles for customC');
+                });
+            }
+        }, this);
+        this.listenTo(this.model, 'change:c_by_c', function(){
+            var c_by_c = this.model.get('c_by_c');
+            var c_map = this.model.get('c_map');
+            var cat_ct = this.model.get('cat_ct');
+            var custom_c = this.model.get('custom_c');
+            var interpolate = d3.scaleSequential(colorMaps[c_map]).domain([1,cat_ct+1]);
+
+            function update_cTile(key, callback) {
+                d3.select(that.obj._cTiles[key].el).selectAll('ellipse').attr('fill', function(d) {
+                    return interpolate(d.cat_rank);
+                });
+                callback(null);
+            }
+            var key;
+            var q = d3.queue();
+            if (c_by_c === true) {
+                d3.selectAll('.leaflet-tile').selectAll('ellipse').attr('fill', function(d) {
+                    return interpolate(d.cat_rank);
+                });
+                q.defer(change_c_options);
+                for (key in that.obj._cTiles) {
+                    q.defer(update_cTile, key);
+                }
+                q.awaitAll(function(error) {
+                    if (error) throw error;
+                    console.log('update cTiles for customC');
+                });
+            }
+            else if (custom_c === false && c_by_c === false) {
+                d3.selectAll('.leaflet-tile').selectAll('ellipse').attr('fill', that.model.get('color'));
+                var c = this.model.get('color');
+                q.defer(change_c_options);
+                for (key in this.obj._cTiles) {
+                    q.defer(single_cTile, key, c);
+                }
+                q.awaitAll(function(error) {
+                    if (error) throw error;
+                    console.log('back to single color');
+                });
+                this.obj.options.color = c;
+            }
         }, this);
         this.listenTo(this.model, 'change:c_min_max', function() {
             var custom_c = this.model.get('custom_c');
+            var c_by_c = this.model.get('c_by_c');
             var c_min_max = this.model.get('c_min_max');
             var c_map = this.model.get('c_map');
             var interpolate = d3.scaleSequential(colorMaps[c_map]).domain(c_min_max);
@@ -334,18 +399,19 @@ var LeafletGridLayerView = LeafletRasterLayerView.extend({
                     if (error) throw error;
                     console.log('update cTiles for customC');
                 });
-            } else {
+            }
+            else if (custom_c === false && c_by_c === false){
                 d3.selectAll('.leaflet-tile').selectAll('ellipse').attr('fill', that.model.get('color'));
                 var c = this.model.get('color');
                 q.defer(change_c_options);
-                for (key in that.obj._cTiles) {
+                for (key in this.obj._cTiles) {
                     q.defer(single_cTile, key, c);
                 }
                 q.awaitAll(function(error) {
                     if (error) throw error;
                     console.log('back to single color');
                 });
-                that.obj.options.color = c;
+                this.obj.options.color = c;
             }
         }, this);
         this.listenTo(this.model, 'change:filter_range', function() {
@@ -1046,6 +1112,9 @@ var LeafletGridLayerModel = LeafletRasterLayerModel.extend({
         y_range: 1.0,
         center: [],
         color: 'red',
+        c_lock: false,
+        c_by_c: false,
+        cat_ct: 1,
         c_min_max: [],
         custom_c: false,
         c_field: '',
