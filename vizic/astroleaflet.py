@@ -298,7 +298,7 @@ class GridLayer(RasterLayer):
                             if x.upper() not in ['RA', 'DEC']]
                 df_r.drop(col_keys,axis=1, inplace=True)
                 for k in col_keys:
-                    coll._minMax.pop(k, None)
+                    self.__minMax.pop(k, None)
 
             self._insert_data(df_r, coll_name)
         else:
@@ -369,12 +369,14 @@ class GridLayer(RasterLayer):
         data_d = df.to_dict(orient='records')
         coll = self.db[self.collection]
         coll.insert_many(data_d, ordered=False)
-        coll.insert_one({'_id': 'meta', 'adjust': self._des_crs, 'xRange': self.x_range, 'yRange': self.y_range, 'minmax': self.__minMax, 'radius':self.radius,'point':self.point, 'cat_ct':1})
+        coll.insert_one({'_id': 'meta', 'adjust': self._des_crs, 'xRange': self.x_range, 'yRange': self.y_range, 'minmax': self.__minMax, 'radius':self.radius,'point':self.point, 'catCt':1})
         bulk = coll.initialize_unordered_bulk_op()
         bulk.find({'ra':{'$exists':True}}).update(
-            {'$rename':{'ra':'loc.lng', 'dec':'loc.lat'}})
+            {'$rename':{'ra':'loc.lng'}})
+        bulk.find({'dec':{'$exists':True}}).update(
+            {'$rename':{'dec':'loc.lat'}})
         try:
-            bulk.execute()
+            result = bulk.execute()
         except pmg.errors.BulkWriteError as bwe:
             print(bwe.details)
         coll.create_index([('loc', pmg.GEO2D)], name='geo_loc_2d', min=-90, max=360)

@@ -1,5 +1,4 @@
 from __future__ import print_function
-import pymongo as pg
 import requests
 from pymongo.errors import AutoReconnect, ConnectionFailure
 from notebook.utils import url_path_join
@@ -49,7 +48,7 @@ class Connection(object):
             self.sevrPort = sevrPort
         self._url = "http://localhost:{}/".format(self.sevrPort)
         try:
-            self.client = pg.MongoClient(dbHost, dbPort)
+            self.client = pmg.MongoClient(dbHost, dbPort)
             self.db = self.client[db]
             self.change_db(db)
         except ConnectionFailure as err:
@@ -303,10 +302,13 @@ class Connection(object):
         collection.insert_many(data_d, ordered=False)
         collection.update_one({'_id': 'meta'}, {'$set':{'adjust': coll._des_crs, 'xRange': coll.x_range, 'yRange': coll.y_range, 'minmax': coll._minMax, 'radius':coll.radius,'point':coll.point, 'catCt':coll.cat_ct}}, upsert=True)
         bulk = collection.initialize_unordered_bulk_op()
+        # Must be lng first, required for geo 2d indexing
         bulk.find({'ra':{'$exists':True}}).update(
-            {'$rename':{'ra':'loc.lng', 'dec':'loc.lat'}})
+            {'$rename':{'ra':'loc.lng'}})
+        bulk.find({'dec':{'$exists':True}}).update(
+            {'$rename':{'dec':'loc.lat'}})
         try:
-            bulk.execute()
+            result = bulk.execute({'w':'majority', 'j':True})
         except pmg.errors.BulkWriteError as bwe:
             print(bwe.details)
         collection.create_index([('loc', pmg.GEO2D)], name='geo_loc_2d', min=-90, max=360)

@@ -18,6 +18,7 @@ class MongoConnect(object):
     """
     range_dict = {}
     zoom_dict = {}
+    meta_dict = {}
 
     def __init__(self, host, port, db):
         """Initiate an asynchronous client and a static client.
@@ -51,7 +52,6 @@ class MongoConnect(object):
         """
         result = self.getCoordRange(int(xc), int(yc), int(zoom), coll)
         minR = self.getMinRadius(zoom, self.range_dict[coll])
-
         cursor = self.db[coll].find({'$and':[
             {
                 'loc': {
@@ -108,15 +108,15 @@ class MongoConnect(object):
 
         """
         # read map range info from collection
-        meta = self.stat_db[collection].find_one({'_id':'meta'})
+        meta = self.meta_dict[collection]
         x_range = meta['xRange']
         y_range = meta['yRange']
 
         total = 2**(zoom)
         xMin = x_range*xc/total+meta['adjust'][0]
         xMax = x_range*(xc+1)/total+meta['adjust'][0]
-        yMin = meta['adjust'][1]-y_range*yc/total
-        yMax = meta['adjust'][1]-y_range*(yc+1)/total
+        yMax = meta['adjust'][1]-y_range*yc/total
+        yMin = meta['adjust'][1]-y_range*(yc+1)/total
         return (xMin, yMin, xMax, yMax)
 
     def getMinRadius(self, zoom, mapSizeV):
