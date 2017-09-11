@@ -63,12 +63,16 @@ class rangeHandler(IPythonHandler):
         pass
 
     def post(self):
+        global connection
         arguments = {k.lower(): self.get_argument(k) for k in self.request.arguments}
         collection = arguments['collection']
         mRange = arguments['mrange']
         maxZoom = arguments['maxzoom']
-        MongoConnect.range_dict[collection] = float(mRange)
-        MongoConnect.zoom_dict[collection] = int(maxZoom)
+        connection.range_dict[collection] = float(mRange)
+        connection.zoom_dict[collection] = int(maxZoom)
+
+        meta = connection.stat_db[collection].find_one({'_id':'meta'})
+        connection.meta_dict[collection] = meta
 
 
 class popupHandler(IPythonHandler):

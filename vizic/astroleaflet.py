@@ -159,7 +159,10 @@ class GridLayer(RasterLayer):
     point = Bool(False).tag(sync=True, o=True)
     df_rad = Int(2).tag(sync=True, o=True)
     scale_r = Float(1.0).tag(sync=True, o=True)
+    c_lock = Bool(False, help='Lock on objects coloring method.').tag(sync=True)
 
+    # color by catalogs
+    c_by_c = Bool(False, help='Color the map by different catalogs').tag(sync=True, o=True)
     # filter by property range
     filter_obj = Bool(False, help="Fileter object by property value range").tag(sync=True)
     filter_property = Unicode(help="The proerty field used to sort objects").tag(sync=True)
@@ -169,23 +172,40 @@ class GridLayer(RasterLayer):
     __minMax = {}
     _popup_callbacks = Instance(CallbackDispatcher, ())
 
+    @observe('c_by_c')
+    def _update_cat_color(self, change):
+        if change['new'] is True:
+            self.custom_c = False
+            self.c_lock = True
+        else:
+            self.c_lock = False
+
     @observe('custom_c')
     def _update_color_src(self, change):
-        if change['new'] is True and self.c_field in self.get_fields():
-            self.c_min_max = self.__minMax[self.c_field]
+        if change['new'] is True:
+            self.c_min_max = []
+            self.c_by_c = False
+            self.c_lock = True
         else:
             self.c_min_max = []
+            self.c_lock = False
+
+    @validate('c_field')
+    def _valid_field(self, proposal):
+        if self.custom_c is False and not proposal['value'] == '':
+            raise TraitError('Activate color by properties before ' +
+                             'assigning a field to use')
+        return proposal['value']
 
     @observe('c_field')
     def _update_c_min_max(self, change):
         if self.custom_c is True and self.c_field in self.get_fields():
             self.c_min_max = self.__minMax[change['new']]
-        elif self.custom_c is False:
+        elif self.custom_c is False and change['new'] == '':
             pass
         else:
             raise Exception('Color Field ({}) not valid!'.format(self.c_field))
             self.c_field = change['old']
-        # return proposal['value']
 
     @observe('filter_obj')
     def _update_filter(self, change):
@@ -202,7 +222,7 @@ class GridLayer(RasterLayer):
         elif self.filter_property not in self.get_fields():
             self.filter_property = ''
 
-    def __init__(self, connection, coll_name=None, **kwargs):
+    def __init__(self, connection, coll_name=None, map_dict=None, **kwargs):
         """
         Args:
             connection: A wrapper for MongoDB connections.
@@ -216,16 +236,20 @@ class GridLayer(RasterLayer):
         except:
             raise Exception('Mongodb connection error! Check connection object!')
 
-        self.coll_name = coll_name
+        if map_dict is not None:
+            for k in map_dict.keys():
+                self.df[k] = self.df[map_dict[k]]
+
+        self.connection = connection
         self._server_url = connection._url
-        self._checkInput()
+        self._checkInput(coll_name, map_dict)
         self.push_data(self._server_url)
         self._popup_callbacks.register_callback(self._query_obj, remove=False)
         self.on_msg(self._handle_leaflet_event)
 
         print('Mongodb collection name is {}'.format(self.collection))
 
-    def _checkInput(self):
+    def _checkInput(self, coll_name, map_dict):
         """Check data source.
 
         If a string specifying the collection name for stored catalog is given
@@ -234,6 +258,10 @@ class GridLayer(RasterLayer):
         containing the catalog is provided in the instructor, the catalog will
         be formated and ingested into the database using provided ``coll_name``
         or a randomly generated string by ``uuid``.
+
+        Args:
+            coll_name: MongoDB collection name for the new catalog.
+            map_dict(dict): Dataframe columns mapping dictionary.
         """
         if not self.collection == '':
             meta = self.db[self.collection].find_one({'_id': 'meta'})
@@ -241,10 +269,8 @@ class GridLayer(RasterLayer):
             self.x_range = meta['xRange']
             self.y_range = meta['yRange']
             self.__minMax = meta['minmax']
-            (self.radius,self.point) = (meta['radius'], meta['point'])
-            self.db_maxZoom = int(meta['maxZoom'])
-            if self.max_zoom > int(meta['maxZoom']):
-                self.max_zoom = int(meta['maxZoom'])
+            (self.radius, self.point) = (meta['radius'], meta['point'])
+            self.cat_ct = meta['catCt']
         elif self.df is not None:
             clms = [x.upper() for x in list(self.df.columns)]
             exist_colls = self.db.collection_names()
@@ -260,17 +286,25 @@ class GridLayer(RasterLayer):
                     print('Object as point, slow performance!')
                     self.point = True
 
-            if self.coll_name is not None and self.coll_name in exist_colls:
-                raise Exception('Collectoin name already exists, try to use a different name or remove the df argument.')
-            df_r, self._des_crs = self._data_prep(self.max_zoom, self.df)
+            if coll_name is not None and coll_name in exist_colls:
+                raise Exception('Collectoin name already exists, try to use a different name or use existing collection.')
+            df_r, self._des_crs = self._data_prep(self.df)
             self.x_range = self._des_crs[2]*256
             self.y_range = self._des_crs[3]*256
-            self.db_maxZoom = self.max_zoom
-            self._insert_data(df_r)
+
+            # drop created mapped columns before ingecting data
+            if map_dict is not None:
+                col_keys = [x.upper() for x in map_dict.keys()
+                            if x.upper() not in ['RA', 'DEC']]
+                df_r.drop(col_keys,axis=1, inplace=True)
+                for k in col_keys:
+                    self.__minMax.pop(k, None)
+
+            self._insert_data(df_r, coll_name)
         else:
             raise Exception('Need to provide a collection name or a pandas dataframe!')
 
-    def _data_prep(self, zoom, df):
+    def _data_prep(self, df):
         """Private method for formatting catalog.
 
         Metadata for catalog provided in a pandas dataframe is extracted here.
@@ -279,8 +313,6 @@ class GridLayer(RasterLayer):
         shapes/sizes for the objects.
 
         Args:
-            zoom: An integer indicating the maximum zoom level for visualized
-                catalog.
             df: A pandas dataframe containning the catalog.
 
         Returns:
@@ -292,7 +324,6 @@ class GridLayer(RasterLayer):
         dff.columns = [x.upper() for x in dff.columns]
         (xMax, xMin) = (dff['RA'].max(), dff['RA'].min())
         (yMax, yMin) = (dff['DEC'].max(), dff['DEC'].min())
-        scaleMax = 2**int(zoom)
         x_range = xMax - xMin
         y_range = yMax - yMin
 
@@ -300,9 +331,6 @@ class GridLayer(RasterLayer):
         for col in dff.columns:
             if dff[col].dtype.kind == 'f':
                 self.__minMax[col] = [dff[col].min(), dff[col].max()]
-
-        dff['tile_x'] = ((dff.RA-xMin)*scaleMax/x_range).apply(np.floor).astype(int)
-        dff['tile_y'] = ((yMax-dff.DEC)*scaleMax/y_range).apply(np.floor).astype(int)
 
         if self.radius:
             dff.loc[:, 'b'] = dff.loc[:, 'RADIUS'].apply(lambda x: x*0.267/3600)
@@ -315,40 +343,32 @@ class GridLayer(RasterLayer):
             dff.loc[:, 'b'] = dff.loc[:, 'B_IMAGE'].apply(lambda x: x*0.267/3600)
             dff.loc[:, 'theta'] = dff.loc[:, 'THETA_IMAGE']
 
-        dff['ra'] = dff['RA']
-        dff['dec'] = dff['DEC']
-        # dff['zoom'] = int(zoom)
+        # assign 'loc' columns for geoIndex in Mongo
+        dff['loc'] = list(zip(dff.RA, dff.DEC))
 
         xScale = x_range/256
         yScale = y_range/256
         return dff, [xMin, yMax, xScale, yScale]
 
-    def _insert_data(self, df):
+    def _insert_data(self, df, coll_name):
         """Private method to insert a catalog into database.
 
         Args:
             df: A pandas dataframe with correctly formatted catalog.
+            coll_name: MongoDB collection name for the new catalog.
         """
-        if self.coll_name is not None:
-            self.collection = self.coll_name
+        if coll_name is not None:
+            self.collection = coll_name
         if self.collection == '':
             coll_id = str(uuid.uuid4())
             self.collection = coll_id
 
+        df['cat_rank'] = 1
         data_d = df.to_dict(orient='records')
         coll = self.db[self.collection]
         coll.insert_many(data_d, ordered=False)
-        coll.insert_one({'_id': 'meta', 'adjust': self._des_crs, 'xRange': self.x_range, 'yRange': self.y_range, 'minmax': self.__minMax, 'maxZoom':self.max_zoom,'radius':self.radius,'point':self.point})
-        bulk = coll.initialize_unordered_bulk_op()
-        bulk.find({'_id':{'$ne':'meta'}}).update({'$rename':{'ra':'loc.lng'}})
-        bulk.find({'_id':{'$ne':'meta'}}).update({'$rename':{'dec':'loc.lat'}})
-        try:
-            result = bulk.execute()
-        except:
-            print(result)
+        coll.insert_one({'_id': 'meta', 'adjust': self._des_crs, 'xRange': self.x_range, 'yRange': self.y_range, 'minmax': self.__minMax, 'radius': self.radius,'point': self.point, 'catCt': 1})
         coll.create_index([('loc', pmg.GEO2D)], name='geo_loc_2d', min=-90, max=360)
-        # coll.create_index([('RA', pmg.ASCENDING),('DEC', pmg.ASCENDING)], name='ra_dec')
-        coll.create_index([('tile_x', pmg.ASCENDING),('tile_y', pmg.ASCENDING)], name='tile_x_y')
         coll.create_index([('b', pmg.ASCENDING)], name='semi_axis')
 
     def push_data(self, url):
@@ -366,7 +386,7 @@ class GridLayer(RasterLayer):
         body = {
             'collection': self.collection,
             'mrange': mRange,
-            'maxzoom': self.db_maxZoom
+            'maxzoom': self.max_zoom
         }
         push_url = url_path_join(url, '/rangeinfo/')
         req = requests.post(push_url, data=body)

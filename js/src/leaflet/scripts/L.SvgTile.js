@@ -17,6 +17,8 @@ L.SvgTile = L.GridLayer.extend({
                 color: undefined,
                 cMinMax: [],
                 customC: false,
+                cByC: false,
+                catCt: 1,
                 cField: undefined,
                 cMap: 1,
                 filterObj:false,
@@ -297,6 +299,12 @@ L.SvgTile = L.GridLayer.extend({
                     var cField = that.options.cField;
                     color = function(d) {
                         return interpolate.domain(cMinMax)(d[cField]);
+                    };
+                }
+                if (this.options.cByC){
+                    var catCt = that.options.catCt;
+                    color = function(d) {
+                        return interpolate.domain([1, catCt+1])(d.cat_rank);
                     };
                 }
                 var validate = function(value){
