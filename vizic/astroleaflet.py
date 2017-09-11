@@ -288,7 +288,7 @@ class GridLayer(RasterLayer):
 
             if coll_name is not None and coll_name in exist_colls:
                 raise Exception('Collectoin name already exists, try to use a different name or use existing collection.')
-            df_r, self._des_crs = self._data_prep(self.max_zoom, self.df)
+            df_r, self._des_crs = self._data_prep(self.df)
             self.x_range = self._des_crs[2]*256
             self.y_range = self._des_crs[3]*256
 

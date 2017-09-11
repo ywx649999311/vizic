@@ -118,6 +118,14 @@ class Connection(object):
         return circles
 
     def import_new(self, df, coll_name, map_dict=None):
+        """Import new catalog without creating a map layer.
+
+        Args:
+            df: The pandas dataframe contaning the data to be imported.
+            coll_name(str): A string for naming the data collection in DB.
+            map_dict(dict): A dictionary to assign different names to
+                existing columns.
+        """
 
         exist_colls = self.show_catalogs()
         if coll_name in exist_colls:
@@ -156,7 +164,14 @@ class Connection(object):
         self._insert_data(df_r, coll)
 
     def add_to_old(self, df, coll_name, map_dict=None):
+        """Add new data to existing catalog collection.
 
+        Args:
+            df:The pandas dataframe contaning the data to be imported.
+            coll_name(str): The name of the existing collection.
+            map_dict(dict): A dictionary to assign different names to
+                existing columns.
+        """
         exist_colls = self.show_catalogs()
         if coll_name in exist_colls:
             db_meta = self.read_meta(coll_name)
@@ -200,6 +215,12 @@ class Connection(object):
         self._insert_data(df_r, coll)
 
     def _update_coll(self, new, old):
+        """Private method to update collection meta data.
+
+        Args:
+            new: A collection object for the updated dataset.
+            old: A collection object for the existing catalog collection.
+        """
 
         xMin = new._des_crs[0] if new._des_crs[0] < old._des_crs[0] \
             else old._des_crs[0]
@@ -228,6 +249,16 @@ class Connection(object):
         new.cat_ct = old.cat_ct + 1
 
     def read_meta(self, coll_name):
+        """Read meta information from a existing catalog collection and stores in
+        a collection object.
+
+        Args:
+            coll_name(str): Name of the requested collection.
+
+        Returns:
+            A new collection object encapsulating the requested meta information.
+
+        """
 
         coll = Collection()
         meta = self.db[coll_name].find_one({'_id': 'meta'})
@@ -251,8 +282,8 @@ class Connection(object):
 
         Args:
             df: A pandas dataframe containning the catalog.
-            coll: The Collection object containing meta information for the new
-                catalog.
+            coll: The Collection object storing meta information for the
+                corresponding catalog.
 
         Returns:
             A new pandas dataframe with added columns and a list specifying
@@ -294,7 +325,8 @@ class Connection(object):
 
         Args:
             df: A pandas dataframe with correctly formatted catalog.
-            coll_name: MongoDB collection name for the new catalog.
+            coll: The collection object storing meta information for the
+                corresponding catalog.
         """
 
         df['cat_rank'] = coll.cat_ct
