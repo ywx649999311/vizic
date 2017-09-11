@@ -168,7 +168,7 @@ class Connection(object):
         if map_dict is not None:
             for k in map_dict.keys():
                 df[k] = df[map_dict[k]]
-
+        print(list(df.columns))
         clms = [x.upper() for x in list(df.columns)]
         if not set(['RA', 'DEC']).issubset(set(clms)):
             raise Exception("RA, DEC is required for visualization!")
@@ -178,6 +178,7 @@ class Connection(object):
         elif ('RADIUS' not in clms and
                 not set(['A_IMAGE', 'B_IMAGE', 'THETA_IMAGE']).issubset(set(clms))) or  \
                 db_meta.point:
+            print(db_meta.point)
             coll.point = True
             print('Objects as points, slow performance')
         else:
@@ -186,7 +187,7 @@ class Connection(object):
         df_r, coll._des_crs = self._data_prep(df, coll)
         coll.x_range = coll._des_crs[2]*256
         coll.y_range = coll._des_crs[3]*256
-        self.update_coll(coll, db_meta)
+        self._update_coll(coll, db_meta)
 
         # drop created mapped columns before ingecting data
         if map_dict is not None:
@@ -198,7 +199,7 @@ class Connection(object):
 
         self._insert_data(df_r, coll)
 
-    def update_coll(self, new, old):
+    def _update_coll(self, new, old):
 
         xMin = new._des_crs[0] if new._des_crs[0] < old._des_crs[0] \
             else old._des_crs[0]
@@ -281,8 +282,8 @@ class Connection(object):
             dff.loc[:, 'b'] = dff.loc[:, 'B_IMAGE'].apply(lambda x: x*0.267/3600)
             dff.loc[:, 'theta'] = dff.loc[:, 'THETA_IMAGE']
 
-        dff['ra'] = dff['RA']
-        dff['dec'] = dff['DEC']
+        # assign 'loc' columns for geoIndex in Mongo
+        dff['loc'] = list(zip(dff.RA, dff.DEC))
 
         xScale = x_range/256
         yScale = y_range/256
@@ -301,15 +302,5 @@ class Connection(object):
         collection = self.db[coll.name]
         collection.insert_many(data_d, ordered=False)
         collection.update_one({'_id': 'meta'}, {'$set':{'adjust': coll._des_crs, 'xRange': coll.x_range, 'yRange': coll.y_range, 'minmax': coll._minMax, 'radius':coll.radius,'point':coll.point, 'catCt':coll.cat_ct}}, upsert=True)
-        bulk = collection.initialize_unordered_bulk_op()
-        # Must be lng first, required for geo 2d indexing
-        bulk.find({'ra':{'$exists':True}}).update(
-            {'$rename':{'ra':'loc.lng'}})
-        bulk.find({'dec':{'$exists':True}}).update(
-            {'$rename':{'dec':'loc.lat'}})
-        try:
-            result = bulk.execute({'w':'majority', 'j':True})
-        except pmg.errors.BulkWriteError as bwe:
-            print(bwe.details)
         collection.create_index([('loc', pmg.GEO2D)], name='geo_loc_2d', min=-90, max=360)
         collection.create_index([('b', pmg.ASCENDING)], name='semi_axis')

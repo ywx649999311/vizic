@@ -304,7 +304,7 @@ class GridLayer(RasterLayer):
         else:
             raise Exception('Need to provide a collection name or a pandas dataframe!')
 
-    def _data_prep(self, zoom, df):
+    def _data_prep(self, df):
         """Private method for formatting catalog.
 
         Metadata for catalog provided in a pandas dataframe is extracted here.
@@ -313,8 +313,6 @@ class GridLayer(RasterLayer):
         shapes/sizes for the objects.
 
         Args:
-            zoom: An integer indicating the maximum zoom level for visualized
-                catalog.
             df: A pandas dataframe containning the catalog.
 
         Returns:
@@ -345,8 +343,8 @@ class GridLayer(RasterLayer):
             dff.loc[:, 'b'] = dff.loc[:, 'B_IMAGE'].apply(lambda x: x*0.267/3600)
             dff.loc[:, 'theta'] = dff.loc[:, 'THETA_IMAGE']
 
-        dff['ra'] = dff['RA']
-        dff['dec'] = dff['DEC']
+        # assign 'loc' columns for geoIndex in Mongo
+        dff['loc'] = list(zip(dff.RA, dff.DEC))
 
         xScale = x_range/256
         yScale = y_range/256
@@ -369,16 +367,7 @@ class GridLayer(RasterLayer):
         data_d = df.to_dict(orient='records')
         coll = self.db[self.collection]
         coll.insert_many(data_d, ordered=False)
-        coll.insert_one({'_id': 'meta', 'adjust': self._des_crs, 'xRange': self.x_range, 'yRange': self.y_range, 'minmax': self.__minMax, 'radius':self.radius,'point':self.point, 'catCt':1})
-        bulk = coll.initialize_unordered_bulk_op()
-        bulk.find({'ra':{'$exists':True}}).update(
-            {'$rename':{'ra':'loc.lng'}})
-        bulk.find({'dec':{'$exists':True}}).update(
-            {'$rename':{'dec':'loc.lat'}})
-        try:
-            result = bulk.execute()
-        except pmg.errors.BulkWriteError as bwe:
-            print(bwe.details)
+        coll.insert_one({'_id': 'meta', 'adjust': self._des_crs, 'xRange': self.x_range, 'yRange': self.y_range, 'minmax': self.__minMax, 'radius': self.radius,'point': self.point, 'catCt': 1})
         coll.create_index([('loc', pmg.GEO2D)], name='geo_loc_2d', min=-90, max=360)
         coll.create_index([('b', pmg.ASCENDING)], name='semi_axis')
 
