@@ -16,7 +16,6 @@ class Collection(object):
         self._des_crs = []
         self.x_range = 0
         self.y_range = 0
-        self.db_maxZoom = 8
         self._minMax = {}
         self.cat_ct = 1
 
@@ -117,7 +116,7 @@ class Connection(object):
 
         return circles
 
-    def import_new(self, df, coll_name, map_dict=None):
+    def to_new(self, df, coll_name, map_dict=None):
         """Import new catalog without creating a map layer.
 
         Args:
@@ -129,7 +128,7 @@ class Connection(object):
 
         exist_colls = self.show_catalogs()
         if coll_name in exist_colls:
-            raise Exception('Provided collection name already exists, use a different name or use function import_exists().')
+            raise Exception('Provided collection name already exists, use a different name or use function to_exists().')
 
         coll = Collection()
         coll.name = coll_name
@@ -163,7 +162,7 @@ class Connection(object):
 
         self._insert_data(df_r, coll)
 
-    def add_to_old(self, df, coll_name, map_dict=None):
+    def to_exists(self, df, coll_name, map_dict=None):
         """Add new data to existing catalog collection.
 
         Args:
@@ -176,14 +175,14 @@ class Connection(object):
         if coll_name in exist_colls:
             db_meta = self.read_meta(coll_name)
         else:
-            raise Exception('Provided collection name does not exist, please use function import_new()')
+            raise Exception('Provided collection name does not exist, please use function to_new()')
 
         coll = Collection()
         coll.name = coll_name
         if map_dict is not None:
             for k in map_dict.keys():
                 df[k] = df[map_dict[k]]
-        print(list(df.columns))
+
         clms = [x.upper() for x in list(df.columns)]
         if not set(['RA', 'DEC']).issubset(set(clms)):
             raise Exception("RA, DEC is required for visualization!")
@@ -193,7 +192,7 @@ class Connection(object):
         elif ('RADIUS' not in clms and
                 not set(['A_IMAGE', 'B_IMAGE', 'THETA_IMAGE']).issubset(set(clms))) or  \
                 db_meta.point:
-            print(db_meta.point)
+
             coll.point = True
             print('Objects as points, slow performance')
         else:
@@ -334,5 +333,7 @@ class Connection(object):
         collection = self.db[coll.name]
         collection.insert_many(data_d, ordered=False)
         collection.update_one({'_id': 'meta'}, {'$set':{'adjust': coll._des_crs, 'xRange': coll.x_range, 'yRange': coll.y_range, 'minmax': coll._minMax, 'radius':coll.radius,'point':coll.point, 'catCt':coll.cat_ct}}, upsert=True)
-        collection.create_index([('loc', pmg.GEO2D)], name='geo_loc_2d', min=-90, max=360)
-        collection.create_index([('b', pmg.ASCENDING)], name='semi_axis')
+
+        if coll.cat_ct == 1:
+            collection.create_index([('loc', pmg.GEO2D)], name='geo_loc_2d', min=-90, max=360)
+            collection.create_index([('b', pmg.ASCENDING)], name='semi_axis')

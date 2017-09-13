@@ -10,6 +10,7 @@ import json
 import requests
 from notebook.utils import url_path_join
 from .utils import cut_tree, get_mst, get_m_index, get_vert_bbox
+from .connection import Collection
 
 
 class AstroMap(Map):
@@ -263,17 +264,16 @@ class GridLayer(RasterLayer):
             coll_name: MongoDB collection name for the new catalog.
             map_dict(dict): Dataframe columns mapping dictionary.
         """
+
+        coll = Collection()
+        exist_colls = self.db.collection_names()
+
         if not self.collection == '':
-            meta = self.db[self.collection].find_one({'_id': 'meta'})
-            self._des_crs = meta['adjust']
-            self.x_range = meta['xRange']
-            self.y_range = meta['yRange']
-            self.__minMax = meta['minmax']
-            (self.radius, self.point) = (meta['radius'], meta['point'])
-            self.cat_ct = meta['catCt']
+            if self.collection not in exist_colls:
+                raise Exception('Provided collection does not exist!')
+            coll = self.connection.read_meta(self.collection)
         elif self.df is not None:
             clms = [x.upper() for x in list(self.df.columns)]
-            exist_colls = self.db.collection_names()
 
             if not set(['RA', 'DEC']).issubset(set(clms)):
                 raise Exception("RA, DEC is required for visualization!")
@@ -281,16 +281,16 @@ class GridLayer(RasterLayer):
                 print('No shape information provided')
                 if 'RADIUS' in clms:
                     print('Will use radius for filtering!')
-                    self.radius = True
+                    coll.radius = True
                 else:
                     print('Object as point, slow performance!')
-                    self.point = True
+                    coll.point = True
 
             if coll_name is not None and coll_name in exist_colls:
                 raise Exception('Collectoin name already exists, try to use a different name or use existing collection.')
-            df_r, self._des_crs = self._data_prep(self.df)
-            self.x_range = self._des_crs[2]*256
-            self.y_range = self._des_crs[3]*256
+            df_r, coll._des_crs = self.connection._data_prep(self.df, coll)
+            coll.x_range = coll._des_crs[2]*256
+            coll.y_range = coll._des_crs[3]*256
 
             # drop created mapped columns before ingecting data
             if map_dict is not None:
@@ -298,78 +298,31 @@ class GridLayer(RasterLayer):
                             if x.upper() not in ['RA', 'DEC']]
                 df_r.drop(col_keys,axis=1, inplace=True)
                 for k in col_keys:
-                    self.__minMax.pop(k, None)
+                    coll._minMax.pop(k, None)
 
-            self._insert_data(df_r, coll_name)
+            # check if name given, if not using uuid
+            if coll_name is not None:
+                coll.name = coll_name
+            else:
+                coll_id = str(uuid.uuid4())
+                coll.name = coll_id
+
+            self.connection._insert_data(df_r, coll)
         else:
             raise Exception('Need to provide a collection name or a pandas dataframe!')
 
-    def _data_prep(self, df):
-        """Private method for formatting catalog.
+        # now assign collection object values to GridLayer
+        self._des_crs = coll._des_crs
+        self.x_range = coll.x_range
+        self.y_range = coll.y_range
+        self.point = coll.point
+        self.radius = coll.radius
+        self.__minMax = coll._minMax
+        self.cat_ct = coll.cat_ct
+        self.collection = coll.name
 
-        Metadata for catalog provided in a pandas dataframe is extracted here.
-        Corresponding tile ID for each object in the catalog is caculated and
-        inserted into the dataframe, so as the mapped coordinates and
-        shapes/sizes for the objects.
-
-        Args:
-            df: A pandas dataframe containning the catalog.
-
-        Returns:
-            A new pandas dataframe with added columns and a list specifying
-            the coordinate scale.
-
-        """
-        dff = df.copy()
-        dff.columns = [x.upper() for x in dff.columns]
-        (xMax, xMin) = (dff['RA'].max(), dff['RA'].min())
-        (yMax, yMin) = (dff['DEC'].max(), dff['DEC'].min())
-        x_range = xMax - xMin
-        y_range = yMax - yMin
-
-        # find field min and max
-        for col in dff.columns:
-            if dff[col].dtype.kind == 'f':
-                self.__minMax[col] = [dff[col].min(), dff[col].max()]
-
-        if self.radius:
-            dff.loc[:, 'b'] = dff.loc[:, 'RADIUS'].apply(lambda x: x*0.267/3600)
-            dff['theta'] = 0
-        elif self.point:
-            dff['b'] = 360
-            dff['theta'] = 0
-        else:
-            dff.loc[:, 'a'] = dff.loc[:, 'A_IMAGE'].apply(lambda x: x*0.267/3600)
-            dff.loc[:, 'b'] = dff.loc[:, 'B_IMAGE'].apply(lambda x: x*0.267/3600)
-            dff.loc[:, 'theta'] = dff.loc[:, 'THETA_IMAGE']
-
-        # assign 'loc' columns for geoIndex in Mongo
-        dff['loc'] = list(zip(dff.RA, dff.DEC))
-
-        xScale = x_range/256
-        yScale = y_range/256
-        return dff, [xMin, yMax, xScale, yScale]
-
-    def _insert_data(self, df, coll_name):
-        """Private method to insert a catalog into database.
-
-        Args:
-            df: A pandas dataframe with correctly formatted catalog.
-            coll_name: MongoDB collection name for the new catalog.
-        """
-        if coll_name is not None:
-            self.collection = coll_name
-        if self.collection == '':
-            coll_id = str(uuid.uuid4())
-            self.collection = coll_id
-
-        df['cat_rank'] = 1
-        data_d = df.to_dict(orient='records')
-        coll = self.db[self.collection]
-        coll.insert_many(data_d, ordered=False)
-        coll.insert_one({'_id': 'meta', 'adjust': self._des_crs, 'xRange': self.x_range, 'yRange': self.y_range, 'minmax': self.__minMax, 'radius': self.radius,'point': self.point, 'catCt': 1})
-        coll.create_index([('loc', pmg.GEO2D)], name='geo_loc_2d', min=-90, max=360)
-        coll.create_index([('b', pmg.ASCENDING)], name='semi_axis')
+        # The center is required, don't remove
+        self.center = [self._des_crs[1]-self.y_range/2, self._des_crs[0]+self.x_range/2]
 
     def push_data(self, url):
         """Update server extension with newly displayed catalog.
@@ -380,8 +333,7 @@ class GridLayer(RasterLayer):
         Args:
             url(str): The Jupyter server address.
         """
-        # The center is required, don't remove
-        self.center = [self._des_crs[1]-self.y_range/2, self._des_crs[0]+self.x_range/2]
+
         mRange = (self.x_range + self.y_range)/2
         body = {
             'collection': self.collection,
@@ -390,6 +342,21 @@ class GridLayer(RasterLayer):
         }
         push_url = url_path_join(url, '/rangeinfo/')
         req = requests.post(push_url, data=body)
+
+    def update_meta(self):
+        """Update meta information after new data added."""
+
+        coll = self.connection.read_meta(self.collection)
+        self._des_crs = coll._des_crs
+        self.x_range = coll.x_range
+        self.y_range = coll.y_range
+        self.__minMax = coll._minMax
+        self.cat_ct = coll.cat_ct
+        # update info at Jupyter server
+        self.push_data(self._server_url)
+        # update the AstroMap meta
+        self._map.center = self.center = [self._des_crs[1]-self.y_range/2, self._des_crs[0]+self.x_range/2]
+        self._map._des_crs = self._des_crs
 
     def _handle_leaflet_event(self, _, content, buffers):
         """Handle leaflet events trigged."""
