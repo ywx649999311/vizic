@@ -10,6 +10,7 @@ import json
 import requests
 from notebook.utils import url_path_join
 from .utils import cut_tree, get_mst, get_m_index, get_vert_bbox
+from .connection import collection
 
 
 class AstroMap(Map):

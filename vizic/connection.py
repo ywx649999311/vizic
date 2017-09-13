@@ -116,7 +116,7 @@ class Connection(object):
 
         return circles
 
-    def import_new(self, df, coll_name, map_dict=None):
+    def to_new(self, df, coll_name, map_dict=None):
         """Import new catalog without creating a map layer.
 
         Args:
@@ -128,7 +128,7 @@ class Connection(object):
 
         exist_colls = self.show_catalogs()
         if coll_name in exist_colls:
-            raise Exception('Provided collection name already exists, use a different name or use function import_exists().')
+            raise Exception('Provided collection name already exists, use a different name or use function to_exists().')
 
         coll = Collection()
         coll.name = coll_name
@@ -162,7 +162,7 @@ class Connection(object):
 
         self._insert_data(df_r, coll)
 
-    def add_to_old(self, df, coll_name, map_dict=None):
+    def to_exists(self, df, coll_name, map_dict=None):
         """Add new data to existing catalog collection.
 
         Args:
@@ -175,7 +175,7 @@ class Connection(object):
         if coll_name in exist_colls:
             db_meta = self.read_meta(coll_name)
         else:
-            raise Exception('Provided collection name does not exist, please use function import_new()')
+            raise Exception('Provided collection name does not exist, please use function to_new()')
 
         coll = Collection()
         coll.name = coll_name
