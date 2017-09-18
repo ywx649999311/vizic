@@ -51,10 +51,6 @@ Vizic
 	jupyter nbextension enable --py --sys-prefix widgetsnbextension
 	jupyter nbextension enable --py --sys-prefix vizic
 
-.. warning::
-
-	Because of the recent major release from **ipywdigets**, **vizic** requires specific versions of some dependencies to be full functioning. Please install the required versions after the installation of **vizic**. Here are the affected packages: ipywidgets==5.2.2, notebook==4.2.3, widgetsnbextension==1.2.6.
-
 
 **Development installation**::
 
