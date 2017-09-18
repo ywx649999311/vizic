@@ -191,7 +191,8 @@ class ColorMap(Dropdown):
 class FilterSlider(FloatRangeSlider):
     """RangeSlider widget for filering displayed objects.
 
-    Ranges for selected field are automatically displayed on the slider. Move the bars to filter out unwanted objects.
+    Ranges for selected field are automatically displayed on the slider. Move
+    the bars to filter out unwanted objects.
 
     Attributes:
         readout_format(str): The format of the float numbers, which show the
@@ -239,7 +240,8 @@ class FilterSlider(FloatRangeSlider):
 class FilterWidget(Box):
     """A Dropdown menu and a rangeSlider wrapped in a box layout.
 
-    Select the field for filtering objects and perform the filter action in one widget. The map will reset when a new field is chosen.
+    Select the field for filtering objects and perform the filter action in one
+    widget. The map will reset when a new field is chosen.
     """
     filter_field = Unicode()
     _active = Bool(False)
@@ -251,7 +253,10 @@ class FilterWidget(Box):
     def __init__(self, layer, *pargs, **kwargs):
         """Extends ``Box`` from ``ipywidgets``.
 
-        Two links are created: 1) link the dropDown menu with the ``filter_field`` attribute from the tileLayer. 2) link the ``filter_obj`` attribute from the tileLayer to the ``_active`` status attribute in this widget.
+        Two links are created: 1) link the dropDown menu with the ``filter_field``
+        attribute from the tileLayer. 2) link the ``filter_obj`` attribute from
+        the tileLayer to the ``_active`` status attribute in this widget.
+
         Args:
             layer: A gridLayer instance.
             *args: Variable length argument list for ``Box``.
@@ -347,7 +352,8 @@ class SelectionTrig(ToggleButton):
 class GetDataButton(Button):
     """Getting selected data.
 
-    Clicking this button to query the database for data selected using the lasso-like selection tool.
+    Clicking this button to query the database for data selected using the
+    lasso-like selection tool.
     """
     _view_name = Unicode('GetDataButtonView').tag(sync=True)
     _view_module = Unicode('jupyter-vizic').tag(sync=True)

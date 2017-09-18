@@ -187,9 +187,10 @@ class circlesHandler(IPythonHandler):
 
 
 def load_jupyter_server_extension(nbapp):
-    """
-    nbapp is instance of Jupyter.notebook.notebookapp.NotebookApp
-    nbapp.web_app is instance of tornado.web.Application - can register new tornado.web.RequestHandlers to extend API backend.
+    """nbapp is instance of Jupyter.notebook.notebookapp.NotebookApp.
+
+    nbapp.web_app is instance of tornado.web.Application - can register
+    new tornado.web.RequestHandlers to extend API backend.
     """
     nbapp.log.info('My Extension Loaded')
     web_app = nbapp.web_app

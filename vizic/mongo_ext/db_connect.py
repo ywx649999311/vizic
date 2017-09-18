@@ -11,8 +11,9 @@ class MongoConnect(object):
     """MongoDB utility wrapper.
 
     Attributes:
-        range_dict(dict): Geographical coverage, represented as the value ranges
-            in ``RA`` and ``DEC``, for catalog collections displayed in the notebooks.
+        range_dict(dict): Geographical coverage, represented as the value
+            ranges in ``RA`` and ``DEC``, for catalog collections displayed
+            in the notebooks.
         zoom_dict(dict): Maximum zooms for catalog collections displayed in
             Jupyter notebooks.
     """
@@ -74,7 +75,8 @@ class MongoConnect(object):
     def getVoronoi(self, collection):
         """Retriev the entire catalog.
 
-        The retured catalog will be used to calculate Voronoi diagram at the front-end.
+        The retured catalog will be used to calculate Voronoi diagram at
+        the front-end.
 
         Args:
             collection(str): Collection name for the required catalog.
@@ -122,7 +124,8 @@ class MongoConnect(object):
     def getMinRadius(self, zoom, mapSizeV):
         """Returns the length scale of a one pixel.
 
-        Converting from pixel to degree, with provided projecting zoom level and the size of the map measure in degree.
+        Converting from pixel to degree, with provided projecting zoom level
+        and the size of the map measure in degree.
 
         Args:
             zoom(int): The projected zoom level.

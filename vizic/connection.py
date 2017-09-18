@@ -23,7 +23,9 @@ class Collection(object):
 class Connection(object):
     """MongoDB connection wrapper at the front-end.
 
-    This object establish connections to the given database. Error will be thrown if fails, otherwise push the database information to the server through REST API.
+    This object establish connections to the given database. Error will be
+    thrown if fails, otherwise push the database information to the server
+    through REST API.
     """
 
     def __init__(self, dbHost="localhost", dbPort=27017, db="vis", sevrPort=None):
